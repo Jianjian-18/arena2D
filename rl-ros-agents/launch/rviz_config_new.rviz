@@ -6,7 +6,6 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /RobotModel1/Status1
       Splitter Ratio: 0.5
     Tree Height: 335
   - Class: rviz/Selection
@@ -27,7 +26,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: LaserScan
+    SyncSource: ""
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -128,8 +127,6 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        arena_robot_00:
-          Value: true
         map:
           Value: true
         world:
@@ -142,8 +139,6 @@ Visualization Manager:
       Show Names: true
       Tree:
         world:
-          arena_robot_00:
-            {}
           map:
             {}
       Update Interval: 0
@@ -176,7 +171,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 17.6953182220459
+      Distance: 46.76688003540039
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -192,7 +187,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.0797964334487915
+      Pitch: 0.9897962808609009
       Target Frame: <Fixed Frame>
       Yaw: 4.725400924682617
     Saved: ~

@@ -3,7 +3,7 @@ import rospy
 from arena2d_msgs.msg import Arena2dResp
 from sensor_msgs.msg import LaserScan
 from nav_msgs.msg import OccupancyGrid
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseStamped, TransformStamped
 import argparse
 import time
 import tf
@@ -11,6 +11,7 @@ import tf.transformations as tft
 import numpy as np
 from collections import deque
 import threading
+import tf2_ros
 
 class IntermediateRosNode:
     """
@@ -30,6 +31,10 @@ class IntermediateRosNode:
         self._header_seq_id = 0
         rospy.init_node("arena_env{:02d}_redirecter".format(idx_env), anonymous=True)
         self._idx_env = idx_env
+
+        # ⭐
+        self._map_origin = [0,0]
+
         print(laser_scan_publish_rate, "\n")
         if laser_scan_publish_rate == 0:
             # a flag to show where the laser scan is publised in a asynchronized way
@@ -62,6 +67,10 @@ class IntermediateRosNode:
         times = 0
         # subscriber
         # According to the testing,enable tcp_nodelay can double the performance
+
+        # ⭐
+        self._sub_map = rospy.Subscriber("map", OccupancyGrid, self._mapCallback ,tcp_nodelay=True)        
+
         self._sub = rospy.Subscriber(namespace_sub + "response", Arena2dResp,
                                      self._arena2dRespCallback, tcp_nodelay=True)
         # # give rospy enough time to establish the connection, without this procedure, the message to
@@ -70,7 +79,25 @@ class IntermediateRosNode:
             time.sleep(0.1)
             times += 1
         rospy.loginfo("Successfully connected with arena-2d simulator, took {:3.1f}s.".format(.1 * times))
-        # ⭐设置topic
+    # ⭐
+    def _mapCallback(self, msg: OccupancyGrid):
+        rospy.loginfo(rospy.get_caller_id() + "I heard %s", msg.info)
+        self._map_origin[0] = msg.info.width / 2
+        self._map_origin[1] = msg.info.height / 2
+        self._map_broadcaster = tf2_ros.StaticTransformBroadcaster()
+        static_transformStamped = TransformStamped()
+        static_transformStamped.header.stamp = rospy.Time.now()
+        static_transformStamped.header.frame_id = "world"
+        static_transformStamped.child_frame_id = "map"
+        static_transformStamped.transform.translation.x = - (self._map_origin[0] * msg.info.resolution)
+        static_transformStamped.transform.translation.y = - (self._map_origin[1] * msg.info.resolution)
+        static_transformStamped.transform.translation.z = 0
+        static_transformStamped.transform.rotation.x = 0
+        static_transformStamped.transform.rotation.y = 0
+        static_transformStamped.transform.rotation.z = 0
+        static_transformStamped.transform.rotation.w = 1  
+        self._map_broadcaster.sendTransform(static_transformStamped)    
+
     def _arena2dRespCallback(self, resp: Arena2dResp):
         curr_time = rospy.Time.now()
         robot_pos = resp.robot_pos

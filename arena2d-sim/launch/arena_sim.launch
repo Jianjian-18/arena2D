@@ -1,12 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <launch>
-    <arg name="level_name" default="random"/>
-    <arg name="level_mode" default=" "/>
-    <arg name="video_mode" default="--disable-video"/>
-    <arg name="model"      default="burger"      doc="model type [burger, jackal, ridgeback, agvota, rto, rto_real]"/>
-    <param name="model" value="$(arg model)" />
-    <arg name="mode" default="continuous"      doc="mode type [continuous, discrete]"/>
-    <param name="mode" value="$(arg mode)" />
+    <arg name="level_name" default="static_map" doc = "level name [empty, random, svg, static_map]"/>
+    <arg name="level_mode" default="--dynamic" doc = "[--dynamic,  ]"/>    
+    <arg name="video_mode" default="--enable-video" doc = "video [--disable-video, --enable-video]"/> 
+
+    <arg name="robot_model" default="burger" 
+    doc="model type [burger, jackal, agvota, waffle_pi]"/>
+    <param name="model" value="$(arg robot_model)" />
+
+    <arg name="robot_mode" default="continuous"      doc="mode type [continuous, discrete]"/>
+    <param name="mode" value="$(arg robot_mode)" />
+    
+    <rosparam command="load" 
+    file = "$(find arena2d)/configs/observation_space/$(arg robot_model).model.yaml" />
+
+    <rosparam command="load" 
+    file= "$(find arena2d)/configs/action_space/default_settings_$(arg robot_model).yaml" />
+
     <env name="ROSCONSOLE_CONFIG_FILE" value="$(find arena2d)/ros_logging_settings.conf" />
-    <node name="arena_sim" pkg="arena2d" type="arena2d" \
-    output="screen" args="--use_ros_agent $(arg video_mode)  --run &quot;level $(arg level_name) $(arg level_mode) &quot;"/>
+
+
+
+    <!-- Run the map server -->
+    <arg name="map_file" default="$(find arena2d)/static_map/my_labor.yaml" 
+    doc = "load rosmap from /static_map" />
+    <node if="$(eval arg('level_name') == 'static_map')"
+    name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+
+    <!-- load rviz helper, transfer data to rviz -->    
+    <node if="$(eval arg('level_name') == 'static_map')"
+    name="rviz_visualize_helper" pkg="rl-ros-agents" 
+    type="rviz_visualize_helper.py" output="screen" />
+
+    <!-- load rviz configuration -->
+    <node if="$(eval arg('level_name') == 'static_map')"
+    name ="rviz" pkg="rviz" type="rviz" 
+    args="-d $(find rl-ros-agents)/launch/rviz_config_new.rviz" required="true" />
+
+    <!-- static transform for map to world -->
+    <!-- node pkg="tf" type="static_transform_publisher" name="map_broadcaster" args="0.4 0.4 0 0 0 0 1 world map 100" -->
+
+    <!-- launch arena2d server -->
+    <node name="arena_sim" pkg="arena2d" type="arena2d" output="screen" 
+    args="--use_ros_agent $(arg video_mode) --run &quot;level $(arg level_name) $(arg level_mode) &quot;"/>
+
+
 </launch>
