@@ -46,8 +46,7 @@ enum b2BodyType
 	b2_staticBody = 0,
 	b2_kinematicBody,
 	b2_dynamicBody,
-	b2_dynamicBody_human,
-	b2_dynamicBody_robotPepper
+	b2_dynamicBody_human
 
 	// TODO_ERIN
 	//b2_bulletBody,
@@ -759,9 +758,8 @@ inline void* b2Body::GetUserData() const
 }
 
 inline void b2Body::ApplyForce(const b2Vec2& force, const b2Vec2& point, bool wake)
-{	
-
-	if (m_type != b2_dynamicBody && m_type != b2_dynamicBody_human && m_type != b2_dynamicBody_robotPepper)
+{
+	if (m_type != b2_dynamicBody && m_type != b2_dynamicBody_human)
 	{
 		return;
 	}
@@ -781,7 +779,7 @@ inline void b2Body::ApplyForce(const b2Vec2& force, const b2Vec2& point, bool wa
 
 inline void b2Body::ApplyForceToCenter(const b2Vec2& force, bool wake)
 {
-	if (m_type != b2_dynamicBody && m_type != b2_dynamicBody_human  && m_type != b2_dynamicBody_robotPepper)
+	if (m_type != b2_dynamicBody && m_type != b2_dynamicBody_human)
 	{
 		return;
 	}
@@ -800,7 +798,7 @@ inline void b2Body::ApplyForceToCenter(const b2Vec2& force, bool wake)
 
 inline void b2Body::ApplyTorque(float torque, bool wake)
 {
-	if (m_type != b2_dynamicBody && m_type != b2_dynamicBody_human  && m_type != b2_dynamicBody_robotPepper)
+	if (m_type != b2_dynamicBody && m_type != b2_dynamicBody_human)
 	{
 		return;
 	}
@@ -819,7 +817,7 @@ inline void b2Body::ApplyTorque(float torque, bool wake)
 
 inline void b2Body::ApplyLinearImpulse(const b2Vec2& impulse, const b2Vec2& point, bool wake)
 {
-	if (m_type != b2_dynamicBody && m_type != b2_dynamicBody_human  && m_type != b2_dynamicBody_robotPepper)
+	if (m_type != b2_dynamicBody && m_type != b2_dynamicBody_human)
 	{
 		return;
 	}
@@ -839,7 +837,7 @@ inline void b2Body::ApplyLinearImpulse(const b2Vec2& impulse, const b2Vec2& poin
 
 inline void b2Body::ApplyLinearImpulseToCenter(const b2Vec2& impulse, bool wake)
 {
-	if (m_type != b2_dynamicBody && m_type != b2_dynamicBody_human  && m_type != b2_dynamicBody_robotPepper)
+	if (m_type != b2_dynamicBody && m_type != b2_dynamicBody_human)
 	{
 		return;
 	}
@@ -858,7 +856,7 @@ inline void b2Body::ApplyLinearImpulseToCenter(const b2Vec2& impulse, bool wake)
 
 inline void b2Body::ApplyAngularImpulse(float impulse, bool wake)
 {
-	if (m_type != b2_dynamicBody && m_type != b2_dynamicBody_human  && m_type != b2_dynamicBody_robotPepper)
+	if (m_type != b2_dynamicBody && m_type != b2_dynamicBody_human)
 	{
 		return;
 	}

@@ -84,6 +84,7 @@ int Arena::init(int argc, char **argv)
 				exit(0);
 			}
 		}
+
 #ifdef USE_ROS
 		else if (!strcmp(argv[arg_i], "--use_ros_agent"))
 		{
@@ -113,8 +114,10 @@ int Arena::init(int argc, char **argv)
 	/* init global settings*/
 	if (_SETTINGS_OBJ->init((GLOBAL_PACKAGE_PATH + "/settings.st").c_str()))
 	{
+
 		return -1;
 	}
+
 
 	/* random seed */
 	srand((unsigned int)_SETTINGS->stage.random_seed);
@@ -403,7 +406,6 @@ int Arena::init(int argc, char **argv)
 
 	return 0;
 }
-
 void Arena::initStats()
 {
 	zColor text_color(0.1, 0.1, 0.1, 1.0);

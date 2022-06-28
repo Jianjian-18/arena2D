@@ -130,19 +130,17 @@ void Environment::initializeTraining()
 {
 	_totalReward = 0;
 	_episodeCount = 0;
-  
-
-
-	_robot->reset(b2Vec2(-.5,-.5)); // 0,0
+	_robot->reset(b2Vec2(0, 0));
 	reset(true);
-
 }
 
 void Environment::pre_step(const Twist &t)
 {
 	_reward = 0.0f;
 	_action = t;
-	getGoalDistance(_distance, _angle);
+	float goal_x = 0.f;
+	float goal_y = 0.f;
+	getGoalDistance(_distance, _angle,goal_x,goal_y);
 }
 
 void Environment::step()
@@ -182,7 +180,9 @@ void Environment::post_step()
 	_episodeStepCount++;
 	float distance_after = 0.f;
 	float angle_after = 0.f;
-	getGoalDistance(distance_after, angle_after);
+	float goal_x = 0.f;
+	float goal_y = 0.f;
+	getGoalDistance(distance_after, angle_after,goal_x,goal_y);
 
 	// checking reward for distance to goal decreased/increased
 	if (distance_after < _distance)
@@ -214,11 +214,13 @@ void Environment::getRobotPos(float &x, float &y, float &angle)
 	y = _robot->getBody()->GetPosition().y;
 }
 
-void Environment::getGoalDistance(float &l2, float &angle)
+void Environment::getGoalDistance(float &l2, float &angle,float &x, float &y)
 {
 	if (_level != NULL && _level->getGoal() != NULL)
 	{
 		b2Vec2 goal_pos = _level->getGoalPosition();
+		x = goal_pos.x;
+		y = goal_pos.y;
 		goal_pos = _robot->getBody()->GetLocalPoint(goal_pos);
 		l2 = goal_pos.Length();
 		angle = f_deg(zVector2D::signedAngle(zVector2D(0, 1), zVector2D(goal_pos.x, goal_pos.y)));
@@ -229,9 +231,8 @@ void Environment::reset(bool robot_position_reset)
 {
 	_evaluation.reset();
 	// reset level
-	if(_level != NULL)
+	if (_level != NULL)
 		_level->reset(_episodeState == NEGATIVE_END || robot_position_reset);
-	
 
 	// reset trail
 	if (_SETTINGS->video.enabled)
@@ -246,7 +247,9 @@ void Environment::reset(bool robot_position_reset)
 	//save initial goal distance for evaluation
 	float goal_distance = 0.f;
 	float goal_angle = 0.f;
-	getGoalDistance(goal_distance, goal_angle);
+	float goal_x = 0.f;
+	float goal_y = 0.f;
+	getGoalDistance(goal_distance, goal_angle,goal_x,goal_y);
 	goal_distance -= (_robot->getRadius() + _SETTINGS->stage.goal_size/2.); //correct goal distance
 	_evaluation.saveGoalDistance(goal_distance, goal_angle);
 	_evaluation.countAction(_robot->getBody()->GetTransform());
@@ -261,6 +264,7 @@ void Environment::RequestReset() {
     _episodeState = RUNNING;
     //reset(true);
 }
+
 
 void Environment::BeginContact(b2Contact *contact)
 {

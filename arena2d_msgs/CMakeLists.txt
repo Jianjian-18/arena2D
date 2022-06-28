@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
   geometry_msgs
+  nav_msgs
   message_generation
 )
 
@@ -75,6 +76,7 @@ generate_messages(
   DEPENDENCIES
     sensor_msgs# Or other packages containing msgs
     geometry_msgs
+    nav_msgs
 )
 
 ################################################
@@ -113,6 +115,7 @@ catkin_package(
     message_runtime
     sensor_msgs 
     geometry_msgs
+    nav_msgs
 #  DEPENDS system_lib
 )
 

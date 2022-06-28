@@ -75,9 +75,13 @@ void RosNode::publishStates(const bool *dones, float mean_reward, float mean_suc
         {
             resp.observation.ranges.push_back(laser_data[i]);
         }
-        // set goal position
+   
+        // set goal position & distance and angle from goal
+        float goal_x = 0, goal_y = 0;
         float angle = 0, distance = 0;
-        m_envs[idx_env].getGoalDistance(distance, angle);
+        m_envs[idx_env].getGoalDistance(distance, angle, goal_x, goal_y);
+        resp.goal_xy[0] = static_cast<double>(goal_x);
+        resp.goal_xy[1] = static_cast<double>(goal_y);
         resp.goal_pos[0] = static_cast<double>(distance);
         resp.goal_pos[1] = static_cast<double>(angle);
         // robot theta is in radian

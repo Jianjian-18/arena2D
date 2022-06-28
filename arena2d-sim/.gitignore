@@ -1,9 +1,5 @@
-<<<<<<< HEAD
-
-=======
 # this file would be configed and generated locally
 engine/GlobalSettings.cpp
->>>>>>> arena-ros
 # Agent Data
 *.dat
 *.dat.txt
@@ -11,8 +7,3 @@ engine/GlobalSettings.cpp
 training/
 
 
-<<<<<<< HEAD
-# this file would be configed and generated locally
-engine/GlobalSettings.cpp
-=======
->>>>>>> arena-ros

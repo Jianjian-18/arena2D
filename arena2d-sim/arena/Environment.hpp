@@ -103,13 +103,9 @@ public:
 
 	/* override functions from b2ContactListener
 	 */
-
-   
-	void BeginContact(b2Contact * contact) override;
-	void EndContact(b2Contact * contact) override;
+	void BeginContact(b2Contact *contact) override;
+	void EndContact(b2Contact *contact) override;
 	void RequestReset() override;
-
-
 
 	/* reset environment
 	 * @param robot_position_reset passed to level reset function
@@ -146,8 +142,10 @@ public:
 	/* get distance to goal
 	 * @param l2 is set to the l2 distance from robot to goal
 	 * @param angle is set to the angle (degree) from the robot's facing direction to goal
+	 * @param x is local corrdinate of goal
+	 * @param y is local corrdinate of goal
 	 */
-	void getGoalDistance(float &l2, float &angle);
+	void getGoalDistance(float &l2, float &angle, float &x, float &y);
 
 	/* get scan observation
 	 * @param num_samples is set to the number of samples in the returned array

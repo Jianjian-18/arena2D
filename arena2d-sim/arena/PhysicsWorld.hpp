@@ -161,7 +161,6 @@ private:
 	/* fixture colors for debug drawing */
 	zColor _dynamicColor;
 	zColor _dynamicColor_human;
-	zColor _dynamicColor_robotPepper;
 	zColor _sensorColor;
 	zColor _sleepColor;
 	zColor _sleepColor_human;

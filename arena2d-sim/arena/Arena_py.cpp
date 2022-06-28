@@ -24,7 +24,9 @@ PyObject* Arena::packPyObservation(int env_index)
 	// pack goal position
 	float angle = 0;
 	float distance = 0;
-	_envs[env_index].getGoalDistance(distance, angle);
+	float goal_x = 0;
+	float goal_y = 0;
+	_envs[env_index].getGoalDistance(distance, angle, goal_x, goal_y);
 	PyList_SET_ITEM(obs, 0, PyFloat_FromDouble(distance));
 	PyList_SET_ITEM(obs, 1, PyFloat_FromDouble(angle));
 

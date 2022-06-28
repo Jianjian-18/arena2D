@@ -418,7 +418,6 @@ private:
 	/* if set to true no training data is recorded*/
 	bool _noTrainingRecord;
 
-
 	/* if set to true, additional data for the Evaluation of the agent is recorded*/
 	bool _doEvaluation;
 #ifdef USE_ROS
@@ -426,7 +425,6 @@ private:
 	bool _use_ros_agent = false;
 	bool *_ros_envs_reset;
 #endif // USE_ROS
-
 };
 
 #endif

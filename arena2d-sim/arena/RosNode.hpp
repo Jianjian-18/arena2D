@@ -9,7 +9,6 @@
 #include <arena2d_msgs/RosAgentReq.h>
 #include <arena2d_msgs/Arena2dResp.h>
 #include <engine/GlobalSettings.hpp>
-
 class RosNode
 {
     using size_t = unsigned int;

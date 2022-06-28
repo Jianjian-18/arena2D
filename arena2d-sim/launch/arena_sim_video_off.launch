@@ -1,4 +1,12 @@
 <launch>
+    <arg name="level_name" default="svg" doc = "level name [empty, random, svg, static_map]"/>
+    <arg name="level_mode" default="" doc = "random only [--dynamic,  ]"/>    
+    <arg name="model" default="burger"      doc="model type [burger, jackal, ridgeback, agvota, rto, rto_real]"/>
+    <param name="model" value="$(arg model)" />
+    <arg name="mode" default="continuous"      doc="mode type [continuous, discrete]"/>
+    <param name="mode" value="$(arg mode)" />
+
+
     <env name="ROSCONSOLE_CONFIG_FILE" value="$(find arena2d)/ros_logging_settings.conf" />
-    <node name="arena_sim" pkg="arena2d" type="arena2d" output="screen" args="--use_ros_agent --disable-video --run &quot;level &quot;svg&quot; --dynamic;&quot;"/>
+    <node name="arena_sim" pkg="arena2d" type="arena2d" output="screen" args="--use_ros_agent --disable-video --run &quot;level $(arg level_name) $(arg level_mode) &quot;"/>
 </launch>

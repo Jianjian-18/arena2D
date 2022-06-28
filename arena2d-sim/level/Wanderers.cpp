@@ -19,8 +19,7 @@ void Wanderers::freeRobotWanderers(){
 void Wanderers::reset(RectSpawn & _dynamicSpawn, bool _dynamic, bool _human) {
     if (_wanderers.size() > 0) freeWanderers();
     if (_robot_wanderers.size() > 0) freeRobotWanderers();
-    // adding a human wanderers
-    int _mode=MODE_FOLLOW_PATH;
+    int _mode=MODE_RANDOM;
     if (_dynamic) 
     {
         if(_mode==MODE_RANDOM)
@@ -34,12 +33,19 @@ void Wanderers::reset(RectSpawn & _dynamicSpawn, bool _dynamic, bool _human) {
                 float change_rate=0.5f;
                 float stop_rate=0.05f;
                 float max_angle_velo=60.0f;
-                Wanderer *w =new Wanderer(_levelDef.world, p,_SETTINGS->stage.obstacle_speed,WANDERER_ID_ROBOT,MODE_RANDOM,
-                    waypoints,stop_counter_threshold,
-                    change_rate, stop_rate , max_angle_velo);
-                w->addRobotPepper(_SETTINGS->stage.dynamic_obstacle_size);
+                Wanderer *w =new Wanderer(_levelDef.world, 
+                                          p,
+                                          _SETTINGS->stage.obstacle_speed,
+                                          WANDERER_ID_ROBOT,
+                                          MODE_RANDOM,
+                                          waypoints,
+                                          stop_counter_threshold,
+                                          change_rate, 
+                                          stop_rate, 
+                                          max_angle_velo);
+                //w->addRobotPepper(_SETTINGS->stage.dynamic_obstacle_size);
+                w->addCircle(_SETTINGS->stage.dynamic_obstacle_size / 2.f);
                 _robot_wanderers.push_back(w);
-
             }
         }
         else if(_mode==MODE_FOLLOW_PATH)
@@ -70,21 +76,16 @@ void Wanderers::reset(RectSpawn & _dynamicSpawn, bool _dynamic, bool _human) {
 
                 for(int i=0;i<waypoint_list.size();i++)
                 {
-                    
+                    Wanderer *w =new Wanderer(_levelDef.world, waypoint_list[i][0],_SETTINGS->stage.obstacle_speed,WANDERER_ID_ROBOT,MODE_FOLLOW_PATH,
+                    waypoint_list[i],stop_counter_threshold);
                     if(i==0){
-                        Wanderer *w =new Wanderer(_levelDef.world, waypoint_list[i][0],_SETTINGS->stage.obstacle_speed,WANDERER_ID_ROBOT_PEPPER,MODE_FOLLOW_PATH,
-                    waypoint_list[i],stop_counter_threshold);
                         w->addRobotPepper(_SETTINGS->stage.dynamic_obstacle_size);
-                        _robot_wanderers.push_back(w);
                     }else{
-                        Wanderer *w =new Wanderer(_levelDef.world, waypoint_list[i][0],_SETTINGS->stage.obstacle_speed,WANDERER_ID_ROBOT,MODE_FOLLOW_PATH,
-                    waypoint_list[i],stop_counter_threshold);
                         w->addCircle(_SETTINGS->stage.dynamic_obstacle_size / 2.f);
-                        _robot_wanderers.push_back(w);
 
                     }
                     
-                    
+                    _robot_wanderers.push_back(w);
     
                 }
 
@@ -104,11 +105,17 @@ void Wanderers::reset(RectSpawn & _dynamicSpawn, bool _dynamic, bool _human) {
                 float change_rate=0.5f;
                 float stop_rate=0.05f;
                 float max_angle_velo=60.0f;
-                WandererBipedal *w =new WandererBipedal(_levelDef.world, p,_SETTINGS->stage.obstacle_speed,WANDERER_ID_HUMAN,MODE_RANDOM,
-                    waypoints,stop_counter_threshold,
-                    change_rate, stop_rate , max_angle_velo);
+                WandererBipedal *w =new WandererBipedal(_levelDef.world, 
+                                                        p,_SETTINGS->stage.obstacle_speed,
+                                                        WANDERER_ID_HUMAN,
+                                                        MODE_RANDOM,
+                                                        waypoints,
+                                                        stop_counter_threshold,
+                                                        change_rate, 
+                                                        stop_rate, 
+                                                        max_angle_velo);
                 w->addRobotPepper(_SETTINGS->stage.dynamic_obstacle_size);
-                _robot_wanderers.push_back(w);
+                _wanderers.push_back(w);
 
             }
         }

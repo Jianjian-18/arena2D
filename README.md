@@ -1,4 +1,4 @@
-# arena2D
+# arena2D - branch with human level
 A plattform to ease DRL research.
 
 Arena2D is a research framework for fast development and training of reinforcement learning algorithms for autonomous navigation. 
@@ -40,15 +40,12 @@ Our design principles are:
 If you use the arena2d platform in your research, please cite the following [paper](https://arxiv.org/abs/2008.00516):
 
 ````
-@INPROCEEDINGS{9216798,
-  author={L. {Kästner} and C. {Marx} and J. {Lambrecht}},
-  booktitle={2020 IEEE 16th International Conference on Automation Science and Engineering (CASE)}, 
-  title={Deep-Reinforcement-Learning-Based Semantic Navigation of Mobile Robots in Dynamic Environments}, 
-  year={2020},
-  volume={},
-  number={},
-  pages={1110-1115},
-  doi={10.1109/CASE48305.2020.9216798}}
+@article{kastner2020deep,
+  title={Deep-Reinforcement-Learning-Based Semantic Navigation of Mobile Robots in Dynamic Environments},
+  author={K{\"a}stner, Linh and Marx, Cornelius and Lambrecht, Jens},
+  journal={arXiv preprint arXiv:2008.00516},
+  year={2020}
+}
 ````
 
 ## Updates
@@ -84,8 +81,6 @@ set(SDL2_LIBRARIES "-L${SDL2_LIBDIR}  -lSDL2 ")   <---- here
 ```
 
 ## Installation
-We provide building with and without ROS. If you consider testing your agents with ROS messages (e.g. within a ROS map or on real hardware), we recommend building with ROS by following the instructions down below.
-
 It is encouraged (but not necessary) to install the python libraries within a conda environment:
 ```
 conda create --name arena2d
@@ -121,7 +116,7 @@ sudo apt-get install cmake libsdl2-dev libfreetype-dev
 brew install cmake sdl2 freetype
 ```
 
-## Building (without ROS)
+## Building
 Clone the repository and navigate to the folder `arena2d-sim/`:
 ```
 git clone https://github.com/ignc-research/arena2d
@@ -195,58 +190,6 @@ sudo make install
 ## Running
 Once you have compiled the application you can run the application from the `arena2d-sim/` folder with `./build/arena2d`.
 If you have installed the binary to your system folder you can run the simulator from anywhere by simply executing `arena2d`.
-
-
-# Running the arenea2d with ROS
-
-## Prequisites
-1. Standard ROS setup. The link can be found [here](http://wiki.ros.org/melodic/Installation/Ubuntu) (Code has been tested with Melodic on Ubuntu 18.04)
-2. Python3 and dependencies. its recommended to use conda to install necessary packages listed in the `envoronment.yml`.
-    ```
-     conda env create -f environment.yml
-    ```
-    
-## Building 
-1. Create a catkin workspace:
-    ```bash
-    $ mkdir -p ~/ARENA2d_ws/src
-    $ cd ~/ARENA2d_ws/
-    $ rosws update
-    ```
-2. Clone this repository in the src-folder of your catkin workspace and checkout the branch `arena-ros`. Compile tehe code and add the workspace to the ROS environment with:
-    ```bash
-    $ catkin_make -DSUPPORT_ROS_AGENT=ON
-    $ source devel/setup.bash
-    ```
-3. Make sure `rl_ros_agents`is included in the PYTHONPATH. Append following command to your `.bashrc`:
-    ```bash
-    $ export PYTHONPATH=${path_to_this_package}/rl_ros_agents:${PYTHONPATH}
-    ```
-
-## Usage
----
-#### Training
-1. open the simulator by:
-    ```bash
-    $ roslaunch arena2d arena_sim_video_off.launch
-    OR
-    $ roslaunch arena2d arena_sim_video_on.launch 
-    ```
-    Turning the Video on or off have no significant difference in the training speed.
-2. running the training script:
-    ```bash
-    $ conda activate arena2d
-    $ python scripts/train_a3c.py
-    ```
-3. To visualize robot position and laserscan run the the script in an another terminal
-    ```bash
-    $ python scripts/rviz_visualize_helper.py
-    ```
-4. open the rviz and start it with a config file
-    ```bash
-    $ rviz -d launch/rviz_arena_config.rviz
-    ```
-
 
 ## Docker Setup
 TBR

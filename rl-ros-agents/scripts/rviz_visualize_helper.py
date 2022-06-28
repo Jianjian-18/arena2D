@@ -1,7 +1,9 @@
+#!/usr/bin/env python
 import rospy
 from arena2d_msgs.msg import Arena2dResp
-from geometry_msgs.msg import Pose2D
 from sensor_msgs.msg import LaserScan
+from nav_msgs.msg import OccupancyGrid
+from geometry_msgs.msg import PoseStamped
 import argparse
 import time
 import tf
@@ -9,7 +11,6 @@ import tf.transformations as tft
 import numpy as np
 from collections import deque
 import threading
-
 
 class IntermediateRosNode:
     """
@@ -29,6 +30,7 @@ class IntermediateRosNode:
         self._header_seq_id = 0
         rospy.init_node("arena_env{:02d}_redirecter".format(idx_env), anonymous=True)
         self._idx_env = idx_env
+        print(laser_scan_publish_rate, "\n")
         if laser_scan_publish_rate == 0:
             # a flag to show where the laser scan is publised in a asynchronized way
             self._is_laser_scan_publish_asyn = False
@@ -43,6 +45,7 @@ class IntermediateRosNode:
             self._laser_scan_pub_rater = rospy.Rate(hz=laser_scan_publish_rate)
             self._new_laser_scan_received = False
             self.start_time = rospy.Time.now()
+            
         self._setSubPub()
 
     def _setSubPub(self, laser_scan_publish_rate: int = 0):
@@ -51,10 +54,9 @@ class IntermediateRosNode:
 
         # publisher
         self._pub_laser_scan = rospy.Publisher(namespace_pub + "laserscan", LaserScan, queue_size=1, tcp_nodelay=True)
-        #
-        # self. = rospy.Publisher(namespace_pub+"robot_pos", Pose2D, queue_size=1, tcp_nodelay=True)
+        # self._pub_path = rospy.Publisher(namespace_pub + "path", Path, queue_size=10, tcp_nodelay=True)
+        self._pub_goal = rospy.Publisher(namespace_pub + "goal", PoseStamped, queue_size=1, tcp_nodelay=True)
         # transform broadcaseter for robot position
-        # self._tf_rospos = tf.TransformBroadcaster(queue_size=1)
         self._tf_rospos = tf.TransformBroadcaster()
         rospy.loginfo("intermediate node is waiting for connecting env[{:02d}]".format(self._idx_env))
         times = 0
@@ -68,14 +70,15 @@ class IntermediateRosNode:
             time.sleep(0.1)
             times += 1
         rospy.loginfo("Successfully connected with arena-2d simulator, took {:3.1f}s.".format(.1 * times))
-
+        # ⭐设置topic
     def _arena2dRespCallback(self, resp: Arena2dResp):
         curr_time = rospy.Time.now()
         robot_pos = resp.robot_pos
+        
         self._tf_rospos.sendTransform((robot_pos.x, robot_pos.y, 0),
                                       tft.quaternion_from_euler(0, 0, robot_pos.theta),
                                       curr_time,
-                                      self._robot_frame_id, "world")
+                                      self._robot_frame_id, "world")                      
         laser_scan = resp.observation
         #
         laser_scan.angle_min = 0
@@ -83,8 +86,7 @@ class IntermediateRosNode:
         laser_scan.angle_increment = np.pi/180
         laser_scan.range_min = 0
         # not sure about it.
-        laser_scan.range_max = 5
-
+        laser_scan.range_max = 5   
         # set up header
         laser_scan.header.frame_id = self._robot_frame_id
         laser_scan.header.seq = self._header_seq_id
@@ -97,6 +99,15 @@ class IntermediateRosNode:
         else:
             with self._laser_scan_cache_lock:
                 self._laser_scan_cache.append(laser_scan)
+
+        goal = PoseStamped()
+        goal.header.frame_id = "world"
+        goal.header.seq = self._header_seq_id
+        goal.header.stamp = curr_time
+        goal.pose.position.x = resp.goal_xy[0]
+        goal.pose.position.y = resp.goal_xy[1]
+        self._pub_goal.publish(goal)
+
 
     def run(self):
         while not rospy.is_shutdown():
@@ -129,9 +140,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--env", type=int, default=0,
                         help="the index of the environment whose response message need to be redicted!")
-    parser.add_argument("--laser_scan_pub_rate", type=int, default=5,
+    parser.add_argument("--laser_scan_pub_rate", type=int, default=0,
                         help="set up the publishing rate of the laser scan, if it is set to 0, then the rate is synchronized with\
                         the receiving rate")
-    args = parser.parse_args()
+    args, unknown = parser.parse_known_args()
     helper_node = IntermediateRosNode(args.env, args.laser_scan_pub_rate)
     helper_node.run()
