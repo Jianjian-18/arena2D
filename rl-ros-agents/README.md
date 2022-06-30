@@ -219,7 +219,7 @@ e.g `roslaunch arena2d arena_sim.launch model:=burger mode:=continuous ...`
 |                   | `level_name:=<level_name>` | empty, random, svg, static_map | Option of task mode |
 |                   | `level_mode:=<level_mode>` | --dynamic,   | Option of using dynamic obstacle (available mode need edit) |
 |                   | `video_mode:=<video_mode>` | --disable-video, --enable-video | Option to use built-in video |
-
+|                   | `scenerio_mode:=<scenerio_mode>` | true, false | Option to execute scenerio task |
 
 2. open a new terminal and run the training script:
 
