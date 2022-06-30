@@ -1,22 +1,22 @@
-#include "LevelStaticMap.hpp"
+#include "LevelScenerio.hpp"
 
-std::shared_ptr<nav_msgs::OccupancyGrid> StaticMap::m_static_map = nullptr;
-std::unique_ptr<ros::NodeHandle> StaticMap::m_nh = nullptr;
+std::shared_ptr<nav_msgs::OccupancyGrid> Scenerio::m_static_map = nullptr;
+std::unique_ptr<ros::NodeHandle> Scenerio::m_nh = nullptr;
 
-LevelStaticMap::LevelStaticMap(const LevelDef &d, bool dynamic, bool human):
+LevelScenerio::LevelScenerio(const LevelDef &d, bool dynamic, bool human):
 Level(d), _dynamic(dynamic), _human(human), wanderers(d)
 {   
     _human=human;
     _dynamic=dynamic;
     _init_reset=true;
     _n_non_clear_bodies = 0;
-    _occupancygrid_ptr = StaticMap::getMap(_SETTINGS->stage.static_map_ros_service_name);
+    _occupancygrid_ptr = Scenerio::getMap(_SETTINGS->stage.static_map_ros_service_name);
     ROS_INFO("load map start");
-    loadStaticMap();
+    loadScenerio();
     ROS_INFO("loaded map!");
 }
 
-void LevelStaticMap::reset(bool robot_position_reset)
+void LevelScenerio::reset(bool robot_position_reset)
 {
     ROS_INFO("reset start!");
     lazyclear();
@@ -26,6 +26,7 @@ void LevelStaticMap::reset(bool robot_position_reset)
         wanderers.freeRobotWanderers();
 
     // get constants
+
 	const float half_goal_size = _SETTINGS->stage.goal_size/2.f;
 	const float dynamic_radius = _SETTINGS->stage.dynamic_obstacle_size/2.f;
 	const float dynamic_speed = _SETTINGS->stage.obstacle_speed;
@@ -39,8 +40,8 @@ void LevelStaticMap::reset(bool robot_position_reset)
 	const zRect main_rect(0,0, half_width, half_height);
 	const zRect big_main_rect(0, 0, half_width+max_obstacle_radius, half_height+max_obstacle_radius);
     double fixed_x = 0.0, fixed_y = 0.0;
-    ros::param::get("scenerio/fixed_goal_x", fixed_x);
-    ros::param::get("scenerio/fixed_goal_y", fixed_y);
+    ros::param::get("/fixed_goal_x", fixed_x);
+    ros::param::get("/fixed_goal_y", fixed_y);
     const zRect goal_rect(fixed_x, fixed_y, 0, 0);
     
 
@@ -54,17 +55,9 @@ void LevelStaticMap::reset(bool robot_position_reset)
 
     if (_init_reset)
     {
-        bool scenerio = false;
-        ros::param::get("scenerio/scenerio", scenerio);
-        if(!scenerio){
-            _goalSpawnArea.addQuadTree(main_rect, _levelDef.world, COLLIDE_CATEGORY_STAGE,
-                                    LEVEL_RANDOM_GOAL_SPAWN_AREA_BLOCK_SIZE, half_goal_size);
-        }
-        else{
-            _goalSpawnArea.addQuadTree(goal_rect, _levelDef.world, COLLIDE_CATEGORY_STAGE,
-                                    LEVEL_RANDOM_GOAL_SPAWN_AREA_BLOCK_SIZE, half_goal_size);            
-        }       
         // calculating goal spawn area
+        _goalSpawnArea.addQuadTree(goal_rect, _levelDef.world, COLLIDE_CATEGORY_STAGE,
+                                   LEVEL_RANDOM_GOAL_SPAWN_AREA_BLOCK_SIZE, half_goal_size);
         _goalSpawnArea.calculateArea();
     }
 
@@ -90,19 +83,19 @@ void LevelStaticMap::reset(bool robot_position_reset)
     }
     ROS_DEBUG("dynamic obstacles created!");
 
-    randomGoalSpawnUntilValid();
+    randomGoalSpawnUntilValid(&_goalSpawnArea);
     ROS_DEBUG("goal spawned");
 }
 
 
-void LevelStaticMap::renderGoalSpawn()
+void LevelScenerio::renderGoalSpawn()
 {
     Level::renderGoalSpawn();
     Z_SHADER->setColor(zColor(0.1, 0.9, 0.0, 0.5));
     _dynamicSpawn.render();
 }
 
-void LevelStaticMap::loadStaticMap()
+void LevelScenerio::loadScenerio()
 {   
     
     b2Assert(_occupancygrid_ptr);
@@ -256,7 +249,7 @@ void LevelStaticMap::loadStaticMap()
 
 }
 
-void LevelStaticMap::lazyclear()
+void LevelScenerio::lazyclear()
 {
     // only free the bodies that not belong to static map.
     int i = 0, size = _bodyList.size();
@@ -274,7 +267,7 @@ void LevelStaticMap::lazyclear()
     }
 }
 
-float LevelStaticMap::getReward()
+float LevelScenerio::getReward()
 {
 	float reward = 0;
 	_closestDistance_old.clear();
@@ -318,7 +311,7 @@ float LevelStaticMap::getReward()
 	return reward;
 }
 
-void LevelStaticMap::randomGoalSpawnUntilValid(RectSpawn * goal_spawn)
+void LevelScenerio::randomGoalSpawnUntilValid(RectSpawn * goal_spawn)
 {   
     const auto &info = _occupancygrid_ptr->info;
     const auto &data = _occupancygrid_ptr->data;

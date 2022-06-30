@@ -3,7 +3,7 @@ import rospy
 from arena2d_msgs.msg import Arena2dResp
 from sensor_msgs.msg import LaserScan
 from nav_msgs.msg import OccupancyGrid
-from geometry_msgs.msg import PoseStamped, TransformStamped
+from geometry_msgs.msg import PoseStamped, TransformStamped, TwistStamped, Pose, Pose2D, Point, Vector3, Quaternion
 import argparse
 import time
 import tf
@@ -12,6 +12,9 @@ import numpy as np
 from collections import deque
 import threading
 import tf2_ros
+from visualization_msgs.msg import MarkerArray, Marker
+from std_msgs.msg import Header, ColorRGBA, String
+
 
 class IntermediateRosNode:
     """
@@ -32,8 +35,14 @@ class IntermediateRosNode:
         rospy.init_node("arena_env{:02d}_redirecter".format(idx_env), anonymous=True)
         self._idx_env = idx_env
 
-        # ⭐
+        # ⭐hyperparameter
         self._map_origin = [0,0]
+        self.points_idx = 0
+        self.pre_goal = [0.0,0.0]
+        self.goal = Marker()
+        self.line_strip = MarkerArray()
+        self.marker_max = 200
+        
 
         print(laser_scan_publish_rate, "\n")
         if laser_scan_publish_rate == 0:
@@ -60,7 +69,9 @@ class IntermediateRosNode:
         # publisher
         self._pub_laser_scan = rospy.Publisher(namespace_pub + "laserscan", LaserScan, queue_size=1, tcp_nodelay=True)
         # self._pub_path = rospy.Publisher(namespace_pub + "path", Path, queue_size=10, tcp_nodelay=True)
-        self._pub_goal = rospy.Publisher(namespace_pub + "goal", PoseStamped, queue_size=1, tcp_nodelay=True)
+        self._pub_goal = rospy.Publisher(namespace_pub + "goal", Marker, queue_size=1, tcp_nodelay=True)
+        self._pub_robot = rospy.Publisher(namespace_pub + "robot", Marker, queue_size=1, tcp_nodelay=True)
+        self._pub_path = rospy.Publisher(namespace_pub + "path", MarkerArray, queue_size=1, tcp_nodelay=True)
         # transform broadcaseter for robot position
         self._tf_rospos = tf.TransformBroadcaster()
         rospy.loginfo("intermediate node is waiting for connecting env[{:02d}]".format(self._idx_env))
@@ -73,6 +84,8 @@ class IntermediateRosNode:
 
         self._sub = rospy.Subscriber(namespace_sub + "response", Arena2dResp,
                                      self._arena2dRespCallback, tcp_nodelay=True)
+
+                                     
         # # give rospy enough time to establish the connection, without this procedure, the message to
         # # be published at the beginning could be lost.
         while self._sub.get_num_connections() == 0:
@@ -81,6 +94,7 @@ class IntermediateRosNode:
         rospy.loginfo("Successfully connected with arena-2d simulator, took {:3.1f}s.".format(.1 * times))
     # ⭐
     def _mapCallback(self, msg: OccupancyGrid):
+
         rospy.loginfo(rospy.get_caller_id() + "I heard %s", msg.info)
         self._map_origin[0] = msg.info.width / 2
         self._map_origin[1] = msg.info.height / 2
@@ -97,17 +111,9 @@ class IntermediateRosNode:
         static_transformStamped.transform.rotation.z = 0
         static_transformStamped.transform.rotation.w = 1  
         self._map_broadcaster.sendTransform(static_transformStamped)    
-
-    def _arena2dRespCallback(self, resp: Arena2dResp):
-        curr_time = rospy.Time.now()
-        robot_pos = resp.robot_pos
-        
-        self._tf_rospos.sendTransform((robot_pos.x, robot_pos.y, 0),
-                                      tft.quaternion_from_euler(0, 0, robot_pos.theta),
-                                      curr_time,
-                                      self._robot_frame_id, "world")                      
-        laser_scan = resp.observation
-        #
+        print(static_transformStamped.transform.translation.x, static_transformStamped.transform.translation.y,"\n")
+    def _show_scan_in_rviz(self, scan: LaserScan):
+        laser_scan = scan
         laser_scan.angle_min = 0
         laser_scan.angle_max = 2 * np.pi
         laser_scan.angle_increment = np.pi/180
@@ -117,7 +123,7 @@ class IntermediateRosNode:
         # set up header
         laser_scan.header.frame_id = self._robot_frame_id
         laser_scan.header.seq = self._header_seq_id
-        laser_scan.header.stamp = curr_time
+        laser_scan.header.stamp = rospy.Time.now()
 
         self._header_seq_id += 1
 
@@ -125,15 +131,83 @@ class IntermediateRosNode:
             self._pub_laser_scan.publish(laser_scan)
         else:
             with self._laser_scan_cache_lock:
-                self._laser_scan_cache.append(laser_scan)
+                self._laser_scan_cache.append(laser_scan)    
 
-        goal = PoseStamped()
-        goal.header.frame_id = "world"
-        goal.header.seq = self._header_seq_id
-        goal.header.stamp = curr_time
-        goal.pose.position.x = resp.goal_xy[0]
-        goal.pose.position.y = resp.goal_xy[1]
-        self._pub_goal.publish(goal)
+    def _show_goal_robot_in_rviz(self, x, y, robot_pos: Pose2D):
+        # ⭐ also reset path
+        if((self.pre_goal[0] != x) & (self.pre_goal[1] != y)):
+            for i in self.line_strip.markers:
+                i.action = Marker.DELETEALL   
+            self.goal.header.frame_id = "world"
+            self.goal.id = 0
+            self.goal.type = self.goal.SPHERE
+            self.goal.action = self.goal.ADD
+            self.goal.pose = Pose(Point(x,y,0), Quaternion(0, 0, 0, 1))
+            self.goal.color.r = 1.0
+            self.goal.color.g = 1.0
+            self.goal.color.b = 0.0
+            self.goal.color.a = 1.0
+            self.goal.scale.x = 0.2
+            self.goal.scale.y = 0.2
+            self.goal.scale.z = 0.2
+            self.goal.frame_locked = False
+            self._pub_goal.publish(self.goal)
+
+        robot = Marker()
+        robot.header.frame_id = "world"
+        robot.id = 1
+        robot.type = robot.SPHERE
+        robot.action = robot.ADD
+        robot.pose = Pose(Point(robot_pos.x,robot_pos.y,0), Quaternion(0, 0, 0, 1))
+        robot.color.r = 1.0
+        robot.color.g = 0.0
+        robot.color.b = 0.5
+        robot.color.a = 1.0
+        robot.scale.x = 0.2
+        robot.scale.y = 0.2
+        robot.scale.z = 0.2
+        robot.frame_locked = False
+        self._pub_robot.publish(robot)
+
+        self.pre_goal[0] = x
+        self.pre_goal[1] = y
+
+    def _show_path_in_rviz(self,robot_pos: Pose2D):
+        marker = Marker()
+        marker.header.frame_id = "world"
+        # marker.id = self.points_idx
+        marker.type = marker.SPHERE
+        marker.action = marker.ADD
+        marker.pose = Pose(Point(robot_pos.x,robot_pos.y,0), Quaternion(0, 0, 0, 1))
+        marker.color.r = 0.0
+        marker.color.g = 0.5
+        marker.color.b = 0.5
+        marker.color.a = 0.8
+        marker.scale.x = 0.05
+        marker.scale.y = 0.05
+        marker.scale.z = 0.05
+        marker.frame_locked = False
+        self.points_idx+=1
+        if(self.points_idx > self.marker_max):
+           self.line_strip.markers.pop(0)
+        self.line_strip.markers.append(marker) 
+        id = 0
+        for m in self.line_strip.markers:
+            m.id = id
+            id += 1
+        self._pub_path.publish(self.line_strip)
+        # rospy.loginfo('msg published')
+    def _arena2dRespCallback(self, resp: Arena2dResp):
+        curr_time = rospy.Time.now()
+        robot_pos = resp.robot_pos
+        self._tf_rospos.sendTransform((robot_pos.x, robot_pos.y, 0),
+                                      tft.quaternion_from_euler(0, 0, robot_pos.theta),
+                                      curr_time,
+                                      self._robot_frame_id, "world")      
+
+        self._show_scan_in_rviz(resp.observation)                                        
+        self. _show_goal_robot_in_rviz(resp.goal_xy[0],resp.goal_xy[1], robot_pos)
+        self._show_path_in_rviz(resp.robot_pos)
 
 
     def run(self):

@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
+
+    <!-- arguments for simulator setting -->
     <arg name="level_name" default="static_map" doc = "level name [empty, random, svg, static_map]"/>
     <arg name="level_mode" default="--dynamic" doc = "[--dynamic,  ]"/>    
     <arg name="video_mode" default="--enable-video" doc = "video [--disable-video, --enable-video]"/> 
 
+    <!-- robot setting -->
     <arg name="robot_model" default="burger" 
     doc="model type [burger, jackal, agvota, waffle_pi]"/>
     <param name="model" value="$(arg robot_model)" />
@@ -17,12 +20,18 @@
     <rosparam command="load" 
     file= "$(find arena2d)/configs/action_space/default_settings_$(arg robot_model).yaml" />
 
-    <env name="ROSCONSOLE_CONFIG_FILE" value="$(find arena2d)/ros_logging_settings.conf" />
+    <!-- fixed goal for scenerio task-->
+    <!-- The value needs to be set carefully, 
+    1.) range = [- (width * resolution / 2) , width * resolution / 2]
+    2.) make sure the spawn point without obstacle -->
+    <param name="scenerio/fixed_goal_x" value = "3.0" />
+    <param name="scenerio/fixed_goal_y" value = "4.0" />
 
-
+    <arg name="scenerio_mode" default="false" doc = "[true, false]"/> 
+    <param name="scenerio/scenerio" value="$(arg scenerio_mode)" />
 
     <!-- Run the map server -->
-    <arg name="map_file" default="$(find arena2d)/static_map/my_labor.yaml" 
+    <arg name="map_file" default="$(find arena2d)/static_map/map_labor.yaml" 
     doc = "load rosmap from /static_map" />
     <node if="$(eval arg('level_name') == 'static_map')"
     name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
@@ -37,10 +46,9 @@
     name ="rviz" pkg="rviz" type="rviz" 
     args="-d $(find rl-ros-agents)/launch/rviz_config_new.rviz" required="true" />
 
-    <!-- static transform for map to world -->
-    <!-- node pkg="tf" type="static_transform_publisher" name="map_broadcaster" args="0.4 0.4 0 0 0 0 1 world map 100" -->
-
     <!-- launch arena2d server -->
+    <env name="ROSCONSOLE_CONFIG_FILE" value="$(find arena2d)/ros_logging_settings.conf" />
+
     <node name="arena_sim" pkg="arena2d" type="arena2d" output="screen" 
     args="--use_ros_agent $(arg video_mode) --run &quot;level $(arg level_name) $(arg level_mode) &quot;"/>
 
