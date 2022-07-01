@@ -69,6 +69,12 @@ public:
 	void getAgentData(std::vector<float> & data) override{
 		wanderers.getWandererData(data);
 	}
+	/* provide the obstacle information 
+	 * @param coordinate data for all robot obstacle
+	 */	
+	void getRobotAgentsData(std::vector<float> & data) override{
+		wanderers.getRobotWandererData(data);
+	}
 
 	/* get level specific reward, called after every complete simulation step (not on every step iteration)
 	 * use this function to implement custom reward functions that depend on additional metrics in the level

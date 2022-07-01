@@ -9,7 +9,7 @@
 #include "Level.hpp"
 #include "Wanderer.hpp"
 #include "WandererBipedal.hpp"
-
+#include <ros/ros.h>
 extern Evaluation _evaluation;
 
 
@@ -41,10 +41,12 @@ struct WandererInfo {
  */
 class Wanderers
 {
+    friend class RosNode;
 public:
     /* constructor
 	 * @param levelDef initializer for level containing b2World and Robot
 	 */
+    
     Wanderers(const LevelDef & levelDef):_levelDef(levelDef){}
 
     /* destructor, delete all wanderers */
@@ -102,6 +104,11 @@ public:
 	 */
     bool checkHumanContact(b2Fixture* other_fixture);
     
+	/* provide the obstacle information 
+	 * @param coordinate data for all robot obstacle
+	 */	    
+    void getRobotWandererData(std::vector<float> & data);
+
 private:
     /* calculate distance and angle of all wanderers relativ to the robot
 	 */

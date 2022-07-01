@@ -14,6 +14,7 @@ Level(d), _dynamic(dynamic), _human(human), wanderers(d)
     ROS_INFO("load map start");
     loadStaticMap();
     ROS_INFO("loaded map!");
+    
 }
 
 void LevelStaticMap::reset(bool robot_position_reset)

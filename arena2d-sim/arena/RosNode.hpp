@@ -9,6 +9,7 @@
 #include <arena2d_msgs/RosAgentReq.h>
 #include <arena2d_msgs/Arena2dResp.h>
 #include <engine/GlobalSettings.hpp>
+#include <iostream>
 class RosNode
 {
     using size_t = unsigned int;
@@ -31,7 +32,6 @@ private:
     bool m_any_env_reset;
     int m_env_close; // number of envs request to close
     Environment* m_envs;
-   
 
 public:
     bool m_env_connected;
@@ -47,11 +47,11 @@ public:
     RosNode(const RosNode&)=delete;
     ~RosNode();
     void publishStates(const bool *dones, float mean_reward = 0, float mean_sucess = 0);
-
     /*  Synchronize the actions in temporary buffer with the buffer in the class Arena, 
      *  if return false, Synchronization is not done. it means not all the messages are received 
      *  
      */
     Status getActions(Twist *robot_Twist, bool* ros_envs_reset, float waitTime);
     void waitConnection();
+    
 };

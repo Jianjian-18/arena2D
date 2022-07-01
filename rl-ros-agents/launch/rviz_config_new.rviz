@@ -6,6 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /Obstacle1/Status1
       Splitter Ratio: 0.5
     Tree Height: 335
   - Class: rviz/Selection
@@ -26,7 +27,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: LaserScan
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -110,7 +111,7 @@ Visualization Manager:
       Marker Topic: /arena2d_intermediate/goal
       Name: Goal
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -118,7 +119,7 @@ Visualization Manager:
       Marker Topic: /arena2d_intermediate/robot
       Name: Robot
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -126,7 +127,15 @@ Visualization Manager:
       Marker Topic: /arena2d_intermediate/path
       Name: Path
       Namespaces:
-        {}
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /arena2d_intermediate/obstacle
+      Name: Obstacle
+      Namespaces:
+        "": true
       Queue Size: 100
       Value: true
   Enabled: true
@@ -157,7 +166,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 16.200210571289062
+      Distance: 14.416180610656738
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -173,9 +182,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.1697962284088135
+      Pitch: 1.479796290397644
       Target Frame: <Fixed Frame>
-      Yaw: 4.825401306152344
+      Yaw: 4.725400924682617
     Saved: ~
 Window Geometry:
   Displays:

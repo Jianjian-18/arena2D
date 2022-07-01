@@ -10,8 +10,10 @@
 #include "MeanBuffer.hpp"
 #include "ConsoleParameters.hpp"
 #include <level/LevelFactory.hpp>
-
+#include <iostream>
+#include <vector>
 #include "Evaluation.hpp"
+#include <string.h>
 extern Evaluation _evaluation;
 
 /* forward declaration */
@@ -171,6 +173,11 @@ public:
 	 * @return current level
 	 */
 	Level *getLevel() { return _level; }
+
+	/* provide the obstacle information 
+	 * @param coordinate data for all robot obstacle
+	 */		
+	void getObstaclePosition(std::vector<float> &data);
 
 private:
 	/* prepare simulation step

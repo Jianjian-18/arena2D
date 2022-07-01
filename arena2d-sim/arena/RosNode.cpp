@@ -21,6 +21,7 @@ RosNode::RosNode(Environment *envs, int num_envs, int argc, char **argv) : m_num
     _publishParams();
     _setRosAgentsReqSub();
     _setArena2dResPub();
+
 }
 RosNode::~RosNode(){};
 
@@ -90,6 +91,12 @@ void RosNode::publishStates(const bool *dones, float mean_reward, float mean_suc
         resp.robot_pos.x = static_cast<double>(robot_x);
         resp.robot_pos.y = static_cast<double>(robot_y);
         resp.robot_pos.theta = static_cast<double>(robot_theta);
+
+        std::vector<float> obstacle_data;
+        m_envs[idx_env].getObstaclePosition(obstacle_data);
+        for(auto i = 0; i < obstacle_data.size(); i++){
+            resp.obstacle_pos[i] = static_cast<double>(obstacle_data[i]);
+        }
 
         //TODO Whats is additional data? add it and change the msg type if needed
 

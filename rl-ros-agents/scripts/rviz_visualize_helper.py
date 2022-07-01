@@ -41,7 +41,8 @@ class IntermediateRosNode:
         self.pre_goal = [0.0,0.0]
         self.goal = Marker()
         self.line_strip = MarkerArray()
-        self.marker_max = 200
+        self.obstacle_group = MarkerArray()
+        self.marker_max = 500
         
 
         print(laser_scan_publish_rate, "\n")
@@ -72,6 +73,7 @@ class IntermediateRosNode:
         self._pub_goal = rospy.Publisher(namespace_pub + "goal", Marker, queue_size=1, tcp_nodelay=True)
         self._pub_robot = rospy.Publisher(namespace_pub + "robot", Marker, queue_size=1, tcp_nodelay=True)
         self._pub_path = rospy.Publisher(namespace_pub + "path", MarkerArray, queue_size=1, tcp_nodelay=True)
+        self._pub_obstacle = rospy.Publisher(namespace_pub + "obstacle", MarkerArray, queue_size=1, tcp_nodelay=True)
         # transform broadcaseter for robot position
         self._tf_rospos = tf.TransformBroadcaster()
         rospy.loginfo("intermediate node is waiting for connecting env[{:02d}]".format(self._idx_env))
@@ -138,6 +140,8 @@ class IntermediateRosNode:
         if((self.pre_goal[0] != x) & (self.pre_goal[1] != y)):
             for i in self.line_strip.markers:
                 i.action = Marker.DELETEALL   
+            for i in self.obstacle_group.markers:
+                i.action = Marker.DELETEALL   
             self.goal.header.frame_id = "world"
             self.goal.id = 0
             self.goal.type = self.goal.SPHERE
@@ -159,9 +163,9 @@ class IntermediateRosNode:
         robot.type = robot.SPHERE
         robot.action = robot.ADD
         robot.pose = Pose(Point(robot_pos.x,robot_pos.y,0), Quaternion(0, 0, 0, 1))
-        robot.color.r = 1.0
-        robot.color.g = 0.0
-        robot.color.b = 0.5
+        robot.color.r = 0.1
+        robot.color.g = 0.1
+        robot.color.b = 1.0
         robot.color.a = 1.0
         robot.scale.x = 0.2
         robot.scale.y = 0.2
@@ -179,10 +183,10 @@ class IntermediateRosNode:
         marker.type = marker.SPHERE
         marker.action = marker.ADD
         marker.pose = Pose(Point(robot_pos.x,robot_pos.y,0), Quaternion(0, 0, 0, 1))
-        marker.color.r = 0.0
-        marker.color.g = 0.5
-        marker.color.b = 0.5
-        marker.color.a = 0.8
+        marker.color.r = 0.8
+        marker.color.g = 0.3
+        marker.color.b = 0.3
+        marker.color.a = 1.0
         marker.scale.x = 0.05
         marker.scale.y = 0.05
         marker.scale.z = 0.05
@@ -197,6 +201,31 @@ class IntermediateRosNode:
             id += 1
         self._pub_path.publish(self.line_strip)
         # rospy.loginfo('msg published')
+    def _show_obstacle_in_rviz(self,obstacle_pos):
+        step = 2
+        tmp = [obstacle_pos[i:i+step] for i in range(0,len(obstacle_pos),step)]
+        for j,i in enumerate(tmp):
+            if (i[0] or i[1]):
+                obstacle = Marker()
+                obstacle.header.frame_id = "world"
+                obstacle.id = j
+                obstacle.type = obstacle.SPHERE
+                obstacle.action = obstacle.ADD
+                obstacle.pose = Pose(Point(i[0],i[1],0), Quaternion(0, 0, 0, 1))
+                obstacle.color.r = 0.6
+                obstacle.color.g = 1.0
+                obstacle.color.b = 0.5
+                obstacle.color.a = 1.0
+                obstacle.scale.x = 0.2
+                obstacle.scale.y = 0.2
+                obstacle.scale.z = 0.2
+                obstacle.frame_locked = False
+                for b,a in enumerate(self.obstacle_group.markers):
+                    if (self.obstacle_group.markers[b].id == j):
+                        self.obstacle_group.markers.pop(b)
+                self.obstacle_group.markers.append(obstacle)      
+        self._pub_obstacle.publish(self.obstacle_group)        
+
     def _arena2dRespCallback(self, resp: Arena2dResp):
         curr_time = rospy.Time.now()
         robot_pos = resp.robot_pos
@@ -208,6 +237,7 @@ class IntermediateRosNode:
         self._show_scan_in_rviz(resp.observation)                                        
         self. _show_goal_robot_in_rviz(resp.goal_xy[0],resp.goal_xy[1], robot_pos)
         self._show_path_in_rviz(resp.robot_pos)
+        self._show_obstacle_in_rviz(resp.obstacle_pos)
 
 
     def run(self):

@@ -1,5 +1,7 @@
 #include "Wanderers.hpp"
 
+bool init_flag = false;
+
 void Wanderers::freeWanderers(){
     // free all wanderers
     for(int i = 0; i < _wanderers.size(); i++){
@@ -193,8 +195,6 @@ void Wanderers::reset(RectSpawn & _dynamicSpawn, bool _dynamic, bool _human) {
 void Wanderers::update(){
     updateHuman();
     updateRobot();
-
-
 }
 
 void Wanderers::updateHuman(){
@@ -251,8 +251,34 @@ void Wanderers::updateHuman(){
 }
 
 void Wanderers::updateRobot(){
+    // #ifdef USE_ROS
+    // if(!init_flag){
+    //     ros::init(argc, argv, "obstacle_pos");
+    //     ros::NodeHandle n;
+    //     ros::Publisher obstacle_pos_pub = n.advertise<geometry_msgs::Pose>("obstacle_pos", 1000);
+    //     ros::Rate loop_rate(10);
+    //     int count = 0;
+    //     init_flag == true;
+    // }
+    // while (ros::ok())
+    // {
+    //     // vector<b2Vec2> pos_container;
+    //     for(int i = 0; i < _robot_wanderers.size(); i++){
+    //         // pos_container[i] =  _robot_wanderers[i]->getPosition();
+    //         geometry_msgs::Pose pos;
+    //         pos.x =  _robot_wanderers[i]->getPosition().x;
+    //         pos.y =  _robot_wanderers[i]->getPosition().y;
+    //         obstacle_pos_pub.publish(pos);
+    //     }            
+    //     ros::spinOnce();
+    //     loop_rate.sleep();
+    //     ++count;
+    // }
+
+    // #endif             
     for(int i = 0; i < _robot_wanderers.size(); i++){
         _robot_wanderers[i]->update(false);
+
     }
 }
 
@@ -347,6 +373,13 @@ void Wanderers::getWandererData(std::vector<float> & data){
             data.push_back(2*_SETTINGS->stage.level_size);		// largest distance in level
 			data.push_back(0.);		// wanderer is in front of robot
         }
+    }
+}
+
+void Wanderers::getRobotWandererData(std::vector<float> & data){
+    for(int i = 0; i < _SETTINGS->stage.num_dynamic_obstacles; i++){
+        data.push_back(_robot_wanderers[i]->getPosition().x);
+        data.push_back(_robot_wanderers[i]->getPosition().y);
     }
 }
 

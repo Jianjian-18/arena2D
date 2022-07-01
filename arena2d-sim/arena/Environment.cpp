@@ -1,6 +1,6 @@
 /* Author: Cornelius Marx */
 #include "Environment.hpp"
-
+bool flag_level = false;
 // EnvironmentThread
 EnvironmentThread::EnvironmentThread()
 {
@@ -116,7 +116,11 @@ int Environment::loadLevel(const char *level_name, const ConsoleParameters &para
 	// free old level
 	delete _level;
 	_level = LEVEL_FACTORY->createLevel(level_name, LevelDef(_world, _robot), params);
-
+	cout << "level_name: " << level_name << endl;
+	if(!strcmp(level_name,"static_map")){
+		cout << "change succeed" << endl;
+		flag_level = true;
+		}
 	initializeTraining();
 
 	if (_level == NULL)
@@ -227,6 +231,14 @@ void Environment::getGoalDistance(float &l2, float &angle,float &x, float &y)
 	}
 }
 
+void Environment::getObstaclePosition(std::vector<float> &data){
+	if (flag_level == true){
+		_level -> getRobotAgentsData(data);
+		// for(auto i = 0; i < data.size();i += 2){
+		// 	cout << "obstacle position: "<< data[i] << ", "<<  data[i+1] << endl;
+		// }
+	}
+}
 void Environment::reset(bool robot_position_reset)
 {
 	_evaluation.reset();
