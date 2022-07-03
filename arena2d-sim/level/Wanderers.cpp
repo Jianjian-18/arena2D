@@ -251,34 +251,8 @@ void Wanderers::updateHuman(){
 }
 
 void Wanderers::updateRobot(){
-    // #ifdef USE_ROS
-    // if(!init_flag){
-    //     ros::init(argc, argv, "obstacle_pos");
-    //     ros::NodeHandle n;
-    //     ros::Publisher obstacle_pos_pub = n.advertise<geometry_msgs::Pose>("obstacle_pos", 1000);
-    //     ros::Rate loop_rate(10);
-    //     int count = 0;
-    //     init_flag == true;
-    // }
-    // while (ros::ok())
-    // {
-    //     // vector<b2Vec2> pos_container;
-    //     for(int i = 0; i < _robot_wanderers.size(); i++){
-    //         // pos_container[i] =  _robot_wanderers[i]->getPosition();
-    //         geometry_msgs::Pose pos;
-    //         pos.x =  _robot_wanderers[i]->getPosition().x;
-    //         pos.y =  _robot_wanderers[i]->getPosition().y;
-    //         obstacle_pos_pub.publish(pos);
-    //     }            
-    //     ros::spinOnce();
-    //     loop_rate.sleep();
-    //     ++count;
-    // }
-
-    // #endif             
     for(int i = 0; i < _robot_wanderers.size(); i++){
         _robot_wanderers[i]->update(false);
-
     }
 }
 

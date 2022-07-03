@@ -2,7 +2,7 @@
 <launch>
 
     <!-- arguments for simulator setting -->
-    <arg name="level_name" default="static_map" doc = "level name [empty, random, svg, static_map]"/>
+    <arg name="level_name" default="random" doc = "level name [empty, random, svg, static_map]"/>
     <arg name="level_mode" default="--dynamic" doc = "[--dynamic,  ]"/>    
     <arg name="video_mode" default="--enable-video" doc = "video [--disable-video, --enable-video]"/> 
 
@@ -20,6 +20,16 @@
     <rosparam command="load" 
     file= "$(find arena2d)/configs/action_space/default_settings_$(arg robot_model).yaml" />
 
+    <!-- load training curriculum for stage mode + set stage mode -->
+    <rosparam if="$(eval arg('level_name') == 'random')"
+    command="load" 
+    file = "$(find arena2d)/configs/training_curriculum.yaml" />
+
+    <arg name="stage_mode" default="false" doc = "[true, false]"/> 
+    <param if="$(eval arg('level_name') == 'random')"
+    name="stage/stage" value="$(arg stage_mode)" />
+
+
     <!-- fixed goal for scenerio task-->
     <!-- The value needs to be set carefully, 
     1.) range = [- (width * resolution / 2) , width * resolution / 2]
@@ -27,7 +37,7 @@
     <param name="scenerio/fixed_goal_x" value = "3.0" />
     <param name="scenerio/fixed_goal_y" value = "4.0" />
 
-    <arg name="scenerio_mode" default="false" doc = "[true, false]"/> 
+    <arg name="scenerio_mode" default="true" doc = "[true, false]"/> 
     <param name="scenerio/scenerio" value="$(arg scenerio_mode)" />
 
     <!-- Run the map server -->

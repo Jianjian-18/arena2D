@@ -45,6 +45,7 @@ int Arena::init(int argc, char **argv)
 	/* use for the redirection of the parameters to ros init */
 	int ros_argc = 0;
 	std::vector<char *> ros_argv;
+	_cur_stage = 1;
 
 	while (arg_i < argc)
 	{
@@ -366,6 +367,17 @@ int Arena::init(int argc, char **argv)
 	if (_use_ros_agent)
 	{
 		_ros_node_ptr = std::unique_ptr<RosNode>(new RosNode(_envs, _numEnvs, ros_argc, ros_argv.data()));
+		// if use stage mode, initial number of obstacles by curriculum
+		bool stage_flag;
+		ros::param::get("stage/stage", stage_flag);
+		if(stage_flag){
+			int static_obs,dynamic_obs;
+			string s = "/stage_" + to_string(_cur_stage);
+			ros::param::get(s, static_obs);
+			ros::param::get(s, dynamic_obs);					
+			_SETTINGS->stage.num_obstacles = static_obs;
+			_SETTINGS->stage.num_dynamic_obstacles = dynamic_obs;
+		}
 	}
 	else
 	{
@@ -794,7 +806,8 @@ void Arena::printEpisodeResults(float total_reward)
 		   _agentMeasure.getMean(), _agentPostMeasure.getMean(),
 		   _simulationMeasure.getMean(),
 		   _levelResetMeasure.getMean(),
-		   time_buffer, _meanSuccess.getMean() * 100);
+		   time_buffer, 
+		   _meanSuccess.getMean() * 100);
 }
 
 void Arena::refreshFPSCounter()

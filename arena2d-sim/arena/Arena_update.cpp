@@ -181,7 +181,8 @@ void Arena::update()
 				// adding success value to success buffer
 				_meanSuccess.push((s == Environment::POSITIVE_END) ? 1 : 0);
 				_meanSuccess.calculateMean();
-
+				cout <<"try to find successrate: -1 "<< _meanSuccess.getMean() << endl;
+				
 				// adding reward to total reward buffer
 				_meanReward.push(_envs[i].getTotalReward());
 				_meanReward.calculateMean();
@@ -356,7 +357,8 @@ void Arena::update()
 		}
 	}
 }
-#ifdef USE_ROS
+
+// #ifdef USE_ROS
 void Arena::rosUpdate(float wait_time = 0.0f)
 {
 	bool any_arrow_key_pressed = false;
@@ -485,6 +487,26 @@ void Arena::rosUpdate(float wait_time = 0.0f)
 				_meanSuccess.push((s == Environment::POSITIVE_END) ? 1 : 0);
 				_meanSuccess.calculateMean();
 
+				// stage mode: update number of obstacle
+				float cur_success = _meanSuccess.getMean();
+				string cur_level = _SETTINGS->stage.initial_level;
+				string::size_type idx = cur_level.find("random");
+				if((cur_success >= 0.9) && (idx != string::npos)){					
+					int static_obs,dynamic_obs = 0;
+					_cur_stage += 1;
+					bool flag_static = ros::param::get("/stage_" + to_string(_cur_stage) + "/static", static_obs);
+					bool flag_dynamic = ros::param::get("/stage_" + to_string(_cur_stage) + "/dynamic", dynamic_obs);	
+					if(flag_static && flag_dynamic){
+						_SETTINGS->stage.num_obstacles = static_obs;
+						_SETTINGS->stage.num_dynamic_obstacles = dynamic_obs;
+						INFO_F("Next stage is stage_%i with num_static = %i, num_dynamic = %i\n",_cur_stage,static_obs,dynamic_obs);
+						// cout << "stage over, next stage with num_static,num_dynamic: " << _SETTINGS->stage.num_obstacles 
+						// << ", "<< _SETTINGS->stage.num_dynamic_obstacles << endl;
+					}
+					else{
+						INFO("Already to maximal stage of curriculum!\n");
+					}
+				}
 				// adding reward to total reward buffer
 				_meanReward.push(_envs[i].getTotalReward());
 				_meanReward.calculateMean();
@@ -522,4 +544,4 @@ void Arena::rosUpdate(float wait_time = 0.0f)
 	// if (!any_arrow_key_pressed)
 	_ros_node_ptr->publishStates(_dones, _meanReward.getMean(), _meanSuccess.getMean());
 }
-#endif
+// #endif

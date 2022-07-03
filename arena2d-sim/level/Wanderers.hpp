@@ -9,7 +9,6 @@
 #include "Level.hpp"
 #include "Wanderer.hpp"
 #include "WandererBipedal.hpp"
-#include <ros/ros.h>
 extern Evaluation _evaluation;
 
 
@@ -41,7 +40,6 @@ struct WandererInfo {
  */
 class Wanderers
 {
-    friend class RosNode;
 public:
     /* constructor
 	 * @param levelDef initializer for level containing b2World and Robot

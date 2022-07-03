@@ -23,8 +23,10 @@
 #include <Python.h>
 #include <script_sources.generated.h>
 #include <memory>
+#include <string>
 #ifdef USE_ROS
 #include "RosNode.hpp"
+#include <ros/ros.h>
 #endif
 
 #include "Evaluation.hpp"
@@ -389,6 +391,10 @@ private:
 
 	/* set to true if python callback functions are used for training */
 	bool _pyAgentUsed;
+
+	int _cur_stage;
+
+	
 #ifdef ARENA_PYTHON_VERSION_3
 	wchar_t
 #else // old python <= 2.7

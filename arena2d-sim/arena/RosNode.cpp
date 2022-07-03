@@ -91,7 +91,7 @@ void RosNode::publishStates(const bool *dones, float mean_reward, float mean_suc
         resp.robot_pos.x = static_cast<double>(robot_x);
         resp.robot_pos.y = static_cast<double>(robot_y);
         resp.robot_pos.theta = static_cast<double>(robot_theta);
-
+        // obstacle position
         std::vector<float> obstacle_data;
         m_envs[idx_env].getObstaclePosition(obstacle_data);
         for(auto i = 0; i < obstacle_data.size(); i++){
