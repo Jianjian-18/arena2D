@@ -394,7 +394,8 @@ private:
 
 	int _cur_stage;
 
-	
+	/* total number of episodes since fit next stage */
+	int _episodeCount_tmp;
 #ifdef ARENA_PYTHON_VERSION_3
 	wchar_t
 #else // old python <= 2.7
@@ -430,6 +431,9 @@ private:
 	std::unique_ptr<RosNode> _ros_node_ptr;
 	bool _use_ros_agent = false;
 	bool *_ros_envs_reset;
+	bool stage_flag;
+	bool episode_flag;
+	bool curriculum_flag;
 #endif // USE_ROS
 };
 

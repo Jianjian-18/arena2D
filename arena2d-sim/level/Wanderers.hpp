@@ -9,6 +9,7 @@
 #include "Level.hpp"
 #include "Wanderer.hpp"
 #include "WandererBipedal.hpp"
+#include <ros/ros.h>
 extern Evaluation _evaluation;
 
 
@@ -106,7 +107,10 @@ public:
 	 * @param coordinate data for all robot obstacle
 	 */	    
     void getRobotWandererData(std::vector<float> & data);
-
+	/* provide the obstacle information 
+	 * @param coordinate data for all human obstacle
+	 */	    
+    void getHumanWandererData(std::vector<float> & data);
 private:
     /* calculate distance and angle of all wanderers relativ to the robot
 	 */
@@ -140,6 +144,12 @@ private:
 
     /* save distances of wanderers for the evaluation */
     std::list<float> _distance_evaluation;
+
+    // true if need fixed obstacle
+    bool scenerio_init_flag = true;
+
+    // save initial pos of human 
+    std::vector<b2Vec2> fixed_human;
 };
 
 #endif

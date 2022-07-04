@@ -201,10 +201,12 @@ class IntermediateRosNode:
             id += 1
         self._pub_path.publish(self.line_strip)
         # rospy.loginfo('msg published')
-    def _show_obstacle_in_rviz(self,obstacle_pos):
+    def _show_obstacle_in_rviz(self,robot_obstacle_pos, human_obstacle_pos):
         step = 2
-        tmp = [obstacle_pos[i:i+step] for i in range(0,len(obstacle_pos),step)]
-        for j,i in enumerate(tmp):
+        robot_tmp = [robot_obstacle_pos[i:i+step] for i in range(0,len(robot_obstacle_pos),step)]
+        human_tmp = [human_obstacle_pos[i:i+step] for i in range(0,len(human_obstacle_pos),step)]
+        count_robot_obstacle = 0;
+        for j,i in enumerate(robot_tmp):
             if (i[0] or i[1]):
                 obstacle = Marker()
                 obstacle.header.frame_id = "world"
@@ -221,9 +223,30 @@ class IntermediateRosNode:
                 obstacle.scale.z = 0.2
                 obstacle.frame_locked = False
                 for b,a in enumerate(self.obstacle_group.markers):
-                    if (self.obstacle_group.markers[b].id == j):
+                    if (self.obstacle_group.markers[b].id == obstacle.id):
                         self.obstacle_group.markers.pop(b)
-                self.obstacle_group.markers.append(obstacle)      
+                self.obstacle_group.markers.append(obstacle) 
+                count_robot_obstacle+=1     
+        for k,l in enumerate(human_tmp):
+            if (l[0] or l[1]):
+                obstacle = Marker()
+                obstacle.header.frame_id = "world"
+                obstacle.id = k + count_robot_obstacle
+                obstacle.type = obstacle.SPHERE
+                obstacle.action = obstacle.ADD
+                obstacle.pose = Pose(Point(l[0],l[1],0), Quaternion(0, 0, 0, 1))
+                obstacle.color.r = 1.0
+                obstacle.color.g = 0.6
+                obstacle.color.b = 0.5
+                obstacle.color.a = 1.0
+                obstacle.scale.x = 0.2
+                obstacle.scale.y = 0.2
+                obstacle.scale.z = 0.2
+                obstacle.frame_locked = False
+                for b,a in enumerate(self.obstacle_group.markers):
+                    if (self.obstacle_group.markers[b].id == obstacle.id):
+                        self.obstacle_group.markers.pop(b)
+                self.obstacle_group.markers.append(obstacle)  
         self._pub_obstacle.publish(self.obstacle_group)        
 
     def _arena2dRespCallback(self, resp: Arena2dResp):
@@ -237,7 +260,7 @@ class IntermediateRosNode:
         self._show_scan_in_rviz(resp.observation)                                        
         self. _show_goal_robot_in_rviz(resp.goal_xy[0],resp.goal_xy[1], robot_pos)
         self._show_path_in_rviz(resp.robot_pos)
-        self._show_obstacle_in_rviz(resp.obstacle_pos)
+        self._show_obstacle_in_rviz(resp.robot_obstacle_pos, resp.human_obstacle_pos)
 
 
     def run(self):

@@ -177,7 +177,12 @@ public:
 	/* provide the obstacle information 
 	 * @param coordinate data for all robot obstacle
 	 */		
-	void getObstaclePosition(std::vector<float> &data);
+	void getRobotObstaclePosition(std::vector<float> &data);
+
+	/* provide the obstacle information 
+	 * @param coordinate data for all robot obstacle
+	 */		
+	void getHumanObstaclePosition(std::vector<float> &data);
 
 private:
 	/* prepare simulation step

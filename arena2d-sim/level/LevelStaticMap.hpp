@@ -9,6 +9,7 @@
 #include <nav_msgs/GetMap.h>
 #include <memory>
 #include <opencv2/opencv.hpp>
+#include <iostream>
 #define LEVEL_RANDOM_GOAL_SPAWN_AREA_BLOCK_SIZE 0.1 // maximum size of block when creating quad tree of goal spawn area
 
 struct StaticMap
@@ -74,6 +75,13 @@ public:
 	 */	
 	void getRobotAgentsData(std::vector<float> & data) override{
 		wanderers.getRobotWandererData(data);
+	}
+
+	/* provide the obstacle information 
+	 * @param coordinate data for all robot obstacle
+	 */	
+	void getHumanAgentsData(std::vector<float> & data) override{
+		wanderers.getHumanWandererData(data);
 	}
 
 	/* get level specific reward, called after every complete simulation step (not on every step iteration)

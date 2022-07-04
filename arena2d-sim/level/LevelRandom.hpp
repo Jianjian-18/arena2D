@@ -47,6 +47,8 @@ private:
 
 	/* spawn area for dynamic obstacles */
 	RectSpawn _dynamicSpawn;
+
+	
 };
 
 #endif

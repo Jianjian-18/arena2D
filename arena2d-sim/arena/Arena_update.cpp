@@ -487,35 +487,79 @@ void Arena::rosUpdate(float wait_time = 0.0f)
 				_meanSuccess.push((s == Environment::POSITIVE_END) ? 1 : 0);
 				_meanSuccess.calculateMean();
 
-				// stage mode: update number of obstacle
-				float cur_success = _meanSuccess.getMean();
-				string cur_level = _SETTINGS->stage.initial_level;
-				string::size_type idx = cur_level.find("random");
-				if((cur_success >= 0.9) && (idx != string::npos)){					
-					int static_obs,dynamic_obs = 0;
-					_cur_stage += 1;
-					bool flag_static = ros::param::get("/stage_" + to_string(_cur_stage) + "/static", static_obs);
-					bool flag_dynamic = ros::param::get("/stage_" + to_string(_cur_stage) + "/dynamic", dynamic_obs);	
-					if(flag_static && flag_dynamic){
-						_SETTINGS->stage.num_obstacles = static_obs;
-						_SETTINGS->stage.num_dynamic_obstacles = dynamic_obs;
-						INFO_F("Next stage is stage_%i with num_static = %i, num_dynamic = %i\n",_cur_stage,static_obs,dynamic_obs);
-						// cout << "stage over, next stage with num_static,num_dynamic: " << _SETTINGS->stage.num_obstacles 
-						// << ", "<< _SETTINGS->stage.num_dynamic_obstacles << endl;
-					}
-					else{
-						INFO("Already to maximal stage of curriculum!\n");
-					}
-				}
 				// adding reward to total reward buffer
 				_meanReward.push(_envs[i].getTotalReward());
 				_meanReward.calculateMean();
 
-				_episodeCount++;
 
+				// stage mode: update number of obstacle
+				// if success rate over 0.9, then start episode wait: after 100 episode will into next stage
+				// if success rate under 0.7, then directly back to previous stage and episode count reset								
+				float cur_success = _meanSuccess.getMean();
+				string cur_level = _SETTINGS->stage.initial_level;
+				string::size_type idx = cur_level.find("random");
+
+				if((stage_flag) && (idx != string::npos) && (curriculum_flag == false)){
+					int static_obs,dynamic_obs = 0, _epsoide_buffer = 20;
+									
+					if((cur_success >= 0.9) ){
+						if(episode_flag == false){
+							episode_flag = true;
+							_episodeCount_tmp = 0;
+							INFO("Start to count episode_tmp\n");
+						}
+						else if(_episodeCount_tmp < _epsoide_buffer){
+							++_episodeCount_tmp;
+							INFO_F("Still need %i episode to next stage.", _epsoide_buffer - _episodeCount_tmp);
+						}
+						else{
+							episode_flag = false;
+							_cur_stage += 1;
+							bool flag_static = ros::param::get("/stage_" + to_string(_cur_stage) + "/static", static_obs);
+							bool flag_dynamic = ros::param::get("/stage_" + to_string(_cur_stage) + "/dynamic", dynamic_obs);
+							if(flag_static && flag_dynamic){
+								_SETTINGS->stage.num_obstacles = static_obs;
+								_SETTINGS->stage.num_dynamic_obstacles = dynamic_obs;
+								INFO_F("Next stage is stage_%i with num_static = %i, num_dynamic = %i\n",_cur_stage,static_obs,dynamic_obs);
+								// cout << "stage over, next stage with num_static,num_dynamic: " << _SETTINGS->stage.num_obstacles 
+								// << ", "<< _SETTINGS->stage.num_dynamic_obstacles << endl;
+							}
+							else{
+								INFO("Already to maximal stage of curriculum!\n");
+								curriculum_flag = true;
+							}						
+						}						
+					}
+					if((cur_success <= 0.7 && _cur_stage != 1)){
+						episode_flag = false;
+						_cur_stage -= 1;
+						bool flag_static = ros::param::get("/stage_" + to_string(_cur_stage) + "/static", static_obs);
+						bool flag_dynamic = ros::param::get("/stage_" + to_string(_cur_stage) + "/dynamic", dynamic_obs);
+						if(flag_static && flag_dynamic){
+							_SETTINGS->stage.num_obstacles = static_obs;
+							_SETTINGS->stage.num_dynamic_obstacles = dynamic_obs;
+							INFO_F("Back to previous stage_%i with num_static = %i, num_dynamic = %i\n",_cur_stage,static_obs,dynamic_obs);
+							// cout << "stage over, next stage with num_static,num_dynamic: " << _SETTINGS->stage.num_obstacles 
+							// << ", "<< _SETTINGS->stage.num_dynamic_obstacles << endl;
+						}						
+				}
+			}
+
+				// scenerio mode: limit number of episode
+				bool scenerio = false;
+				int scenerio_count = 20;
+				ros::param::get("scenerio/scenerio", scenerio);
+				if(scenerio){
+					if(_episodeCount > scenerio_count){
+						INFO_F("%i evaluations are over",scenerio_count);
+						printEpisodeResults(_envs[i].getTotalReward());
+						exitApplication();
+						// TODO: what should do? store plot/store some information?
+					}
+				}
+				_episodeCount++;
 				// show results
 				printEpisodeResults(_envs[i].getTotalReward());
-
 				episode_over = true;
 				// if key pressed reset environment immediately
 				if (any_arrow_key_pressed)

@@ -230,14 +230,19 @@ void Environment::getGoalDistance(float &l2, float &angle,float &x, float &y)
 	}
 }
 
-void Environment::getObstaclePosition(std::vector<float> &data){
+void Environment::getRobotObstaclePosition(std::vector<float> &data){
 	if (flag_level == true){
 		_level -> getRobotAgentsData(data);
-		// for(auto i = 0; i < data.size();i += 2){
-		// 	cout << "obstacle position: "<< data[i] << ", "<<  data[i+1] << endl;
-		// }
+
 	}
 }
+
+void Environment::getHumanObstaclePosition(std::vector<float> &data){
+	if (flag_level == true){
+		_level -> getHumanAgentsData(data);
+	}	
+}
+
 void Environment::reset(bool robot_position_reset)
 {
 	_evaluation.reset();

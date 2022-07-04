@@ -368,7 +368,6 @@ int Arena::init(int argc, char **argv)
 	{
 		_ros_node_ptr = std::unique_ptr<RosNode>(new RosNode(_envs, _numEnvs, ros_argc, ros_argv.data()));
 		// if use stage mode, initial number of obstacles by curriculum
-		bool stage_flag;
 		ros::param::get("stage/stage", stage_flag);
 		if(stage_flag){
 			int static_obs,dynamic_obs;
@@ -377,6 +376,8 @@ int Arena::init(int argc, char **argv)
 			ros::param::get(s, dynamic_obs);					
 			_SETTINGS->stage.num_obstacles = static_obs;
 			_SETTINGS->stage.num_dynamic_obstacles = dynamic_obs;
+			episode_flag = false;
+			curriculum_flag = false;
 		}
 	}
 	else

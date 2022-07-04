@@ -25,10 +25,6 @@ void LevelRandom::reset(bool robot_position_reset)
 	// create border around level
 	createBorder(half_width, half_height);
 
-	if(robot_position_reset){
-		resetRobotToCenter();
-	}
-
 	// calculate spawn area for static obstacles
 	RectSpawn static_spawn;
 	static_spawn.addCheeseRect(big_main_rect, _levelDef.world, COLLIDE_CATEGORY_PLAYER, max_obstacle_radius);
@@ -47,6 +43,12 @@ void LevelRandom::reset(bool robot_position_reset)
 								LEVEL_RANDOM_GOAL_SPAWN_AREA_BLOCK_SIZE, half_goal_size);
 	_goalSpawnArea.calculateArea();
 
+	// reset random robot position
+	if(robot_position_reset){
+		b2Vec2 pos(0, 0);
+		_goalSpawnArea.getRandomPoint(pos);
+		_levelDef.robot->reset(pos, f_frandomRange(0, 2 * M_PI));	
+	}
 	// dynamic obstacles
 
     if(_dynamic || _human){

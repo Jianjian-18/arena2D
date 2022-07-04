@@ -1,7 +1,5 @@
 #include "Wanderers.hpp"
 
-bool init_flag = false;
-
 void Wanderers::freeWanderers(){
     // free all wanderers
     for(int i = 0; i < _wanderers.size(); i++){
@@ -19,6 +17,11 @@ void Wanderers::freeRobotWanderers(){
 }
 
 void Wanderers::reset(RectSpawn & _dynamicSpawn, bool _dynamic, bool _human) {
+    // judge if open scenerio mode
+    bool scenerio = false;
+    ros::param::get("scenerio/scenerio", scenerio);
+    if(scenerio) scenerio_init_flag = false;
+
     if (_wanderers.size() > 0) freeWanderers();
     if (_robot_wanderers.size() > 0) freeRobotWanderers();
     int _mode=MODE_RANDOM;
@@ -26,7 +29,6 @@ void Wanderers::reset(RectSpawn & _dynamicSpawn, bool _dynamic, bool _human) {
     {
         if(_mode==MODE_RANDOM)
         {
-
             for (int i = 0; i < _SETTINGS->stage.num_dynamic_obstacles; i++){
                 b2Vec2 p;
                 _dynamicSpawn.getRandomPoint(p);
@@ -98,28 +100,36 @@ void Wanderers::reset(RectSpawn & _dynamicSpawn, bool _dynamic, bool _human) {
     if(_human){
         if(_mode==MODE_RANDOM)
         {
-
             for (int i = 0; i < _SETTINGS->stage.num_dynamic_obstacles; i++){
                 b2Vec2 p;
+                // ⭐设定是否固定
                 _dynamicSpawn.getRandomPoint(p);
+
+                if(!scenerio_init_flag){
+                  fixed_human.push_back(p);
+                  p = fixed_human[i];
+                }
+                
                 std::vector<b2Vec2> waypoints={p};
                 int stop_counter_threshold=1;
                 float change_rate=0.5f;
                 float stop_rate=0.05f;
                 float max_angle_velo=60.0f;
                 WandererBipedal *w =new WandererBipedal(_levelDef.world, 
-                                                        p,_SETTINGS->stage.obstacle_speed,
+                                                        p,
+                                                        _SETTINGS->stage.obstacle_speed,
                                                         WANDERER_ID_HUMAN,
                                                         MODE_RANDOM,
                                                         waypoints,
                                                         stop_counter_threshold,
                                                         change_rate, 
                                                         stop_rate, 
-                                                        max_angle_velo);
+                                                        max_angle_velo);                                                        
                 w->addRobotPepper(_SETTINGS->stage.dynamic_obstacle_size);
                 _wanderers.push_back(w);
 
             }
+            scenerio_init_flag = true;
         }
         else if(_mode==MODE_FOLLOW_PATH)
         {          
@@ -354,6 +364,13 @@ void Wanderers::getRobotWandererData(std::vector<float> & data){
     for(int i = 0; i < _SETTINGS->stage.num_dynamic_obstacles; i++){
         data.push_back(_robot_wanderers[i]->getPosition().x);
         data.push_back(_robot_wanderers[i]->getPosition().y);
+    }
+}
+
+void Wanderers::getHumanWandererData(std::vector<float> & data){
+    for(int i = 0; i < _SETTINGS->stage.num_dynamic_obstacles; i++){
+        data.push_back(_wanderers[i]->getPosition().x);
+        data.push_back(_wanderers[i]->getPosition().y);
     }
 }
 

@@ -92,11 +92,24 @@ void RosNode::publishStates(const bool *dones, float mean_reward, float mean_suc
         resp.robot_pos.y = static_cast<double>(robot_y);
         resp.robot_pos.theta = static_cast<double>(robot_theta);
         // obstacle position
-        std::vector<float> obstacle_data;
-        m_envs[idx_env].getObstaclePosition(obstacle_data);
-        for(auto i = 0; i < obstacle_data.size(); i++){
-            resp.obstacle_pos[i] = static_cast<double>(obstacle_data[i]);
+        string _level = _SETTINGS->stage.initial_level;
+        string::size_type idx_robot, idx_human;
+        idx_robot = _level.find("dynamic");
+        idx_human = _level.find("human");
+        if(idx_robot != string::npos){
+            std::vector<float> robot_obstacle_data;
+            m_envs[idx_env].getRobotObstaclePosition(robot_obstacle_data);
+            for(auto i = 0; i < robot_obstacle_data.size(); i++){
+                resp.robot_obstacle_pos[i] = static_cast<double>(robot_obstacle_data[i]);
+            }            
         }
+        if(idx_human != string::npos){
+            std::vector<float> human_obstacle_data;
+            m_envs[idx_env].getHumanObstaclePosition(human_obstacle_data);
+            for(auto i = 0; i < human_obstacle_data.size(); i++){
+                resp.human_obstacle_pos[i] = static_cast<double>(human_obstacle_data[i]);
+            }            
+        }        
 
         //TODO Whats is additional data? add it and change the msg type if needed
 
