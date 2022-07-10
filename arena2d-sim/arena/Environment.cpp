@@ -117,7 +117,7 @@ int Environment::loadLevel(const char *level_name, const ConsoleParameters &para
 	delete _level;
 	_level = LEVEL_FACTORY->createLevel(level_name, LevelDef(_world, _robot), params);
 	cout << "level_name: " << level_name << endl;
-	if(!strcmp(level_name,"static_map")){
+	if(!strcmp(level_name,"scenario")){
 		flag_level = true;
 		}
 	initializeTraining();

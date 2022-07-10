@@ -2,7 +2,7 @@
 <launch>
 
     <!-- arguments for simulator setting -->
-    <arg name="level_name" default="random" doc = "level name [empty, random, svg, static_map]"/>
+    <arg name="level_name" default="scenario" doc = "level name [empty, random, svg, scenario]"/>
     <arg name="level_mode" default="--human " doc = "[--dynamic --human, --dynamic, --human,  ]"/>    
     <arg name="video_mode" default="--enable-video" doc = "video [--disable-video, --enable-video]"/> 
 
@@ -21,7 +21,7 @@
     file= "$(find arena2d)/configs/action_space/default_settings_$(arg robot_model).yaml" />
 
     <!-- load training curriculum for stage mode + set stage mode -->
-    <arg name="stage_mode" default="true" doc = "[true, false]"/> 
+    <arg name="stage_mode" default="false" doc = "[true, false]"/> 
     <param name="stage/stage" value="$(arg stage_mode)" />
     <group if="$(eval arg('level_name') == 'random')">
         <group if="$(eval arg('stage_mode') == true)">
@@ -34,7 +34,7 @@
     1.) range = [- (width * resolution / 2) , width * resolution / 2]
     2.) make sure the spawn point without obstacle -->
     
-    <group if="$(eval arg ('level_name') == 'static_map')">
+    <group if="$(eval arg ('level_name') == 'scenario')">
         <param name="scenerio/scenerio" value="true" />    
         <param name="scenerio/goal_x" value = "3.0" />
         <param name="scenerio/goal_y" value = "4.0" />
@@ -44,18 +44,18 @@
 
 
     <!-- Run the map server -->
-    <arg name="map_file" default="$(find arena2d)/static_map/map_labor.yaml" 
-    doc = "load rosmap from /static_map" />
-    <node if="$(eval arg('level_name') == 'static_map')"
+    <arg name="map_file" default="$(find arena2d)/scenario/map_labor.yaml" 
+    doc = "load rosmap from /scenario" />
+    <node if="$(eval arg('level_name') == 'scenario')"
     name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
 
     <!-- load rviz helper, transfer data to rviz -->    
-    <node if="$(eval arg('level_name') == 'static_map')"
+    <node if="$(eval arg('level_name') == 'scenario')"
     name="rviz_visualize_helper" pkg="rl-ros-agents" 
     type="rviz_visualize_helper.py" output="screen" />
 
     <!-- load rviz configuration -->
-    <node if="$(eval arg('level_name') == 'static_map')"
+    <node if="$(eval arg('level_name') == 'scenario')"
     name ="rviz" pkg="rviz" type="rviz" 
     args="-d $(find rl-ros-agents)/launch/rviz_config_new.rviz" required="true" />
 

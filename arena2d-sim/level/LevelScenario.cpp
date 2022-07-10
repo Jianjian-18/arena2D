@@ -1,23 +1,23 @@
-#include "LevelStaticMap.hpp"
+#include "LevelScenario.hpp"
 
-std::shared_ptr<nav_msgs::OccupancyGrid> StaticMap::m_static_map = nullptr;
-std::unique_ptr<ros::NodeHandle> StaticMap::m_nh = nullptr;
+std::shared_ptr<nav_msgs::OccupancyGrid> Scenario::m_scenario = nullptr;
+std::unique_ptr<ros::NodeHandle> Scenario::m_nh = nullptr;
 
-LevelStaticMap::LevelStaticMap(const LevelDef &d, bool dynamic, bool human):
+LevelScenario::LevelScenario(const LevelDef &d, bool dynamic, bool human):
 Level(d), _dynamic(dynamic), _human(human), wanderers(d)
 {   
     _human=human;
     _dynamic=dynamic;
     _init_reset=true;
     _n_non_clear_bodies = 0;
-    _occupancygrid_ptr = StaticMap::getMap(_SETTINGS->stage.static_map_ros_service_name);
+    _occupancygrid_ptr = Scenario::getMap(_SETTINGS->stage.scenario_ros_service_name);
     ROS_INFO("load map start");
-    loadStaticMap();
+    loadScenario();
     ROS_INFO("loaded map!");
     
 }
 
-void LevelStaticMap::reset(bool robot_position_reset)
+void LevelScenario::reset(bool robot_position_reset)
 {
     ROS_INFO("reset start!");
     lazyclear();
@@ -100,14 +100,14 @@ void LevelStaticMap::reset(bool robot_position_reset)
 }
 
 
-void LevelStaticMap::renderGoalSpawn()
+void LevelScenario::renderGoalSpawn()
 {
     Level::renderGoalSpawn();
     Z_SHADER->setColor(zColor(0.1, 0.9, 0.0, 0.5));
     _dynamicSpawn.render();
 }
 
-void LevelStaticMap::loadStaticMap()
+void LevelScenario::loadScenario()
 {   
     
     b2Assert(_occupancygrid_ptr);
@@ -140,18 +140,18 @@ void LevelStaticMap::loadStaticMap()
             body->CreateFixture(&fixture_def);
     };
 
-    // static_map in CV matrix
-    cv::Mat static_map(rows, cols, CV_8UC1);
+    // scenario in CV matrix
+    cv::Mat scenario(rows, cols, CV_8UC1);
 
     for (int i = 0; i < rows; i++)
     {
         for (int j = 0; j < cols; j++)
         {
-            static_map.at<uint8>(i, j) = (data[i * cols + j] == 100 || data[i * cols + j] == -1) ? 255 : 0;
+            scenario.at<uint8>(i, j) = (data[i * cols + j] == 100 || data[i * cols + j] == -1) ? 255 : 0;
         }
     }
 
-    _occupancy_map=static_map.clone();
+    _occupancy_map=scenario.clone();
 
     /*
     // Create FLD detector
@@ -178,7 +178,7 @@ void LevelStaticMap::loadStaticMap()
     //                                                 distance_threshold, canny_th1, canny_th2, canny_aperture_size,
     //                                                 do_merge);
     // vector<cv::Vec4f> lines_fld;
-    // fld->detect(static_map, lines_fld);
+    // fld->detect(scenario, lines_fld);
     // for (const auto &line : lines_fld)
     // {
     //     add_edge(line[0], line[1], line[2], line[3]);
@@ -186,10 +186,10 @@ void LevelStaticMap::loadStaticMap()
     */
     
     // loop through all the rows, looking at 2 at once
-    for (int i = 0; i < static_map.rows - 1; i++)
+    for (int i = 0; i < scenario.rows - 1; i++)
     {
-        cv::Mat row1 = static_map.row(i);
-        cv::Mat row2 = static_map.row(i + 1);
+        cv::Mat row1 = scenario.row(i);
+        cv::Mat row2 = scenario.row(i + 1);
         cv::Mat diff;
 
         // if the two row are the same value, there is no edge
@@ -223,10 +223,10 @@ void LevelStaticMap::loadStaticMap()
         }
     }
     // loop through all the columns, looking at 2 at once
-    for (int i = 0; i < static_map.cols - 1; i++)
+    for (int i = 0; i < scenario.cols - 1; i++)
     {
-        cv::Mat col1 = static_map.col(i);
-        cv::Mat col2 = static_map.col(i + 1);
+        cv::Mat col1 = scenario.col(i);
+        cv::Mat col2 = scenario.col(i + 1);
         cv::Mat diff;
 
         cv::absdiff(col1, col2, diff);
@@ -261,7 +261,7 @@ void LevelStaticMap::loadStaticMap()
 
 }
 
-void LevelStaticMap::lazyclear()
+void LevelScenario::lazyclear()
 {
     // only free the bodies that not belong to static map.
     int i = 0, size = _bodyList.size();
@@ -279,7 +279,7 @@ void LevelStaticMap::lazyclear()
     }
 }
 
-float LevelStaticMap::getReward()
+float LevelScenario::getReward()
 {
 	float reward = 0;
 	_closestDistance_old.clear();
@@ -323,7 +323,7 @@ float LevelStaticMap::getReward()
 	return reward;
 }
 
-void LevelStaticMap::randomGoalSpawnUntilValid(RectSpawn * goal_spawn)
+void LevelScenario::randomGoalSpawnUntilValid(RectSpawn * goal_spawn)
 {   
     const auto &info = _occupancygrid_ptr->info;
     const auto &data = _occupancygrid_ptr->data;
@@ -370,7 +370,7 @@ void LevelStaticMap::randomGoalSpawnUntilValid(RectSpawn * goal_spawn)
    
 }
 
-void LevelStaticMap::dynamicObstacleSpawnUntilValid(){
+void LevelScenario::dynamicObstacleSpawnUntilValid(){
     const auto &info = _occupancygrid_ptr->info;
     const auto &data = _occupancygrid_ptr->data;
     uint32 cols = info.width;

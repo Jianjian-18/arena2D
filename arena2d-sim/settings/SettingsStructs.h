@@ -65,7 +65,7 @@ typedef struct
 	float max_time_chatting;	// maximum time for chatting between two wanderers
 	float goal_size;					// diameter of circular goal to reach
 	string svg_path;					// path to folder where svg files are stored
-	string static_map_ros_service_name; //name of map service provided ros map server.
+	string scenario_ros_service_name; //name of map service provided ros map server.
 } f_stage;
 
 typedef struct

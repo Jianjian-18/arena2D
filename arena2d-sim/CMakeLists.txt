@@ -115,7 +115,7 @@ include(sources.cmake)
 
 # add ros related source files 
 if(USE_ROS)
-list(APPEND ARENA_SOURCES arena/RosNode.cpp arena/RosNode.hpp level/LevelStaticMap.hpp level/LevelStaticMap.cpp)
+list(APPEND ARENA_SOURCES arena/RosNode.cpp arena/RosNode.hpp level/LevelScenario.hpp level/LevelScenario.cpp)
 endif()
 
 

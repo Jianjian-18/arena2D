@@ -19,7 +19,7 @@ void GlobalSettings::setToDefault()
 	_settings.gui.show_robot = 1;
 	_settings.gui.show_goal = 1;
 	_settings.gui.show_laser = 1;
-	_settings.gui.show_stats = 1;
+	_settings.gui.show_stats = 0;
 	_settings.gui.show_goal_spawn = 0;
 	_settings.gui.show_trail = 1;
 	_settings.gui.camera_follow = 0;
@@ -76,7 +76,7 @@ void GlobalSettings::setToDefault()
 	_settings.stage.max_obstacle_size = 1.0;
 	_settings.stage.goal_size = 0.1;
 	_settings.stage.svg_path = "svg_levels/";
-	_settings.stage.static_map_ros_service_name = "/static_map";
+	_settings.stage.scenario_ros_service_name = "/static_map";
 	// robot
 	_settings.robot.laser_noise = 0;
 	_settings.robot.laser_max_distance = 3.5;

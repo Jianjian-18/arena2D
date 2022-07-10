@@ -33,7 +33,7 @@ LevelFactory::LevelFactory()
 	REGISTER_LEVEL(LevelSVG, "svg", "", "Levels loaded from svg-files");
 	#ifdef USE_ROS
 	// static map
-	REGISTER_LEVEL_FUNC(LevelFactory::createLevelStaticMap, "static_map", "[--dynamic]",
+	REGISTER_LEVEL_FUNC(LevelFactory::createLevelScenario, "scenario", "[--dynamic]",
 								"Static Map Level and optional dynamic obstacles (flag --dynamic)");
 	#endif
 }

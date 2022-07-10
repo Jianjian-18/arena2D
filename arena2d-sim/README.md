@@ -108,9 +108,9 @@ The simulator comes with a few built-in levels which are listed below:
 * ```empty```: An empty level with just a border surrounding the level area.
 * ```random```: Randomly generated obstacles. Add flag ```--dynamic``` to add moving obstacles.
 * ```svg```: Custom SVG-levels that are loaded from the folder ```svg_levels/```. The path to the folder can be specified in the settings file with the option ```stage.svg_path```.
-* ```static_map```: A level that receives the map info from the ros map server. To use this level make sure the code is compiled with `catkin_make -DUSE_ROS=ON` to compile the whole code and use `rosrun map_server map_server <your-map-file>.yaml` to provide a map service. A handy command to arena2d-sim in this mode is
+* ```scenario```: A level that receives the map info from the ros map server. To use this level make sure the code is compiled with `catkin_make -DUSE_ROS=ON` to compile the whole code and use `rosrun map_server map_server <your-map-file>.yaml` to provide a map service. A handy command to arena2d-sim in this mode is
 ```bash
-	roslaunch arena2d arena_sim.launch video_mode:=--enable-video level_name:=static_map level_mode:=--dynamic
+	roslaunch arena2d arena_sim.launch video_mode:=--enable-video level_name:=scenario level_mode:=--dynamic
 ```
 
 A level can be loaded with the command ```level <level_name>``` or by setting the option ```stage.initial_level``` in the settings file. Further parameters for built-in levels can be configured in the ```stage``` section of the settings file. For example, the parameter ```stage.level_size``` specifies the size of the square-shaped *empty* and *random* levels.

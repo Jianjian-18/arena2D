@@ -12,7 +12,7 @@
 #include "LevelHuman.hpp"
 #include "LevelMaze.hpp"
 #ifdef USE_ROS
-#include "LevelStaticMap.hpp"
+#include "LevelScenario.hpp"
 #endif
 
 
@@ -108,10 +108,10 @@ public:
 
 	#ifdef USE_ROS
 	// static map level
-	Level* createLevelStaticMap(const LevelDef & d, const ConsoleParameters & params){
+	Level* createLevelScenario(const LevelDef & d, const ConsoleParameters & params){
 		bool level_dynamic = params.getFlag("--dynamic");
 		bool level_human = params.getFlag("--human");
-		return new LevelStaticMap(d,level_dynamic,level_human);
+		return new LevelScenario(d,level_dynamic,level_human);
 	}
 	#endif
 

@@ -1,5 +1,5 @@
-#ifndef LEVELSTATICMAP_H
-#define LEVELSTATICMAP_H
+#ifndef LEVELSCENARIO_H
+#define LEVELSCENARIO_H
 
 #include "Level.hpp"
 #include "Wanderers.hpp"
@@ -12,41 +12,41 @@
 #include <iostream>
 #define LEVEL_RANDOM_GOAL_SPAWN_AREA_BLOCK_SIZE 0.1 // maximum size of block when creating quad tree of goal spawn area
 
-struct StaticMap
+struct Scenario
 {
-	static std::shared_ptr<nav_msgs::OccupancyGrid> m_static_map;
+	static std::shared_ptr<nav_msgs::OccupancyGrid> m_scenario;
 	// if we dont save the node handle the logging system will not work properly, maybe a better solution can be given.
 	static std::unique_ptr<ros::NodeHandle> m_nh;
-	static std::shared_ptr<const nav_msgs::OccupancyGrid> getMap(const std::string &static_map_service_name)
+	static std::shared_ptr<const nav_msgs::OccupancyGrid> getMap(const std::string &scenario_service_name)
 	{
-		if (!static_map_service_name.empty() && !m_static_map)
+		if (!scenario_service_name.empty() && !m_scenario)
 		{
-			m_nh = std::unique_ptr<ros::NodeHandle>(new ros::NodeHandle("arena2d_static_map_node"));
-			ros::ServiceClient map_client = m_nh->serviceClient<nav_msgs::GetMap>(static_map_service_name);
+			m_nh = std::unique_ptr<ros::NodeHandle>(new ros::NodeHandle("arena2d_scenario_node"));
+			ros::ServiceClient map_client = m_nh->serviceClient<nav_msgs::GetMap>(scenario_service_name);
 			nav_msgs::GetMap getmap;
 			if (map_client.call(getmap))
 			{
-				ROS_INFO("Got static map sucessfully!");
+				ROS_INFO("Got scenario sucessfully!");
 			}
 			else
 			{
-				ROS_FATAL_STREAM("Failed to get the static map,please make sure the the map service with the name \"" << static_map_service_name << "\" is provided!");
+				ROS_FATAL_STREAM("Failed to get the scenario,please make sure the the map service with the name \"" << scenario_service_name << "\" is provided!");
 				exit(-1);
 			}
-			m_static_map = std::make_shared<nav_msgs::OccupancyGrid>(getmap.response.map);
+			m_scenario = std::make_shared<nav_msgs::OccupancyGrid>(getmap.response.map);
 		}
-		return m_static_map;
+		return m_scenario;
 	}
 };
 
-class LevelStaticMap : public Level
+class LevelScenario : public Level
 {
 public:
 	
-	LevelStaticMap(const LevelDef & d, bool dynamic = true, bool human = true);
+	LevelScenario(const LevelDef & d, bool dynamic = true, bool human = true);
             
 
-	~LevelStaticMap(){};
+	~LevelScenario(){};
 
 	/* reset
      */
@@ -102,7 +102,7 @@ public:
 	void dynamicObstacleSpawnUntilValid() override;
 
 private:
-	void loadStaticMap();
+	void loadScenario();
 
 	// the map will retain.
 	void lazyclear();

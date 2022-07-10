@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
-    <arg name="level_name" default="static_map" doc = "level name [empty, random, svg, static_map]"/>
+    <arg name="level_name" default="scenario" doc = "level name [empty, random, svg, scenario]"/>
     <arg name="level_mode" default="--dynamic" doc = "[--dynamic,  ]"/>    
     <arg name="video_mode" default="--enable-video" doc = "video [--disable-video, --enable-video]"/> 
 
@@ -22,18 +22,18 @@
 
 
     <!-- Run the map server -->
-    <arg name="map_file" default="$(find arena2d)/static_map/my_labor.yaml" 
-    doc = "load rosmap from /static_map" />
-    <node if="$(eval arg('level_name') == 'static_map')"
+    <arg name="map_file" default="$(find arena2d)/scenario/my_labor.yaml" 
+    doc = "load rosmap from /scenario" />
+    <node if="$(eval arg('level_name') == 'scenario')"
     name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
 
     <!-- load rviz helper, transfer data to rviz -->    
-    <node if="$(eval arg('level_name') == 'static_map')"
+    <node if="$(eval arg('level_name') == 'scenario')"
     name="rviz_visualize_helper" pkg="rl-ros-agents" 
     type="rviz_visualize_helper.py" output="screen" />
 
     <!-- load rviz configuration -->
-    <node if="$(eval arg('level_name') == 'static_map')"
+    <node if="$(eval arg('level_name') == 'scenario')"
     name ="rviz" pkg="rviz" type="rviz" 
     args="-d $(find rl-ros-agents)/launch/rviz_config_new.rviz" required="true" />
 
