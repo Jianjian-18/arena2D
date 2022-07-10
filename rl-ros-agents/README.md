@@ -36,14 +36,6 @@ The definitions of the request and response message can be found [here](../arena
     ```
     $ cd ~/ARENA2d_ws/src
     $ git clone https://github.com/ignc-research/arena2D.git # this repository
-    $ cd arena2D
-    $ git checkout arena-ros 
-
-    you will see this:
-
-    Branch 'arena-ros' set up to track remote branch 'arena-ros' from 'origin'.
-    Switched to a new branch 'arena-ros'
-
     $ cd ~/ARENA2d_ws
     $ pip install empy
 	$ vim ~/.bashrc
