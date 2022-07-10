@@ -46,7 +46,7 @@ The definitions of the request and response message can be found [here](../arena
 
     $ cd ~/ARENA2d_ws
     $ pip install empy
-	$ vim vim ~/.bashrc
+	$ vim ~/.bashrc
 	$ export PYTHONPATH=$PYTHONPATH:~/anaconda3/envs/arena2d/lib/python3.6/site-packages # copy this in the bottom, then use wq! to quit
 	$ source ~/.bashrc
     $ catkin_make -DUSE_ROS=ON
