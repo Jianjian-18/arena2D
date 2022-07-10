@@ -477,6 +477,7 @@ void Arena::rosUpdate(float wait_time = 0.0f)
 
 		// check whether episodes has just ended
 		bool episode_over = false;
+		int over_env = -1;
 		for (int i = 0; i < _numEnvs; i++)
 		{
 			Environment::EpisodeState s = _envs[i].getEpisodeState();
@@ -506,7 +507,7 @@ void Arena::rosUpdate(float wait_time = 0.0f)
 						if(episode_flag == false){
 							episode_flag = true;
 							_episodeCount_tmp = 0;
-							INFO("Start to count episode_tmp\n");
+							INFO("Start to count buffer_episode to next stage\n");
 						}
 						else if(_episodeCount_tmp < _epsoide_buffer){
 							++_episodeCount_tmp;
@@ -531,16 +532,27 @@ void Arena::rosUpdate(float wait_time = 0.0f)
 						}						
 					}
 					if((cur_success <= 0.7 && _cur_stage != 1)){
-						episode_flag = false;
-						_cur_stage -= 1;
-						bool flag_static = ros::param::get("/stage_" + to_string(_cur_stage) + "/static", static_obs);
-						bool flag_dynamic = ros::param::get("/stage_" + to_string(_cur_stage) + "/dynamic", dynamic_obs);
-						if(flag_static && flag_dynamic){
-							_SETTINGS->stage.num_obstacles = static_obs;
-							_SETTINGS->stage.num_dynamic_obstacles = dynamic_obs;
-							INFO_F("Back to previous stage_%i with num_static = %i, num_dynamic = %i\n",_cur_stage,static_obs,dynamic_obs);
-							// cout << "stage over, next stage with num_static,num_dynamic: " << _SETTINGS->stage.num_obstacles 
-							// << ", "<< _SETTINGS->stage.num_dynamic_obstacles << endl;
+						if(episode_flag == false){
+								episode_flag = true;
+								_episodeCount_tmp = 0;
+								INFO("Start to count buffer_episode to last stage\n");							
+						}
+						else if(_episodeCount_tmp < _epsoide_buffer){
+							++_episodeCount_tmp;
+							INFO_F("Still need %i episode to last stage.", _epsoide_buffer - _episodeCount_tmp);
+						}
+						else{
+							episode_flag = false;
+							_cur_stage -= 1;
+							bool flag_static = ros::param::get("/stage_" + to_string(_cur_stage) + "/static", static_obs);
+							bool flag_dynamic = ros::param::get("/stage_" + to_string(_cur_stage) + "/dynamic", dynamic_obs);
+							if(flag_static && flag_dynamic){
+								_SETTINGS->stage.num_obstacles = static_obs;
+								_SETTINGS->stage.num_dynamic_obstacles = dynamic_obs;
+								INFO_F("Back to last stage_%i with num_static = %i, num_dynamic = %i\n",_cur_stage,static_obs,dynamic_obs);
+								// cout << "stage over, next stage with num_static,num_dynamic: " << _SETTINGS->stage.num_obstacles 
+								// << ", "<< _SETTINGS->stage.num_dynamic_obstacles << endl;							
+							}				
 						}						
 				}
 			}
@@ -561,6 +573,7 @@ void Arena::rosUpdate(float wait_time = 0.0f)
 				// show results
 				printEpisodeResults(_envs[i].getTotalReward());
 				episode_over = true;
+				over_env = i;
 				// if key pressed reset environment immediately
 				if (any_arrow_key_pressed)
 				{
@@ -576,6 +589,7 @@ void Arena::rosUpdate(float wait_time = 0.0f)
 			{
 				refreshEpisodeCounter();
 				refreshRewardCounter();
+				_envs[over_env].reset(true);
 			}
 		}
 	}

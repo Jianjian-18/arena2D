@@ -25,6 +25,7 @@ void Wanderers::reset(RectSpawn & _dynamicSpawn, bool _dynamic, bool _human) {
     if (_wanderers.size() > 0) freeWanderers();
     if (_robot_wanderers.size() > 0) freeRobotWanderers();
     int _mode=MODE_RANDOM;
+    if(scenerio) _mode=MODE_FOLLOW_PATH;
     if (_dynamic) 
     {
         if(_mode==MODE_RANDOM)
@@ -82,13 +83,7 @@ void Wanderers::reset(RectSpawn & _dynamicSpawn, bool _dynamic, bool _human) {
                 {
                     Wanderer *w =new Wanderer(_levelDef.world, waypoint_list[i][0],_SETTINGS->stage.obstacle_speed,WANDERER_ID_ROBOT,MODE_FOLLOW_PATH,
                     waypoint_list[i],stop_counter_threshold);
-                    if(i==0){
-                        w->addRobotPepper(_SETTINGS->stage.dynamic_obstacle_size);
-                    }else{
-                        w->addCircle(_SETTINGS->stage.dynamic_obstacle_size / 2.f);
-
-                    }
-                    
+                    w->addCircle(_SETTINGS->stage.dynamic_obstacle_size / 2.f);             
                     _robot_wanderers.push_back(w);
     
                 }
@@ -102,7 +97,6 @@ void Wanderers::reset(RectSpawn & _dynamicSpawn, bool _dynamic, bool _human) {
         {
             for (int i = 0; i < _SETTINGS->stage.num_dynamic_obstacles; i++){
                 b2Vec2 p;
-                // ⭐设定是否固定
                 _dynamicSpawn.getRandomPoint(p);
 
                 if(!scenerio_init_flag){
@@ -172,7 +166,7 @@ void Wanderers::reset(RectSpawn & _dynamicSpawn, bool _dynamic, bool _human) {
                 waypoints={p0,p1,p2};
                 waypoint_list.push_back(waypoints);
 
-                p0.Set(1,0);
+                p0.Set(1.5,0);
                 p1.Set(2,-0.5);
                 p2.Set(0.5,1);
                 waypoints={p0,p1,p2};
@@ -182,6 +176,7 @@ void Wanderers::reset(RectSpawn & _dynamicSpawn, bool _dynamic, bool _human) {
                 {
                     WandererBipedal *w =new WandererBipedal(_levelDef.world, waypoint_list[i][0],_SETTINGS->stage.obstacle_speed,WANDERER_ID_HUMAN,MODE_FOLLOW_PATH,
                     waypoint_list[i],stop_counter_threshold);
+                    w->addRobotPepper(_SETTINGS->stage.dynamic_obstacle_size);
                     _wanderers.push_back(w);
     
                 }
@@ -361,14 +356,14 @@ void Wanderers::getWandererData(std::vector<float> & data){
 }
 
 void Wanderers::getRobotWandererData(std::vector<float> & data){
-    for(int i = 0; i < _SETTINGS->stage.num_dynamic_obstacles; i++){
+    for(int i = 0; i <  _robot_wanderers.size(); i++){
         data.push_back(_robot_wanderers[i]->getPosition().x);
         data.push_back(_robot_wanderers[i]->getPosition().y);
     }
 }
 
 void Wanderers::getHumanWandererData(std::vector<float> & data){
-    for(int i = 0; i < _SETTINGS->stage.num_dynamic_obstacles; i++){
+    for(int i = 0; i < _wanderers.size(); i++){
         data.push_back(_wanderers[i]->getPosition().x);
         data.push_back(_wanderers[i]->getPosition().y);
     }

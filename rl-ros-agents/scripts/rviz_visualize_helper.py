@@ -97,7 +97,7 @@ class IntermediateRosNode:
     # ⭐
     def _mapCallback(self, msg: OccupancyGrid):
 
-        rospy.loginfo(rospy.get_caller_id() + "I heard %s", msg.info)
+        # rospy.loginfo(rospy.get_caller_id() + "I heard %s", msg.info)
         self._map_origin[0] = msg.info.width / 2
         self._map_origin[1] = msg.info.height / 2
         self._map_broadcaster = tf2_ros.StaticTransformBroadcaster()
@@ -113,7 +113,7 @@ class IntermediateRosNode:
         static_transformStamped.transform.rotation.z = 0
         static_transformStamped.transform.rotation.w = 1  
         self._map_broadcaster.sendTransform(static_transformStamped)    
-        print(static_transformStamped.transform.translation.x, static_transformStamped.transform.translation.y,"\n")
+        # print(static_transformStamped.transform.translation.x, static_transformStamped.transform.translation.y,"\n")
     def _show_scan_in_rviz(self, scan: LaserScan):
         laser_scan = scan
         laser_scan.angle_min = 0
@@ -134,28 +134,27 @@ class IntermediateRosNode:
         else:
             with self._laser_scan_cache_lock:
                 self._laser_scan_cache.append(laser_scan)    
-
-    def _show_goal_robot_in_rviz(self, x, y, robot_pos: Pose2D):
-        # ⭐ also reset path
-        if((self.pre_goal[0] != x) & (self.pre_goal[1] != y)):
-            for i in self.line_strip.markers:
-                i.action = Marker.DELETEALL   
-            for i in self.obstacle_group.markers:
-                i.action = Marker.DELETEALL   
-            self.goal.header.frame_id = "world"
-            self.goal.id = 0
-            self.goal.type = self.goal.SPHERE
-            self.goal.action = self.goal.ADD
-            self.goal.pose = Pose(Point(x,y,0), Quaternion(0, 0, 0, 1))
-            self.goal.color.r = 1.0
-            self.goal.color.g = 1.0
-            self.goal.color.b = 0.0
-            self.goal.color.a = 1.0
-            self.goal.scale.x = 0.2
-            self.goal.scale.y = 0.2
-            self.goal.scale.z = 0.2
-            self.goal.frame_locked = False
-            self._pub_goal.publish(self.goal)
+    # ⭐ also reset path    
+    def _show_goal_robot_in_rviz(self, x, y, robot_pos: Pose2D):     
+        # if((self.pre_goal[0] != x) & (self.pre_goal[1] != y)):
+        #     for i in self.line_strip.markers:
+        #         i.action = Marker.DELETEALL   
+        #     for i in self.obstacle_group.markers:
+        #         i.action = Marker.DELETEALL   
+        self.goal.header.frame_id = "world"
+        self.goal.id = 0
+        self.goal.type = self.goal.SPHERE
+        self.goal.action = self.goal.ADD
+        self.goal.pose = Pose(Point(x,y,0), Quaternion(0, 0, 0, 1))
+        self.goal.color.r = 1.0
+        self.goal.color.g = 1.0
+        self.goal.color.b = 0.0
+        self.goal.color.a = 1.0
+        self.goal.scale.x = 0.2
+        self.goal.scale.y = 0.2
+        self.goal.scale.z = 0.2
+        self.goal.frame_locked = False
+        self._pub_goal.publish(self.goal)
 
         robot = Marker()
         robot.header.frame_id = "world"
@@ -173,8 +172,8 @@ class IntermediateRosNode:
         robot.frame_locked = False
         self._pub_robot.publish(robot)
 
-        self.pre_goal[0] = x
-        self.pre_goal[1] = y
+        # self.pre_goal[0] = x
+        # self.pre_goal[1] = y
 
     def _show_path_in_rviz(self,robot_pos: Pose2D):
         marker = Marker()

@@ -99,6 +99,8 @@ public:
 
 	void randomGoalSpawnUntilValid(RectSpawn * goal_spawn = NULL) override;
 
+	void dynamicObstacleSpawnUntilValid() override;
+
 private:
 	void loadStaticMap();
 

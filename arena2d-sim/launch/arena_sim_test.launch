@@ -1,0 +1,5 @@
+<launch>
+
+    <node name="arena_sim" pkg="arena2d" type="arena2d" output="screen" 
+    args="--enable-video --run &quot;level random --dynamic; run_agent $(find arena2d-agents)/A3C_LSTM/agent_train.py  &quot;"/>
+</launch>

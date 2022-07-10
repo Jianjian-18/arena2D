@@ -35,7 +35,7 @@ def main(log_dir = None,name_results_root_folder = "results",use_reward_bound = 
             latest_log_dir = os.path.join(name_results_root_folder,sorted(os.listdir(name_results_root_folder))[-1])
             logdir = latest_log_dir
         else:
-            defaul_log_dir = os.path.join(name_results_root_folder, "A2C_" + getTimeStr())
+            defaul_log_dir = os.path.join(name_results_root_folder, "A3C_" + getTimeStr())
             os.makedirs(defaul_log_dir, exist_ok=True)
             logdir = defaul_log_dir
     else:
@@ -45,7 +45,7 @@ def main(log_dir = None,name_results_root_folder = "results",use_reward_bound = 
     envs = get_arena_envs(log_dir=logdir)
     call_back = SaveOnBestTrainingRewardCallback(500, logdir, 1, reward_bound)
     # set temporary model path, if training was interrupted by the keyboard, the current model parameters will be saved.
-    path_temp_model = os.path.join(logdir,"A2C_TEMP")
+    path_temp_model = os.path.join(logdir,"A3C_TEMP")
     if not args.restart_training:
         model = A2C(MlpPolicy, envs, verbose=1, gamma=GAMMA, n_steps=N_STEPS, max_grad_norm=MAX_GRAD_NORM,
                     learning_rate=LEARNING_RATE,  tensorboard_log=logdir)
@@ -61,7 +61,7 @@ def main(log_dir = None,name_results_root_folder = "results",use_reward_bound = 
             exit(-1)
     try:
         model.learn(time_steps, log_interval=200, callback=call_back,reset_num_timesteps=reset_num_timesteps)
-        model.save(os.path.join(logdir, "A2C_final"))
+        model.save(os.path.join(logdir, "A3C_final"))
     except KeyboardInterrupt:
         model.save(path_temp_model)
         print("KeyboardInterrupt: saved the current model to {}".format(path_temp_model))

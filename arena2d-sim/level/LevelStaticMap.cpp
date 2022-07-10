@@ -40,16 +40,21 @@ void LevelStaticMap::reset(bool robot_position_reset)
 	const zRect main_rect(0,0, half_width, half_height);
 	const zRect big_main_rect(0, 0, half_width+max_obstacle_radius, half_height+max_obstacle_radius);
     double fixed_x = 0.0, fixed_y = 0.0;
-    ros::param::get("scenerio/fixed_goal_x", fixed_x);
-    ros::param::get("scenerio/fixed_goal_y", fixed_y);
+    ros::param::get("scenerio/goal_x", fixed_x);
+    ros::param::get("scenerio/goal_y", fixed_y);
     const zRect goal_rect(fixed_x, fixed_y, 0, 0);
+    b2Vec2 pos;
+    ros::param::get("scenerio/robot_x", pos.x);
+    ros::param::get("scenerio/robot_y", pos.y);
+    
     
 
    
 
     if (robot_position_reset)
     {
-        resetRobotToCenter();
+        _levelDef.robot->reset(pos, 0);
+        // _levelDef.robot->reset(pos, f_frandomRange(0, 2 * M_PI));
     }
 
 
@@ -84,13 +89,12 @@ void LevelStaticMap::reset(bool robot_position_reset)
             ROS_INFO("calculation the respawn area for dynamic obstacles is done");
             _init_reset = false;
         }
-        
-        
+
         wanderers.reset(_dynamicSpawn, _dynamic, _human);
-
     }
-    ROS_DEBUG("dynamic obstacles created!");
 
+    // dynamicObstacleSpawnUntilValid();
+    ROS_DEBUG("dynamic obstacles created!");    
     randomGoalSpawnUntilValid();
     ROS_DEBUG("goal spawned");
 }
@@ -352,16 +356,63 @@ void LevelStaticMap::randomGoalSpawnUntilValid(RectSpawn * goal_spawn)
         i=floor(coord.y/resolution);
         j=floor(coord.x/resolution);
         
-        if ((int)(_occupancy_map.at<uint8>(i, j)) == 255){
+        int point = _occupancy_map.at<uint8>(i, j);
+        if ( point == 255){
             occupied=true;
-            //std::cout<<"occupied"<<i<<"  "<<j<<"  "<<occupied<<"  "<<(int)(_occupancy_map.at<uint8>(i, j))<<std::endl;
         }
         
 		count++;
         
-	}while(!checkValidGoalSpawn(robot_position, spawn_position) || occupied && count < 100);
+	}while((!checkValidGoalSpawn(robot_position, spawn_position) || occupied) && count < 100);
 
-    std::cout<<"find goal in freespace  within count"<<count<<"   Position "<<"x="<<spawn_position.x<<"y="<<spawn_position.y<<std::endl;
+    std::cout<<"find goal in freespace  within count"<<count<<"   Position "<<"x="<<spawn_position.x<<" y="<<spawn_position.y<<std::endl;
 	spawnGoal(spawn_position);
    
+}
+
+void LevelStaticMap::dynamicObstacleSpawnUntilValid(){
+    const auto &info = _occupancygrid_ptr->info;
+    const auto &data = _occupancygrid_ptr->data;
+    uint32 cols = info.width;
+    uint32 rows = info.height;
+    float resolution = info.resolution;
+    b2Vec2 lower_left_pos(-((cols >> 1) - ((cols & 1) ^ 1) / 2.f) * resolution,
+                          -((rows >> 1) - ((rows & 1) ^ 1) / 2.f) * resolution);
+	b2Vec2 robot_position = _levelDef.robot->getPosition();        
+	b2Vec2 spawn_position;
+	int count = 0;
+    bool occupied;
+    b2Vec2 coord;
+    int i,j;
+	do{
+        occupied=false;
+        wanderers.reset(_dynamicSpawn, _dynamic, _human);        
+        std::vector<float> obstacle_data;
+        if(_dynamic && _human){
+            getRobotAgentsData(obstacle_data);
+            getHumanAgentsData(obstacle_data);
+        }
+        else if(_dynamic) getRobotAgentsData(obstacle_data);
+        else if(_human) getHumanAgentsData(obstacle_data);
+        else{
+            ROS_INFO("No avaliable flag for Obstacle Check");
+        }
+
+        for(auto k = 0; k < obstacle_data.size();k+=2){
+            spawn_position.x = obstacle_data[k];
+            spawn_position.y = obstacle_data[k+1];
+            coord=(spawn_position-lower_left_pos);
+            
+            i=floor(coord.y/resolution);
+            j=floor(coord.x/resolution);    
+            int point = _occupancy_map.at<uint8>(i, j);
+            if (point == 255){
+                occupied=true;
+            }                    
+        }
+		count++;
+         
+	}while((!checkValidGoalSpawn(robot_position, spawn_position) || occupied) && count < 1000);
+    // If the number of obstacles increases, the counter upper limit also needs to be increased
+    std::cout<<"find obstacle in freespace  within count "<< count << std::endl;
 }
