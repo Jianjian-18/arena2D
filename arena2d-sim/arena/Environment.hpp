@@ -174,6 +174,10 @@ public:
 	 */
 	Level *getLevel() { return _level; }
 
+	/* get robot currently loaded in environment
+	 * @return current robot
+	 */
+	Robot *getRobot() {return _robot;}
 	/* provide the obstacle information 
 	 * @param coordinate data for all robot obstacle
 	 */		
@@ -183,6 +187,7 @@ public:
 	 * @param coordinate data for all robot obstacle
 	 */		
 	void getHumanObstaclePosition(std::vector<float> &data);
+
 
 private:
 	/* prepare simulation step

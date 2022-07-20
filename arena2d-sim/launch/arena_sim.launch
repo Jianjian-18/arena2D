@@ -11,7 +11,7 @@
     doc="model type [burger, jackal, agvota, waffle_pi]"/>
     <param name="model" value="$(arg robot_model)" />
 
-    <arg name="robot_mode" default="discrete"      doc="mode type [continuous, discrete]"/>
+    <arg name="robot_mode" default="continuous"      doc="mode type [continuous, discrete]"/>
     <param name="mode" value="$(arg robot_mode)" />
     
     <rosparam command="load" 

@@ -246,7 +246,7 @@ int Arena::init(int argc, char **argv)
 
 	/* register this object as contact listener */
 	_PHYSICS_WORLD->SetContactListener((b2ContactListener *)this);
-
+		
 	/* creating environments */
 	_numEnvs = _SETTINGS->training.num_envs;
 	if (_numEnvs <= 0)
@@ -366,7 +366,27 @@ int Arena::init(int argc, char **argv)
 #ifdef USE_ROS
 	if (_use_ros_agent)
 	{
-		_ros_node_ptr = std::unique_ptr<RosNode>(new RosNode(_envs, _numEnvs, ros_argc, ros_argv.data()));
+		_ros_node_ptr = std::unique_ptr<RosNode>(new RosNode(_envs, _numEnvs, ros_argc, ros_argv.data()));		
+
+		// update laser scan and maximal range of robot model
+		float range, angle_max, angle_min, increment = 0.0;
+		ros::param::get("/range", range);
+		ros::param::get("/angle/max", angle_max);		
+		ros::param::get("/angle/min", angle_min);		
+		ros::param::get("/angle/increment", increment);
+		_SETTINGS->robot.laser_num_samples = floor((angle_max - angle_min)/increment);
+		_SETTINGS->robot.laser_max_distance = range;
+		ros::param::set("/arena_sim/settings/observation_space_num_beam", _SETTINGS->robot.laser_num_samples);
+		ros::param::set("/arena_sim/settings/observation_space_upper_limit", _SETTINGS->robot.laser_max_distance);
+		for(auto i=0; i < _numEnvs; ++i){
+			_envs->getRobot()->updateLidar();
+			_envs++;			
+			if(i == _numEnvs -1){
+				_envs-=_numEnvs;
+			}
+		}
+
+
 		// if use stage mode, initial number of obstacles by curriculum
 		ros::param::get("stage/stage", stage_flag);
 		if(stage_flag){

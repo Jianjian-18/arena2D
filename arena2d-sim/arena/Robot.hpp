@@ -7,6 +7,7 @@
 //#include "Environment.hpp"
 #include <engine/zColor.hpp>
 #include <engine/GlobalSettings.hpp>
+#include <ros/ros.h>
 
 /* robot constants */
 #define BURGER_MOTOR_FORCE_FACTOR 	5 			// robot acceleration multiplier
