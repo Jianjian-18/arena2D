@@ -43,6 +43,7 @@ class IntermediateRosNode:
         self.line_strip = MarkerArray()
         self.obstacle_group = MarkerArray()
         self.marker_max = 500
+        self.num_beam = rospy.get_param("/arena_sim/settings/observation_space_num_beam")
         
 
         print(laser_scan_publish_rate, "\n")
@@ -118,10 +119,10 @@ class IntermediateRosNode:
         laser_scan = scan
         laser_scan.angle_min = 0
         laser_scan.angle_max = 2 * np.pi
-        laser_scan.angle_increment = np.pi/180
+        laser_scan.angle_increment = np.pi/(self.num_beam/2)
         laser_scan.range_min = 0
         # not sure about it.
-        laser_scan.range_max = 5   
+        laser_scan.range_max = 50   
         # set up header
         laser_scan.header.frame_id = self._robot_frame_id
         laser_scan.header.seq = self._header_seq_id

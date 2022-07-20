@@ -19,23 +19,23 @@ NS_SETTING = "/arena_sim/settings/"
 HOLONOMIC = "/robot/holonomic/"
 CONTINUOUS_ACTION = "/robot/continuous_actions/"
 DISCRETE_ACTION = "/robot/discrete_actions/"
-OBSERVATION = "/plugins/"
+# OBSERVATION = "/plugins/"
 robot_model = rospy.get_param('model')
 robot_mode = rospy.get_param('mode')
 DEFAULT_ACTION_SPACE = os.path.join(
-    rospkg.RosPack().get_path("rl-ros-agents"),
+    rospkg.RosPack().get_path("arena2d"),
     "configs",
     "action_space",
     f"default_settings_{robot_model}.yaml",
 )
 # ⭐get robot action space
 
-DEFAULT_OBSERVATION_SPACE = os.path.join(
-    rospkg.RosPack().get_path("rl-ros-agents"),
-    "configs",
-    "observation_space",
-    f"{robot_model}.model.yaml",
-)
+# DEFAULT_OBSERVATION_SPACE = os.path.join(
+#     rospkg.RosPack().get_path("arena2d"),
+#     "configs",
+#     "observation_space",
+#     f"{robot_model}.model.yaml",
+# )
 
 DEFAULT_SETTING = os.path.join(
     rospkg.RosPack().get_path("arena2d"),
@@ -57,8 +57,8 @@ def get_arena_envs(use_monitor=True, log_dir=None):
 class Arena2dEnvWrapper(gym.Env):
     def __init__(self, idx_env, _is_action_space_discrete = robot_mode):
         super().__init__()
-        print(DEFAULT_OBSERVATION_SPACE)
         self._idx_env = idx_env
+        print("\nRobot model is: {}, robot model is: {} \n".format(robot_model,robot_mode))
         if _is_action_space_discrete == 'discrete':
             self._is_action_space_discrete = True
         elif _is_action_space_discrete == 'continuous':
@@ -89,42 +89,12 @@ class Arena2dEnvWrapper(gym.Env):
     def _set_action_oberservation_space(self):
         action_space_linear_range = rospy.get_param(CONTINUOUS_ACTION + "linear_range")
         action_space_angular_range = rospy.get_param(CONTINUOUS_ACTION + "angular_range")
-        # if rospy.get_param(HOLONOMIC):
-        #     linear_range_x, linear_range_y = (
-        #         action_space_linear_range["x"],
-        #         action_space_linear_range["y"],
-        #     )
-        #     lower_limit = np.array(
-        #                 [
-        #                     linear_range_x[0],
-        #                     linear_range_y[0],
-        #                     action_space_angular_range[0],
-        #                 ],
-        #                 dtype = np.float
-        #             )
 
-        #     upper_limit = np.array(
-        #                 [
-        #                     linear_range_x[1],
-        #                     linear_range_y[1],
-        #                     action_space_angular_range[1],
-        #                 ],
-        #                 dtype = np.float
-        #             )
-        # ⭐ 暂时不考虑holomonic的机器人
         lower_limit = np.array([action_space_linear_range[0], action_space_angular_range[0]], dtype=np.float)
         upper_limit = np.array([action_space_linear_range[1], action_space_angular_range[1]], dtype=np.float)
 
-        # observation space
-        # observation_plugins = rospy.get_param(OBSERVATION)
-        # obervation_space_upper_limit = observation_plugins[1]["range"]
-        # observation_angle = observation_plugins[1]["angle"]
-        # num_beam = int(round((observation_angle["max"]- observation_angle["min"]) / observation_angle["increment"])+1)
-        # print(f'limit is {obervation_space_upper_limit}')
-        # print(f'number beam is {num_beam}')
         num_beam = rospy.get_param(NS_SETTING + "observation_space_num_beam")    
         obervation_space_upper_limit = rospy.get_param(NS_SETTING + "observation_space_upper_limit")
-        # ⭐ 出于复杂度考虑暂时用默认的observation space
         if not self._is_action_space_discrete:
             self.action_space = spaces.Box(low=lower_limit,
                                            high=upper_limit * 3, dtype=np.float)
@@ -203,20 +173,12 @@ class Arena2dEnvWrapper(gym.Env):
         else:
             req_msg.env_reset = False
             if not self._is_action_space_discrete:
-                if rospy.get_param(HOLONOMIC):
-                    assert isinstance(action, (list, tuple, np.ndarray)) and len(
-                        action) == 3, "Type of action must be one of (list, tuple, numpy.ndarray) and \
-                            length is equal to 3, current type of action is '{:4d}' ".format(type(action))
-                    req_msg.action.linear = action[0]
-                    req_msg.action.linear_y = action[1]
-                    req_msg.action.angular = action[2]
-                else: 
-                    assert isinstance(action, (list, tuple, np.ndarray)) and len(
-                        action) == 2, "Type of action must be one of (list, tuple, numpy.ndarray) and \
-                            length is equal to 2, current type of action is '{:4d}' ".format(type(action))
+                assert isinstance(action, (list, tuple, np.ndarray)) and len(
+                    action) == 2, "Type of action must be one of (list, tuple, numpy.ndarray) and \
+                        length is equal to 2, current type of action is '{:4d}' ".format(type(action))
 
-                    req_msg.action.linear = action[0]
-                    req_msg.action.angular = action[1]
+                req_msg.action.linear = action[0]
+                req_msg.action.angular = action[1]
             else:
                 action_name = self._action_discrete_list[action]
                 for i in range(len(self._action_discrete_map)):
