@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 import rospy
-from arena2d_msgs.msg import Arena2dResp
+from arena2d_msgs.msg import Arena2dResp,Arena2dContAction
 from sensor_msgs.msg import LaserScan
-from nav_msgs.msg import OccupancyGrid
+from nav_msgs.msg import OccupancyGrid, Odometry
 from geometry_msgs.msg import PoseStamped, TransformStamped, TwistStamped, Pose, Pose2D, Point, Vector3, Quaternion
 import argparse
 import time
@@ -45,8 +45,6 @@ class IntermediateRosNode:
         self.marker_max = 500
         self.num_beam = rospy.get_param("/arena_sim/settings/observation_space_num_beam")
         
-
-        print(laser_scan_publish_rate, "\n")
         if laser_scan_publish_rate == 0:
             # a flag to show where the laser scan is publised in a asynchronized way
             self._is_laser_scan_publish_asyn = False
@@ -67,7 +65,7 @@ class IntermediateRosNode:
     def _setSubPub(self, laser_scan_publish_rate: int = 0):
         namespace_sub = "arena2d/env_{:d}/".format(self._idx_env)
         namespace_pub = "arena2d_intermediate/"
-
+        namespace_standard = "standard_arena2d/"
         # publisher
         self._pub_laser_scan = rospy.Publisher(namespace_pub + "laserscan", LaserScan, queue_size=1, tcp_nodelay=True)
         # self._pub_path = rospy.Publisher(namespace_pub + "path", Path, queue_size=10, tcp_nodelay=True)
@@ -78,6 +76,9 @@ class IntermediateRosNode:
         # transform broadcaseter for robot position
         self._tf_rospos = tf.TransformBroadcaster()
         rospy.loginfo("intermediate node is waiting for connecting env[{:02d}]".format(self._idx_env))
+
+        self._standard_laser_scan = rospy.Publisher(namespace_standard + "laserscan", LaserScan, queue_size=1, tcp_nodelay=True)
+        self._standrad_odometry = rospy.Publisher(namespace_standard + "odometry", Odometry, queue_size=1, tcp_nodelay=True)
         times = 0
         # subscriber
         # According to the testing,enable tcp_nodelay can double the performance
@@ -173,9 +174,6 @@ class IntermediateRosNode:
         robot.frame_locked = False
         self._pub_robot.publish(robot)
 
-        # self.pre_goal[0] = x
-        # self.pre_goal[1] = y
-
     def _show_path_in_rviz(self,robot_pos: Pose2D):
         marker = Marker()
         marker.header.frame_id = "world"
@@ -249,6 +247,27 @@ class IntermediateRosNode:
                 self.obstacle_group.markers.append(obstacle)  
         self._pub_obstacle.publish(self.obstacle_group)        
 
+    def _show_odometry_in_rviz(self,last_action: Arena2dContAction, robot_pos: Pose2D):
+        odom = Odometry()
+        odom.header.frame_id = "world"
+        odom.header.seq = self._header_seq_id
+        odom.header.stamp = rospy.Time.now()
+
+        # self._header_seq_id += 1
+
+        odom.child_frame_id = self._robot_frame_id
+        odom.pose.pose.position.x = robot_pos.x;
+        odom.pose.pose.position.y = robot_pos.y;
+        odom.pose.pose.position.z = 0.0;
+        q = tf.transformations.quaternion_from_euler(0, 0, robot_pos.theta + np.pi/4)
+        odom.pose.pose.orientation = Quaternion(q[0], q[1], q[2], q[3])
+
+        odom.twist.twist.linear.x = last_action.linear;
+        odom.twist.twist.linear.y = 0.0;
+        # not holonomic
+        odom.twist.twist.angular.z = last_action.angular;
+        self._standrad_odometry.publish(odom)
+  
     def _arena2dRespCallback(self, resp: Arena2dResp):
         curr_time = rospy.Time.now()
         robot_pos = resp.robot_pos
@@ -262,7 +281,8 @@ class IntermediateRosNode:
         self._show_path_in_rviz(resp.robot_pos)
         self._show_obstacle_in_rviz(resp.robot_obstacle_pos, resp.human_obstacle_pos)
 
-
+        self._standard_laser_scan.publish(resp.observation)
+        self._show_odometry_in_rviz(resp.last_action, resp.robot_pos);
     def run(self):
         while not rospy.is_shutdown():
             if self._is_laser_scan_publish_asyn:

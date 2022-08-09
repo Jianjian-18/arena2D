@@ -23,6 +23,17 @@ find_package(OpenGL REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(PythonLibs REQUIRED)
 
+find_package(PkgConfig REQUIRED)
+
+pkg_check_modules(YAML_CPP REQUIRED yaml-cpp)
+find_path(YAML_CPP_INCLUDE_DIR
+          NAMES yaml_cpp.h
+          PATHS ${YAML_CPP_INCLUDE_DIRS})
+find_library(YAML_CPP_LIBRARY
+             NAMES YAML_CPP
+             PATHS ${YAML_CPP_LIBRARY_DIRS})
+link_directories(${YAML_CPP_LIBRARY_DIRS})
+
 if(USE_ROS)
 	add_compile_options("-DUSE_ROS")
 	message(STATUS "USE_ROS is enabled")
@@ -39,7 +50,7 @@ if(USE_ROS)
 	message_generation
 	rostest
 	roslaunch)
-	include_directories(${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
+	include_directories(${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${YAMLCPP_INCLUDE_DIRS})
 	message("OpenCV package is loaded from: ${OpenCV_INCLUDE_DIRS}")			
 	roslaunch_add_file_check(launch)
 	###################################
@@ -72,11 +83,13 @@ set(LIBRARY_INFO_MESSAGE 	"Libraries:\n"
 							"  -> sdl2:     ${SDL2_LIBRARIES}\n"
 							"  -> opengl:   ${OPENGL_gl_LIBRARY}\n"
 							"  -> freetype: ${FREETYPE_LIBRARIES}\n"
-							"  -> python:   ${PYTHON_LIBRARIES}\n")
+							"  -> python:   ${PYTHON_LIBRARIES}\n"
+							"  -> yaml		${YAML_CPP_LIBRARY_DIRS}\n")
 set(INCLUDE_INFO_MESSAGE	"Include directories:\n"
 							"  -> sdl2:     ${SDL2_INCLUDE_DIRS}\n"
 							"  -> freetype: ${FREETYPE_INCLUDE_DIRS}\n"
-							"  -> python:   ${PYTHON_INCLUDE_DIRS}\n")
+							"  -> python:   ${PYTHON_INCLUDE_DIRS}\n"
+							"  -> yaml		${YAML_CPP_INCLUDE_DIRS}\n")
 message(${INCLUDE_INFO_MESSAGE})
 message(${LIBRARY_INFO_MESSAGE})
 
@@ -115,7 +128,7 @@ include(sources.cmake)
 
 # add ros related source files 
 if(USE_ROS)
-list(APPEND ARENA_SOURCES arena/RosNode.cpp arena/RosNode.hpp level/LevelScenario.hpp level/LevelScenario.cpp)
+list(APPEND ARENA_SOURCES arena/RosNode.cpp arena/RosNode.hpp level/LevelScenario.hpp level/LevelScenario.cpp arena/RosService.cpp arena/RosService.hpp)
 endif()
 
 
@@ -130,6 +143,7 @@ include_directories(
 	${SDL2_INCLUDE_DIRS}
 	${FREETYPE_INCLUDE_DIRS}
 	${PYTHON_INCLUDE_DIRS}
+	${YAML_CPP_INCLUDE_DIRS}
 )
 
 # creating folders to put generated files in
@@ -161,12 +175,13 @@ set(ARENA_LINK_LIBRARIES
 	${SDL2_LIBRARIES}
 	${FREETYPE_LIBRARIES}
 	${PYTHON_LIBRARIES}
+	${YAMLCPP_LIBRARIES}
 	)
 if(USE_ROS)
 	list(APPEND ARENA_LINK_LIBRARIES ${catkin_LIBRARIES} ${OpenCV_LIBS})
 endif()
 
-target_link_libraries(${PROJECT_NAME} "${ARENA_LINK_LIBRARIES}" pthread ${CMAKE_DL_LIBS} box2d util)
+target_link_libraries(${PROJECT_NAME} "${ARENA_LINK_LIBRARIES}" pthread ${CMAKE_DL_LIBS} box2d util yaml-cpp)
 
 # specify install target
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)

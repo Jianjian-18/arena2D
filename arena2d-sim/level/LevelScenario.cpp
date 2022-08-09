@@ -47,8 +47,20 @@ void LevelScenario::reset(bool robot_position_reset)
     ros::param::get("scenerio/robot_x", pos.x);
     ros::param::get("scenerio/robot_y", pos.y);
     
-    
 
+    // noramlly we don't expect generate random static obstacles in scenario mode
+
+	// RectSpawn static_spawn;
+	// static_spawn.addCheeseRect(big_main_rect, _levelDef.world, COLLIDE_CATEGORY_PLAYER, max_obstacle_radius);
+	// static_spawn.calculateArea();
+
+	// // create static obstacles
+	// for(int i = 0; i < num_obstacles; i ++){
+	// 	b2Vec2 p;
+	// 	static_spawn.getRandomPoint(p);
+	// 	zRect aabb;
+	// 	addRandomShape(p, min_obstacle_radius, max_obstacle_radius, &aabb);
+	// }
    
 
     if (robot_position_reset)
@@ -415,4 +427,14 @@ void LevelScenario::dynamicObstacleSpawnUntilValid(){
 	}while((!checkValidGoalSpawn(robot_position, spawn_position) || occupied) && count < 1000);
     // If the number of obstacles increases, the counter upper limit also needs to be increased
     std::cout<<"find obstacle in freespace  within count "<< count << std::endl;
+}
+
+
+
+void LevelScenario::waypointsStore(std::vector<b2Vec2> waypoints){
+    wanderers.getWaypointsList().push_back(waypoints);
+}
+
+void LevelScenario::waypointsClear(){
+    wanderers.getWaypointsList().clear();
 }

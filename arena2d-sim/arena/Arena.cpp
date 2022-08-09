@@ -336,7 +336,6 @@ int Arena::init(int argc, char **argv)
 		// init timer
 		SDL_Init(SDL_INIT_TIMER);
 	}
-
 	// initialize sigint-handler
 	ARENA = this;
 	signal(SIGINT, &sigintHandler);
@@ -363,11 +362,11 @@ int Arena::init(int argc, char **argv)
 #endif
 	INFO("Initialization done! Running Arena...\n");
 	_run = true;
-#ifdef USE_ROS
+// #ifdef USE_ROS
 	if (_use_ros_agent)
 	{
-		_ros_node_ptr = std::unique_ptr<RosNode>(new RosNode(_envs, _numEnvs, ros_argc, ros_argv.data()));		
-
+		_ros_node_ptr = std::unique_ptr<RosNode>(new RosNode(_envs, _numEnvs, ros_argc, ros_argv.data()));	
+		// service_node_ptr = std::unique_ptr<RosService>(new RosService(ros_argc, ros_argv.data()));
 		// update laser scan and maximal range of robot model
 		float range, angle_max, angle_min, increment = 0.0;
 		ros::param::get("/range", range);
@@ -375,38 +374,28 @@ int Arena::init(int argc, char **argv)
 		ros::param::get("/angle/min", angle_min);		
 		ros::param::get("/angle/increment", increment);
 		_SETTINGS->robot.laser_num_samples = floor((angle_max - angle_min)/increment);
-		_SETTINGS->robot.laser_max_distance = range;
 		ros::param::set("/arena_sim/settings/observation_space_num_beam", _SETTINGS->robot.laser_num_samples);
+		_SETTINGS->robot.laser_max_distance = range;
 		ros::param::set("/arena_sim/settings/observation_space_upper_limit", _SETTINGS->robot.laser_max_distance);
-		for(auto i=0; i < _numEnvs; ++i){
+		for(int i=0; i < _numEnvs; ++i){
 			_envs->getRobot()->updateLidar();
-			_envs++;			
+			_envs++;
 			if(i == _numEnvs -1){
 				_envs-=_numEnvs;
 			}
 		}
-
-
-		// if use stage mode, initial number of obstacles by curriculum
-		ros::param::get("stage/stage", stage_flag);
-		if(stage_flag){
-			int static_obs,dynamic_obs;
-			string s = "/stage_" + to_string(_cur_stage);
-			ros::param::get(s, static_obs);
-			ros::param::get(s, dynamic_obs);					
-			_SETTINGS->stage.num_obstacles = static_obs;
-			_SETTINGS->stage.num_dynamic_obstacles = dynamic_obs;
-			episode_flag = false;
-			curriculum_flag = false;
-		}
+		string robot_model;
+		ros::param::get("/model",robot_model);
+		read_action_space_from_yaml(robot_model);
 	}
 	else
 	{
 		_ros_node_ptr = nullptr;
 	}
+
 	_ros_envs_reset = new bool[_numEnvs];
 
-#endif
+// #endif
 
 	/* load initial level */
 	std::string level_cmd = std::string("level ") + _SETTINGS->stage.initial_level.c_str();
@@ -415,6 +404,19 @@ int Arena::init(int argc, char **argv)
 		/* init training if not already done through loadLevel*/
 		initializeTraining();
 	}
+
+	// if use stage mode, initial number of obstacles by curriculum
+	ros::param::get("stage/stage", stage_flag);
+	if(stage_flag){
+		int static_obs,dynamic_obs = 0;
+		string s = "/stage_" + to_string(_cur_stage);
+		ros::param::get(s, static_obs);
+		ros::param::get(s, dynamic_obs);					
+		_SETTINGS->stage.num_obstacles = static_obs;
+		_SETTINGS->stage.num_dynamic_obstacles = dynamic_obs;
+		episode_flag = false;
+		curriculum_flag = false;
+	}			
 
 	if (command_index >= 0)
 	{
@@ -908,3 +910,47 @@ void Arena::resize()
 		renderVideoDisabledScreen();
 	}
 }
+
+
+void Arena::read_action_space_from_yaml(const string& name){
+	string homedir = getenv("HOME");
+	string path = homedir + "/ARENA2d_ws/src/arena2D/arena2d-sim/configs/action_space/default_settings_" + name + ".yaml";
+try{
+	YAML::Node action_space = YAML::LoadFile(path);
+		std::vector<discrete_actions> vec = action_space["robot"]["discrete_actions"].as<std::vector<discrete_actions>>();
+        for (std::vector<discrete_actions>::iterator it = vec.begin(); it != vec.end(); ++it) {
+			if(it->name == "move_forward"){
+				_SETTINGS->robot.forward_speed.linear = it->linear;
+				_SETTINGS->robot.forward_speed.angular = it->angular;
+			}
+			else if(it->name == "move_backward"){
+				_SETTINGS->robot.backward_speed.linear = it->linear;
+				_SETTINGS->robot.backward_speed.angular = it->angular;
+			}
+			else if(it->name == "turn_left"){
+				_SETTINGS->robot.left_speed.linear = it->linear;
+				_SETTINGS->robot.left_speed.angular = it->angular;
+			}
+			else if(it->name == "turn_right"){
+				_SETTINGS->robot.right_speed.linear = it->linear;
+				_SETTINGS->robot.right_speed.angular = it->angular;
+			}
+			else if(it->name == "turn_strong_left"){
+				_SETTINGS->robot.strong_left_speed.linear = it->linear;
+				_SETTINGS->robot.strong_left_speed.angular = it->angular;
+			}
+			else if(it->name == "turn_strong_right"){
+				_SETTINGS->robot.strong_right_speed.linear = it->linear;
+				_SETTINGS->robot.strong_right_speed.angular = it->angular;
+			}
+    	}			
+} catch(const YAML::BadFile& e) {
+        std::cerr << e.msg << std::endl;
+    } catch(const YAML::ParserException& e) {
+        std::cerr << e.msg << std::endl;
+    }
+
+
+}
+	
+

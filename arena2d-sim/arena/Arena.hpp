@@ -24,9 +24,11 @@
 #include <script_sources.generated.h>
 #include <memory>
 #include <string>
+#include <yaml-cpp/yaml.h>
 #ifdef USE_ROS
 #include "RosNode.hpp"
 #include <ros/ros.h>
+#include "RosService.hpp"
 #endif
 
 #include "Evaluation.hpp"
@@ -255,6 +257,13 @@ private:
 	 */
 	void printEpisodeResults(float total_reward);
 
+ /**
+  * @description: read discrete action from .yaml config file for different robot
+  * @param {string&} robot name
+  * @return {*}
+  */
+	void read_action_space_from_yaml(const string& name);
+
 #ifdef USE_ROS
 
 	void rosUpdate(float wait_time);
@@ -429,6 +438,7 @@ private:
 	bool _doEvaluation;
 #ifdef USE_ROS
 	std::unique_ptr<RosNode> _ros_node_ptr;
+	std::unique_ptr<RosService> service_node_ptr;
 	bool _use_ros_agent = false;
 	bool *_ros_envs_reset;
 	bool stage_flag;
@@ -438,3 +448,32 @@ private:
 };
 
 #endif
+
+
+
+//struct and template to load yaml file
+struct discrete_actions {
+    std::string name;
+    double linear;
+	double angular;
+};
+
+namespace YAML {
+    template<>
+    struct convert<discrete_actions> {
+        static Node encode(const discrete_actions &rhs) {
+            Node node;
+            node.push_back(rhs.name);
+            node.push_back(rhs.linear);
+			node.push_back(rhs.angular);
+            return node;
+        }
+
+        static bool decode(const Node &node, discrete_actions &rhs) {
+            rhs.name = node["name"].as<std::string>();
+            rhs.linear = node["linear"].as<double>();
+			rhs.angular = node["angular"].as<double>();
+            return true;
+        }
+    };
+}

@@ -10,7 +10,6 @@
 #include <engine/f_math.h>
 #include <engine/GlobalSettings.hpp>
 #include <engine/zVector2d.hpp>
-
 #include <arena/ConsoleParameters.hpp>
 
 #define LEVEL_STATIC_FRICTION 		1.0f 		// friction of static obstacles
@@ -103,8 +102,20 @@ public:
  	 * @return true if contact with human and false otherwise
 	 */
 	virtual bool checkHumanContact(b2Fixture * other_fixture){return false;}
-
-
+	/* destroy all bodies in _bodyList and clear list, clears goal spawn area
+	 */
+	void clear();
+	/**
+	 * @description: transfer waypoints from task genrator to waypoints_list
+	 * @param {vector<b2Vec2>} waypoints
+	 * @return {*}
+	 */	
+	virtual void waypointsStore(std::vector<b2Vec2> waypoints){};
+	/**
+	 * @description: clear waypoints_list
+	 * @return {*}
+	 */
+	virtual void waypointsClear(){};
 protected:
 	/* check whether goal position is such that robot does not touch it initially
 	 * @return true if robot is does not touch the goal
@@ -184,9 +195,10 @@ protected:
 	 */
 	void resetRobotToCenter(){_levelDef.robot->reset(b2Vec2_zero, f_frandomRange(0, 2*M_PI));}
 
-	/* destroy all bodies in _bodyList and clear list, clears goal spawn area
-	 */
-	void clear();
+	// /* destroy all bodies in _bodyList and clear list, clears goal spawn area
+	//  */
+	// void clear();
+
 
 	/* level initializer */
 	LevelDef _levelDef;

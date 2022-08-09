@@ -15,3 +15,4 @@ float32 reward
 bool  done
 float32 mean_reward
 float32 mean_success
+Arena2dContAction last_action

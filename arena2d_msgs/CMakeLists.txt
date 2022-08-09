@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   geometry_msgs
   nav_msgs
+  std_msgs
   message_generation
 )
 
@@ -57,13 +58,16 @@ add_message_files(
   RosAgentReq.msg
 )
 
-## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
+# Generate services in the 'srv' folder
+add_service_files(
+  FILES
 #   Service1.srv
 #   Service2.srv
-# )
-
+  DeleteModel.srv
+  MoveModel.srv
+  SpawnModel.srv
+  SpawnPeds.srv
+  )
 ## Generate actions in the 'action' folder
 # add_action_files(
 #   FILES
@@ -77,6 +81,7 @@ generate_messages(
     sensor_msgs# Or other packages containing msgs
     geometry_msgs
     nav_msgs
+    std_msgs
 )
 
 ################################################
@@ -109,13 +114,14 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+ INCLUDE_DIRS 
 #  LIBRARIES arena2d-msgs-srvs
  CATKIN_DEPENDS  # necessary for using package defined msgs and srvs.
     message_runtime
     sensor_msgs 
     geometry_msgs
     nav_msgs
+    std_msgs
 #  DEPENDS system_lib
 )
 
@@ -127,7 +133,7 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
 # include
-# ${catkin_INCLUDE_DIRS}
+${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library

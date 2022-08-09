@@ -70,18 +70,15 @@ def main(log_dir = None,name_results_root_folder = "results",use_reward_bound = 
             model = A2C.load(path_best_model,env=envs)
             evaluate_policy(
                 model=model, env=envs, n_eval_episodes=20, deterministic=True)
-            envs.close()
-            exit(0)
         else:
             print("Can't load the model with the path: {}, please check again!".format(path_best_model))
             envs.close()
             exit(-1)
                                 
     try:
-        model.learn(time_steps, log_interval=200, callback=call_back,reset_num_timesteps=reset_num_timesteps)
-        model.save(os.path.join(logdir, "A3C_final"))
+        evaluate_policy(
+            model=model, env=envs, n_eval_episodes=20, deterministic=True)
     except KeyboardInterrupt:
-        model.save(path_temp_model)
         print("KeyboardInterrupt: saved the current model to {}".format(path_temp_model))
     finally:
         envs.close()

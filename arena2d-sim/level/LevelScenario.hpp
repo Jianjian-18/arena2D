@@ -100,7 +100,17 @@ public:
 	void randomGoalSpawnUntilValid(RectSpawn * goal_spawn = NULL) override;
 
 	void dynamicObstacleSpawnUntilValid() override;
-
+	/**
+	 * @description: transfer waypoints from task genrator to waypoints_list
+	 * @param {vector<b2Vec2>} waypoints
+	 * @return {*}
+	 */	
+	void waypointsStore(std::vector<b2Vec2> waypoints) override;
+	/**
+	 * @description: clear waypoints_list
+	 * @return {*}
+	 */
+	void waypointsClear() override;
 private:
 	void loadScenario();
 

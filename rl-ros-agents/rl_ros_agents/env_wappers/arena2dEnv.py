@@ -181,6 +181,9 @@ class Arena2dEnvWrapper(gym.Env):
                 req_msg.action.angular = action[1]
             else:
                 action_name = self._action_discrete_list[action]
+
+                # print("value of action is {}, action name is {}\n".format(action, action_name))
+
                 for i in range(len(self._action_discrete_map)):
                     if self._action_discrete_map[i]['name'] == action_name:
                        req_msg.action.linear = self._action_discrete_map[i]['linear']
@@ -211,7 +214,7 @@ if __name__ == "__main__":
     rospy.init_node("test")
     def test_step(idx_env):
         env = Arena2dEnvWrapper(idx_env)
-        action = [1, 0]
+        action = [2, 0]
         _, reward, _, _ = env.step(action)
         # env.reset()
         print("env: {:d} reward {}".format(idx_env, reward))

@@ -406,11 +406,12 @@ void Arena::rosUpdate(float wait_time = 0.0f)
 		}
 	}
 	// we put the wait connection here so that window will not be in blank screen.
-	if (!_ros_node_ptr->m_env_connected && !any_arrow_key_pressed)
-	{
-		_ros_node_ptr->waitConnection();
-		return;
-	}
+	// update: temporary not needed 
+	// if (!_ros_node_ptr->m_env_connected && !any_arrow_key_pressed)
+	// {
+	// 	_ros_node_ptr->waitConnection();
+	// 	return;
+	// }
 
 	RosNode::Status s;
 	if (_ros_node_ptr == nullptr && !any_arrow_key_pressed)

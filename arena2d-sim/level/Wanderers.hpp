@@ -111,6 +111,8 @@ public:
 	 * @param coordinate data for all human obstacle
 	 */	    
     void getHumanWandererData(std::vector<float> & data);
+
+    std::vector<std::vector<b2Vec2>>& getWaypointsList(){return waypoint_list;}
 private:
     /* calculate distance and angle of all wanderers relativ to the robot
 	 */
@@ -120,6 +122,8 @@ private:
 	 * push the wanderers inside the camera view into the _observed_wanderers vector
 	 */
     void getClosestWanderers();
+
+    void wandererGenerator();
 
     // private variables
 
@@ -150,6 +154,8 @@ private:
 
     // save initial pos of human 
     std::vector<b2Vec2> fixed_human;
+    std::vector<b2Vec2> waypoints;
+    std::vector<std::vector<b2Vec2>> waypoint_list;
 };
 
 #endif

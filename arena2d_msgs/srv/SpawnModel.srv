@@ -1,0 +1,8 @@
+string name
+float64 min_radius
+float64 max_radius
+float64 linear_vel
+float64 angular_vel_max
+---
+bool success
+string message

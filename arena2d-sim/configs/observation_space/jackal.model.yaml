@@ -31,7 +31,8 @@
 #     origin: [0.0, 0.0, 0.0]
 #     # range: 3
 #     #arena
-range: 30.0
+range: 0.5 # to test
+# 30.0
 
 # ARENA 
 # angle: {min: -3.12413936, max: 3.14159265359, increment: 0.01745}

@@ -10,6 +10,12 @@
 #include <arena2d_msgs/Arena2dResp.h>
 #include <engine/GlobalSettings.hpp>
 #include <iostream>
+#include <arena2d_msgs/DeleteModel.h>
+#include <arena2d_msgs/MoveModel.h>
+#include <arena2d_msgs/SpawnModel.h>
+#include <arena2d_msgs/SpawnPeds.h>
+#include <boost/algorithm/string/predicate.hpp>
+#include "level/Wanderers.hpp"
 class RosNode
 {
     using size_t = unsigned int;
@@ -21,6 +27,36 @@ private:
     void _setRosAgentsReqSub();
     void _setArena2dResPub();
 
+    /**
+     * @description: callback function for subscribe standard /cmd_vel
+     * @param {ConstPtr } &action_msg 
+     * @param {int} index of environment
+     * @return {*}
+     */
+    void _RosTwistCallback(const geometry_msgs::Twist::ConstPtr  &action_msg, int idx_action);
+    void _setTwistSub();
+
+    /**
+     * @description: set all rosservice from simulator
+     * @return {*}
+     */
+    void _setRosService();
+
+    /**
+     * @description: callback function for services
+     * @return {*}
+     */    
+    bool DeleteModelCallback(arena2d_msgs::DeleteModel::Request  &request,
+                             arena2d_msgs::DeleteModel::Response &response);
+
+    bool MoveModelCallback(arena2d_msgs::MoveModel::Request  &request,
+                           arena2d_msgs::MoveModel::Response &response);
+
+    bool SpawnModelCallback(arena2d_msgs::SpawnModel::Request  &request,
+                            arena2d_msgs::SpawnModel::Response &response);
+
+    bool SpawnPedestrianCallback(arena2d_msgs::SpawnPeds::Request  &request,
+                                 arena2d_msgs::SpawnPeds::Response &response);    
 
     std::vector<std::unique_ptr<Twist>> m_actions_buffer;
     std::vector<ros::Subscriber> m_ros_agent_subs;
@@ -32,7 +68,15 @@ private:
     bool m_any_env_reset;
     int m_env_close; // number of envs request to close
     Environment* m_envs;
+    // store last velocity
+    double last_linear;
+    double last_angular;
 
+    
+    ros::ServiceServer service_delete;
+    ros::ServiceServer service_move;
+    ros::ServiceServer service_spawn;
+    ros::ServiceServer service_spawn_pedestrian;
 public:
     bool m_env_connected;
     enum class Status
