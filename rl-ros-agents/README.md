@@ -44,7 +44,7 @@ The definitions of the request and response message can be found [here](../arena
     $ catkin_make -DUSE_ROS=ON
     $ source devel/setup.bash
     ```
-    You may encounter some compilation problems when using `catkin_make`, e.g.:
+    You may encounter some compilation problems when using `catkin_make`:
    ```
    $ /usr/bin/ld: /lib/x86_64-linux-gnu/libapr-1.so.0: undefined reference to `uuid_generate@UUID_1.0'
    ```
@@ -54,6 +54,19 @@ The definitions of the request and response message can be found [here](../arena
    $ mkdir ~/anaconda3/libuuid
    $ mv ~/anaconda3/lib/libuuid* ~/anaconda3/libuuid
    $ catkin_make -DUSE_ROS=ON
+   ```
+   And
+   
+   ```
+   $ ImportError: "from catkin_pkg.package import parse_package" failed: No module named 'catkin_pkg'
+   ```
+   to fix that, you need find `PYTHONPATH` of catkin_pkg and add it to `./bashrc`:
+   ```
+   $ locate catkin_pkg
+   # first line is path: /usr/lib/python3/dist-packages/catkin_pkg
+   $ vim ~/.bashrc
+   $ export PYTHONPATH=$PYTHONPATH:/usr/lib/python3/dist-packages # copy this in the bottom, then use wq! to quit
+   $ source ~/.bashrc
    ```
 
 3. Make sure rl_ros_agents and further dependences is included in the PYTHONPATH.
