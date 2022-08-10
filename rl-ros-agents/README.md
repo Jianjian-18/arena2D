@@ -22,7 +22,6 @@ The definitions of the request and response message can be found [here](../arena
    - install conda and necessary dependencies:
    1. install conda see [here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html)
    2. `$ sudo apt-get install cmake libsdl2-dev libfreetype-dev`
-   3. in this repository `$ conda env create -f environment.yml`
 
 ## Building
 1. Create a catkin workspace:
@@ -36,6 +35,8 @@ The definitions of the request and response message can be found [here](../arena
     ```
     $ cd ~/ARENA2d_ws/src
     $ git clone https://github.com/ignc-research/arena2D.git # this repository
+    $ cd ~/ARENA2d_ws/src/arena2D/rl-ros-agents
+    $ conda env create -f environment.yml
     $ cd ~/ARENA2d_ws
     $ pip install empy
 	$ vim ~/.bashrc
