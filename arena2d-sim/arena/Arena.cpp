@@ -16,8 +16,8 @@ static const char *ARENA_HELP_STRING =
 	"--help -h                      display this info\n"
 	"--disable-video                commandline only\n"
 	"--run <commands>               run simulator commands on startup (separated by ;)\n"
-	"--logfile <filename>           log output to file\n";
-
+	"--logfile <filename>           log output to file\n"
+	"--num_envs <number>			number of environment be loaded\n";
 Arena::Arena() : _levelResetMeasure(10)
 {
 	_console = NULL;
@@ -46,6 +46,7 @@ int Arena::init(int argc, char **argv)
 	int ros_argc = 0;
 	std::vector<char *> ros_argv;
 	_cur_stage = 1;
+	int num_envs = 1;
 
 	while (arg_i < argc)
 	{
@@ -72,6 +73,20 @@ int Arena::init(int argc, char **argv)
 			puts(ARENA_HELP_STRING);
 			exit(0);
 		}
+		else if (!strcmp(argv[arg_i], "--num_envs"))
+		{ // num_envs
+			if (arg_i < argc - 1)
+			{
+				num_envs = std::stoi(argv[arg_i + 1]);
+
+				arg_i++; // skip next argument (number of enviroment)
+			}
+			else
+			{
+				printf("No number given for environment!\n");
+				exit(1);
+			}
+		}		
 		else if (!strcmp(argv[arg_i], "--run"))
 		{
 			if (arg_i + 1 < argc)
@@ -85,6 +100,7 @@ int Arena::init(int argc, char **argv)
 				exit(0);
 			}
 		}
+		
 
 #ifdef USE_ROS
 		else if (!strcmp(argv[arg_i], "--use_ros_agent"))
@@ -248,6 +264,7 @@ int Arena::init(int argc, char **argv)
 	_PHYSICS_WORLD->SetContactListener((b2ContactListener *)this);
 		
 	/* creating environments */
+	_SETTINGS->training.num_envs = num_envs;
 	_numEnvs = _SETTINGS->training.num_envs;
 	if (_numEnvs <= 0)
 	{
@@ -915,6 +932,8 @@ void Arena::resize()
 void Arena::read_action_space_from_yaml(const string& name){
 	string homedir = getenv("HOME");
 	string path = homedir + "/ARENA2d_ws/src/arena2D/arena2d-sim/configs/action_space/default_settings_" + name + ".yaml";
+	// string path = homedir + "catkin_ws/src/utils/arena-simulation-setup/robot/" + name + "/model_params.yaml";
+	// path for integration
 try{
 	YAML::Node action_space = YAML::LoadFile(path);
 		std::vector<discrete_actions> vec = action_space["robot"]["discrete_actions"].as<std::vector<discrete_actions>>();
