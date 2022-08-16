@@ -147,7 +147,18 @@ protected:
 
     bool obstacleSpawnUntilValid(RectSpawn *static_spawn, const std::list<zRect*>& existing_boxes, b2Vec2 &p, int obstacle_type);
 
+	/**
+	 * @description: check the spawn area of dynamic obstacles
+	 * @return {*}
+	 */	
 	virtual void dynamicObstacleSpawnUntilValid(){};
+
+	/**
+	 * @description: check the spawn area of static obstacles
+	 * @return {*}
+	 */	
+	virtual void staticObstacleSpawnUntilValid(){};
+
 	/* create rectangular border around level origin (0,0) with given dimensions and add to body list
 	 * @param half_width half the width (along x-axis) of border rect
 	 * @param half_height half the height (along y-axis) of border rect

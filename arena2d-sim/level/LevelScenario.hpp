@@ -99,7 +99,17 @@ public:
 
 	void randomGoalSpawnUntilValid(RectSpawn * goal_spawn = NULL) override;
 
+	/**
+	 * @description: check the spawn area of dynamic obstacles
+	 * @return {*}
+	 */		
 	void dynamicObstacleSpawnUntilValid() override;
+
+	/**
+	 * @description: check the spawn area of static obstacles
+	 * @return {*}
+	 */	
+	void staticObstacleSpawnUntilValid() override;
 	/**
 	 * @description: transfer waypoints from task genrator to waypoints_list
 	 * @param {vector<b2Vec2>} waypoints
@@ -133,6 +143,9 @@ private:
 	/* spawn area for dynamic obstacles */
 	RectSpawn _dynamicSpawn;
 	
+	/* spawn area for static obstacles */
+	RectSpawn _staticSpawn;
+
 	// it takes too long to calculate the spawn area for dynamic obstaticles,to save the time, it will only be done once.
 	bool _init_reset;
 	
