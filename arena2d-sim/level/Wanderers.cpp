@@ -389,7 +389,3 @@ bool Wanderers::checkHumanContact(b2Fixture* other_fixture){
     return humanContact;
 }
 
-
-void Wanderers:: wandererGenerator(){
-
-}
