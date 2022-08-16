@@ -439,7 +439,6 @@ void Arena::rosUpdate(float wait_time = 0.0f)
 				if (s != Environment::RUNNING)
 				{
 					_levelResetMeasure.startTime();
-					callTaskReset();
 					_envs[i].reset(false);
 					_levelResetMeasure.endTime();
 				}
@@ -572,6 +571,7 @@ void Arena::rosUpdate(float wait_time = 0.0f)
 					}
 				}
 				_episodeCount++;
+				callTaskReset();
 				// show results
 				printEpisodeResults(_envs[i].getTotalReward());
 				episode_over = true;
@@ -612,6 +612,7 @@ void Arena::callTaskReset(){
 	task_service_ = nh_.serviceClient<std_srvs::Empty>("task_generator");
 	std_srvs::Empty empty;
 	bool success=task_service_.call(empty);
+	cout << "task generator" << endl << endl;
 	if(success){
 		ROS_INFO("Task Generator:Success");
 	}else{

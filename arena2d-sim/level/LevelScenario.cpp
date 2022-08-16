@@ -378,7 +378,7 @@ void LevelScenario::randomGoalSpawnUntilValid(RectSpawn * goal_spawn)
         
 	}while((!checkValidGoalSpawn(robot_position, spawn_position) || occupied) && count < 100);
     // cout << "find goal in freespace  within count"<<count<<"   Position "<<"x="<<spawn_position.x<<" y="<<spawn_position.y <<endl;
-    ROS_DEBUG_STREAM("find goal in freespace  within count"<<count<<"   Position "<<"x="<<spawn_position.x<<" y="<<spawn_position.y);
+    // ROS_DEBUG_STREAM("find goal in freespace  within count"<<count<<"   Position "<<"x="<<spawn_position.x<<" y="<<spawn_position.y);
 	spawnGoal(spawn_position);
    
 }
@@ -425,9 +425,9 @@ void LevelScenario::dynamicObstacleSpawnUntilValid(){
         }
 		count++;
          
-	}while((!checkValidGoalSpawn(robot_position, spawn_position) || occupied) && count < 1000);
+	}while((!checkValidGoalSpawn(robot_position, spawn_position) || occupied) && count < 10000);
     // If the number of obstacles increases, the counter upper limit also needs to be increased
-    ROS_DEBUG_STREAM("find all dynamic obstacles in freespace  within count "<< count);
+    // ROS_DEBUG_STREAM("find all dynamic obstacles in freespace  within count "<< count);
     // std::cout<<"find all dynamic obstacles in freespace  within count "<< count << std::endl;
 }
 
@@ -463,7 +463,7 @@ void LevelScenario::staticObstacleSpawnUntilValid(){
         
 	}while((!checkValidGoalSpawn(robot_position, p) || occupied) && count < 1000);
     // cout << "find static obstacle in freespace  within count"<<count<<"  Position "<<"x="<<p.x<<" y="<<p.y <<endl;
-    ROS_DEBUG_STREAM("find goal in freespace  within count"<<count<<"   Position "<<"x="<<p.x<<" y="<<p.y);
+    // ROS_DEBUG_STREAM("find static obstacle in freespace  within count"<<count<<"   Position "<<"x="<<p.x<<" y="<<p.y);
     zRect aabb;
     addRandomShape(p, _SETTINGS->stage.min_obstacle_size/2, _SETTINGS->stage.max_obstacle_size/2, &aabb);	
 }

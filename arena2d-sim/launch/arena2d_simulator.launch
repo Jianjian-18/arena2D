@@ -47,7 +47,7 @@
 
 
     <!-- Run the map server -->
-    <arg name="map_file" default="$(find arena2d)/scenario/map_obs.yaml" 
+    <arg name="map_file" default="$(find arena2d)/scenario/map_ignc.yaml" 
     doc = "load rosmap from /scenario" />
     <node if="$(eval arg('level_name') == 'scenario')"
     name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
