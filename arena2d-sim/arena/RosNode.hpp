@@ -16,6 +16,7 @@
 #include <arena2d_msgs/SpawnPeds.h>
 #include <boost/algorithm/string/predicate.hpp>
 #include "level/Wanderers.hpp"
+#include <std_msgs/String.h>
 class RosNode
 {
     using size_t = unsigned int;
@@ -78,6 +79,7 @@ private:
     ros::ServiceServer service_spawn;
     ros::ServiceServer service_spawn_pedestrian;
 public:
+    ros::Publisher pub;
     bool m_env_connected;
     enum class Status
     {
@@ -97,5 +99,6 @@ public:
      */
     Status getActions(Twist *robot_Twist, bool* ros_envs_reset, float waitTime);
     void waitConnection();
-    
+
+
 };

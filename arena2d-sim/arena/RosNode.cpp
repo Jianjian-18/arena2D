@@ -85,6 +85,7 @@ void RosNode::_setArena2dResPub()
         ss << "env_" << i << "/response";
         m_arena2d_pubs.push_back(m_nh_ptr->advertise<arena2d_msgs::Arena2dResp>(ss.str(), 1));
     }
+    pub = m_nh_ptr->advertise<std_msgs::String>("task_reset",1);
 }
 
 void RosNode::publishStates(const bool *dones, float mean_reward, float mean_sucess)
@@ -211,6 +212,11 @@ RosNode::Status RosNode::getActions(Twist *robot_Twist, bool *ros_envs_reset, fl
         for (int i = 0; i < m_num_envs; i++)
         {
             ros_envs_reset[i] = m_envs_reset[i];
+
+            
+            std_msgs::StringPtr str(new std_msgs::String);
+            str->data = "True";
+            pub.publish(str);
         }
         return RosNode::Status::ENV_RESET;
     }

@@ -571,7 +571,7 @@ void Arena::rosUpdate(float wait_time = 0.0f)
 					}
 				}
 				_episodeCount++;
-				callTaskReset();
+				
 				// show results
 				printEpisodeResults(_envs[i].getTotalReward());
 				episode_over = true;
@@ -593,6 +593,7 @@ void Arena::rosUpdate(float wait_time = 0.0f)
 				refreshRewardCounter();
 				_envs[over_env].reset(true);
 			}
+
 		}
 	}
 	if (_SETTINGS->video.enabled && !_videoDisabled)
@@ -612,7 +613,6 @@ void Arena::callTaskReset(){
 	task_service_ = nh_.serviceClient<std_srvs::Empty>("task_generator");
 	std_srvs::Empty empty;
 	bool success=task_service_.call(empty);
-	cout << "task generator" << endl << endl;
 	if(success){
 		ROS_INFO("Task Generator:Success");
 	}else{
