@@ -51,7 +51,7 @@ void LevelScenario::reset(bool robot_position_reset)
     // noramlly we don't expect generate random static obstacles in scenario mode
 
 	RectSpawn static_spawn;
-	static_spawn.addCheeseRect(big_main_rect, _levelDef.world, COLLIDE_CATEGORY_PLAYER, max_obstacle_radius);
+	static_spawn.addCheeseRect(main_rect, _levelDef.world, COLLIDE_CATEGORY_PLAYER, max_obstacle_radius);
 	static_spawn.calculateArea();
 
 	// create static obstacles
@@ -280,7 +280,7 @@ void LevelScenario::lazyclear()
     int i = 0, size = _bodyList.size();
     for (auto it = _bodyList.begin(); it != _bodyList.end();)
     {
-        if (i++ > _n_non_clear_bodies)
+        if (i++ >= _n_non_clear_bodies)
         {
             _levelDef.world->DestroyBody(*it);
             it = _bodyList.erase(it);
