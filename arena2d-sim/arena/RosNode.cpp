@@ -346,7 +346,7 @@ bool RosNode:: SpawnModelCallback(arena2d_msgs::SpawnModel::Request  &request,
             _SETTINGS->stage.num_obstacles++;
             _SETTINGS->stage.min_obstacle_size = request.min_radius;
             _SETTINGS->stage.max_obstacle_size = request.max_radius;
-            m_envs[idx_env].reset(true);
+            m_envs[idx_env].reset(false);
             _SETTINGS->stage.num_obstacles--;
         }
         _SETTINGS->stage.num_obstacles++;
@@ -362,7 +362,7 @@ bool RosNode:: SpawnModelCallback(arena2d_msgs::SpawnModel::Request  &request,
             _SETTINGS->stage.dynamic_obstacle_size = request.min_radius;
             _SETTINGS->stage.obstacle_speed = request.linear_vel;
             _SETTINGS->stage.obstacle_angular_max = request.angular_vel_max;
-            m_envs[idx_env].reset(true);
+            m_envs[idx_env].reset(false);
             _SETTINGS->stage.num_dynamic_obstacles--;
         }
         _SETTINGS->stage.num_dynamic_obstacles++;

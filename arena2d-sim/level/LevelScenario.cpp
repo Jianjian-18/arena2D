@@ -65,7 +65,7 @@ void LevelScenario::reset(bool robot_position_reset)
 
     if (robot_position_reset)
     {
-        resetRobotToCenter();
+        // resetRobotToCenter();
         // _levelDef.robot->reset(pos, 0);
         // _levelDef.robot->reset(pos, f_frandomRange(0, 2 * M_PI));
     }

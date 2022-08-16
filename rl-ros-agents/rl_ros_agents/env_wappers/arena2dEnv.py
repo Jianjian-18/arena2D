@@ -14,6 +14,7 @@ import os
 from rosparam import upload_params
 from yaml import load, safe_load
 import rospkg
+from std_srvs.srv import Empty, EmptyResponse
 # namespace of arena settings
 NS_SETTING = "/arena_sim/settings/"
 HOLONOMIC = "/robot/holonomic/"
@@ -74,6 +75,7 @@ class Arena2dEnvWrapper(gym.Env):
 
         rospy.init_node("arena_ros_agent_env_{:02d}".format(idx_env), anonymous=True, log_level=rospy.INFO)
         self._setSubPub()
+        self._setService()
         # we use this to let main thread know the response is received which is done by another thread
         self.response_con = threading.Condition()
         self.resp_received = False
@@ -123,7 +125,7 @@ class Arena2dEnvWrapper(gym.Env):
 
     def reset(self):
         self._pubRosAgentReq(env_reset=True)
-
+        
         error_showed = False
         with self.response_con:
             while not self.resp_received:
@@ -159,6 +161,12 @@ class Arena2dEnvWrapper(gym.Env):
         rospy.loginfo("env[{:d}] connected with arena-2d simulator, took {:3.1f}s.".format(self._idx_env, .1 * times))
         # time.sleep(1)
 
+    def _setService(self):
+        service_name = "task_generator"
+        rospy.wait_for_service(service_name)
+        print(f"{service_name} has started")
+        self.service_client = rospy.ServiceProxy(service_name, Empty)
+
     def _pubRosAgentReq(self,
                         action: Union[List, Tuple, RosAgentReq] = None,
                         env_reset: bool = False,
@@ -169,7 +177,9 @@ class Arena2dEnvWrapper(gym.Env):
             req_msg.arena2d_sim_close = True
         # reset environment
         elif env_reset:
+            
             req_msg.env_reset = True
+            self.service_client()
         else:
             req_msg.env_reset = False
             if not self._is_action_space_discrete:

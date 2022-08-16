@@ -607,15 +607,3 @@ void Arena::rosUpdate(float wait_time = 0.0f)
 }
 // #endif
 
-void Arena::callTaskReset(){
-	ros::NodeHandle nh_;  ///< NodeHandle to call the pause toggle service
-  	ros::ServiceClient task_service_;  ///< ServiceClient that calls the pause toggle service
-	task_service_ = nh_.serviceClient<std_srvs::Empty>("task_generator");
-	std_srvs::Empty empty;
-	bool success=task_service_.call(empty);
-	if(success){
-		ROS_INFO("Task Generator:Success");
-	}else{
-		ROS_WARN("Task Generator:Failed");
-	}	  
-}
