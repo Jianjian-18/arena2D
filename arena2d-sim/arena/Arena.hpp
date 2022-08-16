@@ -25,10 +25,10 @@
 #include <memory>
 #include <string>
 #include <yaml-cpp/yaml.h>
+#include <std_srvs/Empty.h>
 #ifdef USE_ROS
 #include "RosNode.hpp"
 #include <ros/ros.h>
-#include "RosService.hpp"
 #endif
 
 #include "Evaluation.hpp"
@@ -267,6 +267,7 @@ private:
 #ifdef USE_ROS
 
 	void rosUpdate(float wait_time);
+	void callTaskReset();
 
 #endif // SUPPORT_ROS_AGENG
 
@@ -438,12 +439,12 @@ private:
 	bool _doEvaluation;
 #ifdef USE_ROS
 	std::unique_ptr<RosNode> _ros_node_ptr;
-	std::unique_ptr<RosService> service_node_ptr;
 	bool _use_ros_agent = false;
 	bool *_ros_envs_reset;
 	bool stage_flag;
 	bool episode_flag;
 	bool curriculum_flag;
+
 #endif // USE_ROS
 };
 

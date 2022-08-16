@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   nav_msgs
   std_msgs
   message_generation
+  std_srvs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -82,6 +83,7 @@ generate_messages(
     geometry_msgs
     nav_msgs
     std_msgs
+    std_srvs
 )
 
 ################################################
@@ -122,6 +124,7 @@ catkin_package(
     geometry_msgs
     nav_msgs
     std_msgs
+    std_srvs
 #  DEPENDS system_lib
 )
 
