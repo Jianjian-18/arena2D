@@ -79,7 +79,6 @@ private:
     ros::ServiceServer service_spawn;
     ros::ServiceServer service_spawn_pedestrian;
 public:
-    ros::Publisher pub;
     bool m_env_connected;
     enum class Status
     {
