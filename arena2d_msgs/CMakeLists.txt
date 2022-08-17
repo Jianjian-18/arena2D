@@ -83,7 +83,6 @@ generate_messages(
     geometry_msgs
     nav_msgs
     std_msgs
-    std_srvs
 )
 
 ################################################
@@ -124,7 +123,6 @@ catkin_package(
     geometry_msgs
     nav_msgs
     std_msgs
-    std_srvs
 #  DEPENDS system_lib
 )
 

@@ -267,7 +267,6 @@ private:
 #ifdef USE_ROS
 
 	void rosUpdate(float wait_time);
-	void callTaskReset();
 
 #endif // SUPPORT_ROS_AGENG
 

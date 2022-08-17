@@ -276,14 +276,18 @@ bool RosNode:: DeleteModelCallback(arena2d_msgs::DeleteModel::Request  &request,
   // current only service for delete "obstacle"
   try {
     if(request.name == "all"){
-        for (int idx_env = 0; idx_env < m_num_envs; idx_env++)
-        {
-            _SETTINGS->stage.num_dynamic_obstacles = 0;
-            _SETTINGS->stage.num_obstacles = 0;
-            m_envs[idx_env].getLevel()->waypointsClear();
 
-            m_envs[idx_env].reset(false);
-        }
+        _SETTINGS->stage.num_dynamic_obstacles = 0;
+        _SETTINGS->stage.num_obstacles = 0;
+        m_envs->reset(false);
+        // for (int idx_env = 0; idx_env < m_num_envs; idx_env++)
+        // {
+        //     _SETTINGS->stage.num_dynamic_obstacles = 0;
+        //     _SETTINGS->stage.num_obstacles = 0;
+        //     m_envs[idx_env].getLevel()->waypointsClear();
+
+        //     m_envs[idx_env].reset(false);
+        // }
         response.success = true;
         response.message = "";
     }
@@ -312,11 +316,13 @@ bool RosNode:: MoveModelCallback(arena2d_msgs::MoveModel::Request  &request,
         pose.x = request.pose.x;
         pose.y = request.pose.y;
         float theta = request.pose.theta;
+        m_envs->getRobot()->reset(pose, theta);
 
-        for (int idx_env = 0; idx_env < m_num_envs; idx_env++)
-        {
-            m_envs[idx_env].getRobot()->reset(pose, theta);
-        }
+        // for (int idx_env = 0; idx_env < m_num_envs; idx_env++)
+        // {
+        //     m_envs[idx_env].getRobot()->reset(pose, theta);
+        // }
+
         response.success = true;
         response.message = "";        
     }
@@ -341,31 +347,41 @@ bool RosNode:: SpawnModelCallback(arena2d_msgs::SpawnModel::Request  &request,
   try {
     // if request name have prefix static, generate a random static obstacle    
     if(boost::starts_with(request.name,"static")){
-        for (int idx_env = 0; idx_env < m_num_envs; idx_env++)
-        {
-            _SETTINGS->stage.num_obstacles++;
-            _SETTINGS->stage.min_obstacle_size = request.min_radius;
-            _SETTINGS->stage.max_obstacle_size = request.max_radius;
-            m_envs[idx_env].reset(true);
-            _SETTINGS->stage.num_obstacles--;
-        }
+        // for (int idx_env = 0; idx_env < m_num_envs; idx_env++)
+        // {
+        //     _SETTINGS->stage.num_obstacles++;
+        //     _SETTINGS->stage.min_obstacle_size = request.min_radius;
+        //     _SETTINGS->stage.max_obstacle_size = request.max_radius;
+        //     m_envs[idx_env].reset(false);
+        //     _SETTINGS->stage.num_obstacles--;
+        // }
+        // _SETTINGS->stage.num_obstacles++;
+
         _SETTINGS->stage.num_obstacles++;
+        _SETTINGS->stage.min_obstacle_size = request.min_radius;
+        _SETTINGS->stage.max_obstacle_size = request.max_radius;
+        m_envs->reset(false);        
         response.success = true;
         response.message = "";        
     }
     // if request name have prefix dynamic, generate a random dynamic obstacle
     else if(boost::starts_with(request.name,"dynamic")){
         for (int idx_env = 0; idx_env < m_num_envs; idx_env++)
-        {
-            _SETTINGS->stage.num_dynamic_obstacles++;
-            //TODO dynamic obstacle can also have variable size if need, we pretend all one size
-            _SETTINGS->stage.dynamic_obstacle_size = request.min_radius;
-            _SETTINGS->stage.obstacle_speed = request.linear_vel;
-            _SETTINGS->stage.obstacle_angular_max = request.angular_vel_max;
-            m_envs[idx_env].reset(true);
-            _SETTINGS->stage.num_dynamic_obstacles--;
-        }
+        // {
+        //     _SETTINGS->stage.num_dynamic_obstacles++;
+        //     _SETTINGS->stage.dynamic_obstacle_size = request.min_radius;
+        //     _SETTINGS->stage.obstacle_speed = request.linear_vel;
+        //     _SETTINGS->stage.obstacle_angular_max = request.angular_vel_max;
+        //     m_envs[idx_env].reset(false);
+        //     _SETTINGS->stage.num_dynamic_obstacles--;
+        // }
+        // _SETTINGS->stage.num_dynamic_obstacles++;
+
         _SETTINGS->stage.num_dynamic_obstacles++;
+        _SETTINGS->stage.dynamic_obstacle_size = request.min_radius;
+        _SETTINGS->stage.obstacle_speed = request.linear_vel;
+        _SETTINGS->stage.obstacle_angular_max = request.angular_vel_max;
+        m_envs->reset(false);        
         response.success = true;
         response.message = "";          
     }

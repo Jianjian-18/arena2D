@@ -43,7 +43,7 @@ dependencies:
   - pip=20.2.2=py_0
   - protobuf=3.12.4=py36he6710b0_0
   - pycodestyle=2.6.0=py_0
-  - python=3.6.0=2
+  - python=3.8.0
   - python_abi=3.6=1_cp36m
   - readline=6.2=0
   - scipy=1.5.2=py36h0b6359f_0
