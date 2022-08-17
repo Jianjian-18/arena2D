@@ -87,8 +87,11 @@ private:
     ros::ServiceServer service_spawn_pedestrian;
     ros::ServiceServer service_pause;
     ros::ServiceServer service_unpause;
+
+    int last_call_static = -1;
+    int last_call_dynamic = -1;
 public:
-    bool video_disabled_flag = false;
+    bool pause_flag = false;
     bool m_env_connected;
     enum class Status
     {

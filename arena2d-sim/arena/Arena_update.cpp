@@ -361,13 +361,8 @@ void Arena::update()
 
 // #ifdef USE_ROS
 void Arena::rosUpdate(float wait_time = 0.0f)
-{
-	_videoDisabled = _ros_node_ptr->video_disabled_flag;
+{	
 	bool any_arrow_key_pressed = false;
-	// if (_playSimulation)
-	// {
-	// 	action = Robot::STOP;
-	// }
 	if (_keysPressed[UP] || _keysPressed[DOWN] || _keysPressed[LEFT] || _keysPressed[RIGHT])
 	{
 		any_arrow_key_pressed = true;
@@ -416,6 +411,10 @@ void Arena::rosUpdate(float wait_time = 0.0f)
 	// }
 
 	RosNode::Status s;
+	if(_ros_node_ptr->pause_flag) {
+		std::this_thread::sleep_for(std::chrono::microseconds(5));
+		return;
+		}
 	if (_ros_node_ptr == nullptr && !any_arrow_key_pressed)
 		return; // should throw Exception
 	if (!any_arrow_key_pressed)
@@ -598,6 +597,7 @@ void Arena::rosUpdate(float wait_time = 0.0f)
 
 		}
 	}
+	_videoDisabled = _ros_node_ptr->pause_flag;
 	if (_SETTINGS->video.enabled && !_videoDisabled)
 	{
 		refreshLevelResetTime();

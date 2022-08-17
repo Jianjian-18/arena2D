@@ -19,7 +19,7 @@ ns = 'arena2d/'
 
 service_name = "";
 
-flag = 6;
+flag = 1;
 
 if  (flag == 1):
     service_name = f"{ns}delete_model"
@@ -38,11 +38,11 @@ print(f"{service_name} has started")
 
 # 声明服务的本地代理，需要指定服务的名称（‘word_count’）和类型（WordCount）
 # 这允许我们像使用本地函数一样使用服务。
-# service_client = rospy.ServiceProxy(service_name, DeleteModel)
+service_client = rospy.ServiceProxy(service_name, DeleteModel)
 # service_client = rospy.ServiceProxy(service_name, MoveModel)
 # service_client = rospy.ServiceProxy(service_name, SpawnModel)
 # service_client = rospy.ServiceProxy(service_name, SpawnPeds)
-service_client = rospy.ServiceProxy(service_name, Empty)
+# service_client = rospy.ServiceProxy(service_name, Empty)
 print("get service")
 
 pose = Pose2D()
@@ -92,13 +92,13 @@ waypoints_2 = [
                     0)                
             ]
 
-# output= service_client("all") # delete
+output= service_client("all") # delete
 # output= service_client("robot",pose) # move
 # output= service_client("static",*args_static) # spawn static
 # output= service_client("dynamic",*args_dynamic) # spawn static
 # output= service_client(waypoints_1) # spawn peds1
 # output= service_client(waypoints_2) # spawn peds2
-output = service_client()
+# output = service_client()
 print(output)
 # rospy.spin()
 
