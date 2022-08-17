@@ -33,7 +33,6 @@
 
 #include "Evaluation.hpp"
 extern Evaluation _evaluation;
-
 // python callback functions
 enum PyAgentFunction
 {

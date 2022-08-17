@@ -17,6 +17,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include "level/Wanderers.hpp"
 #include <std_msgs/String.h>
+#include <std_srvs/Empty.h>
 class RosNode
 {
     using size_t = unsigned int;
@@ -59,6 +60,12 @@ private:
     bool SpawnPedestrianCallback(arena2d_msgs::SpawnPeds::Request  &request,
                                  arena2d_msgs::SpawnPeds::Response &response);    
 
+    bool PauseCallback(std_srvs::Empty::Request  &request,
+                       std_srvs::Empty::Response &response);
+                       
+    bool UnpauseCallback(std_srvs::Empty::Request  &request,
+                         std_srvs::Empty::Response &response);
+
     std::vector<std::unique_ptr<Twist>> m_actions_buffer;
     std::vector<ros::Subscriber> m_ros_agent_subs;
     std::vector<ros::Publisher> m_arena2d_pubs;
@@ -78,7 +85,10 @@ private:
     ros::ServiceServer service_move;
     ros::ServiceServer service_spawn;
     ros::ServiceServer service_spawn_pedestrian;
+    ros::ServiceServer service_pause;
+    ros::ServiceServer service_unpause;
 public:
+    bool video_disabled_flag = false;
     bool m_env_connected;
     enum class Status
     {

@@ -35,6 +35,8 @@ void RosNode::_setRosService(){
         service_move = m_nh_ptr->advertiseService("move_model", &RosNode::MoveModelCallback, this);
         service_spawn = m_nh_ptr->advertiseService("spawn_model", &RosNode::SpawnModelCallback, this);
         service_spawn_pedestrian = m_nh_ptr->advertiseService("spawn_pedestrian", &RosNode::SpawnPedestrianCallback, this);
+        service_pause = m_nh_ptr->advertiseService("pause", &RosNode::PauseCallback, this);
+        service_unpause = m_nh_ptr->advertiseService("unpause", &RosNode::UnpauseCallback, this);
 }
 void RosNode::_publishParams()
 {
@@ -428,6 +430,22 @@ bool RosNode:: SpawnPedestrianCallback(arena2d_msgs::SpawnPeds::Request  &reques
     response.success = false;
     response.message = std::string(e.what());
   }    
+
+    return true;
+}
+
+bool RosNode:: PauseCallback(std_srvs::Empty::Request  &request,
+                             std_srvs::Empty::Response &response){
+
+    video_disabled_flag = true;
+
+    return true;
+}
+
+bool RosNode:: UnpauseCallback(std_srvs::Empty::Request  &request,
+                             std_srvs::Empty::Response &response){
+
+    video_disabled_flag = false;
 
     return true;
 }
