@@ -361,7 +361,7 @@ void Arena::update()
 
 // #ifdef USE_ROS
 void Arena::rosUpdate(float wait_time = 0.0f)
-{	
+{	_videoDisabled = _ros_node_ptr->pause_flag;
 	bool any_arrow_key_pressed = false;
 	if (_keysPressed[UP] || _keysPressed[DOWN] || _keysPressed[LEFT] || _keysPressed[RIGHT])
 	{
@@ -409,16 +409,18 @@ void Arena::rosUpdate(float wait_time = 0.0f)
 	// 	_ros_node_ptr->waitConnection();
 	// 	return;
 	// }
-
+	
 	RosNode::Status s;
-	if(_ros_node_ptr->pause_flag) {
-		std::this_thread::sleep_for(std::chrono::microseconds(5));
-		return;
-		}
+
 	if (_ros_node_ptr == nullptr && !any_arrow_key_pressed)
 		return; // should throw Exception
 	if (!any_arrow_key_pressed)
 		s = _ros_node_ptr->getActions(_actions, _ros_envs_reset, wait_time);
+		
+	if(_ros_node_ptr->pause_flag) {
+		std::this_thread::sleep_for(std::chrono::microseconds(5));
+		return;
+		}		
 	/* do nothing if not message from all agents received */
 	if (!any_arrow_key_pressed && s == RosNode::Status::NOT_ALL_AGENT_MSG_RECEIVED)
 	{
@@ -597,7 +599,7 @@ void Arena::rosUpdate(float wait_time = 0.0f)
 
 		}
 	}
-	_videoDisabled = _ros_node_ptr->pause_flag;
+	
 	if (_SETTINGS->video.enabled && !_videoDisabled)
 	{
 		refreshLevelResetTime();

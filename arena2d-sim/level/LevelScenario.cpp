@@ -50,17 +50,10 @@ void LevelScenario::reset(bool robot_position_reset)
 
 
 	
-	_staticSpawn.addCheeseRect(main_rect, _levelDef.world, COLLIDE_CATEGORY_PLAYER, max_obstacle_radius);
-	_staticSpawn.calculateArea();
+
 
 	// create static obstacles
-	for(int i = 0; i < num_obstacles; i ++){
-		// b2Vec2 p;
-		// _staticSpawn.getRandomPoint(p);
-		// zRect aabb;
-		// addRandomShape(p, min_obstacle_radius, max_obstacle_radius, &aabb);
-        staticObstacleSpawnUntilValid();
-	}
+
    
 
     if (robot_position_reset)
@@ -85,6 +78,9 @@ void LevelScenario::reset(bool robot_position_reset)
         }       
         // calculating goal spawn area
         _goalSpawnArea.calculateArea();
+
+        _staticSpawn.addCheeseRect(main_rect, _levelDef.world, COLLIDE_CATEGORY_PLAYER, max_obstacle_radius);
+        _staticSpawn.calculateArea();        
     }
 
     // dynamic obstacles
@@ -103,11 +99,19 @@ void LevelScenario::reset(bool robot_position_reset)
             _init_reset = false;
         }
 
-        wanderers.reset(_dynamicSpawn, _dynamic, _human);
+        // wanderers.reset(_dynamicSpawn, _dynamic, _human);
     }
-
-    dynamicObstacleSpawnUntilValid();
+    
+	for(int i = 0; i < num_obstacles; i ++){
+        staticObstacleSpawnUntilValid();
+	}
+    ROS_DEBUG("static obstacles created!");   
+	for(int i = 0; i < num_dynamic_obstacles; i ++){
+        dynamicObstacleSpawnUntilValid();
+	}
+    wanderers.resetInfo();
     ROS_DEBUG("dynamic obstacles created!");    
+
     randomGoalSpawnUntilValid();
     ROS_DEBUG("goal spawned");
 }
@@ -391,44 +395,35 @@ void LevelScenario::dynamicObstacleSpawnUntilValid(){
     float resolution = info.resolution;
     b2Vec2 lower_left_pos(-((cols >> 1) - ((cols & 1) ^ 1) / 2.f) * resolution,
                           -((rows >> 1) - ((rows & 1) ^ 1) / 2.f) * resolution);
-	b2Vec2 robot_position = _levelDef.robot->getPosition();        
-	b2Vec2 spawn_position;
 	int count = 0;
     bool occupied;
+    b2Vec2 robot_position = _levelDef.robot->getPosition();   
     b2Vec2 coord;
+    b2Vec2 p;
     int i,j;
 	do{
         occupied=false;
-        wanderers.reset(_dynamicSpawn, _dynamic, _human);        
-        std::vector<float> obstacle_data;
-        if(_dynamic && _human){
-            getRobotAgentsData(obstacle_data);
-            getHumanAgentsData(obstacle_data);
+		_dynamicSpawn.getRandomPoint(p);
+        
+        coord=(p-lower_left_pos);
+        
+        i=floor(coord.y/resolution);
+        j=floor(coord.x/resolution);
+        
+        int point = _occupancy_map.at<uint8>(i, j);
+        if ( point == 255){
+            occupied=true;
         }
-        else if(_dynamic) getRobotAgentsData(obstacle_data);
-        else if(_human) getHumanAgentsData(obstacle_data);
-        else{
-            ROS_INFO("No avaliable flag for Obstacle Check");
-        }
-
-        for(auto k = 0; k < obstacle_data.size();k+=2){
-            spawn_position.x = obstacle_data[k];
-            spawn_position.y = obstacle_data[k+1];
-            coord=(spawn_position-lower_left_pos);
-            
-            i=floor(coord.y/resolution);
-            j=floor(coord.x/resolution);    
-            int point = _occupancy_map.at<uint8>(i, j);
-            if (point == 255){
-                occupied=true;
-            }                    
-        }
+        
 		count++;
-         
-	}while((!checkValidGoalSpawn(robot_position, spawn_position) || occupied) && count < 10000);
+        
+	}while((!checkValidGoalSpawn(robot_position, p) || occupied) && count < 1000);
+    wanderers.resetSingleRandomObstacle(p, _dynamicSpawn, _dynamic, _human);
+
     // If the number of obstacles increases, the counter upper limit also needs to be increased
     // ROS_DEBUG_STREAM("find all dynamic obstacles in freespace  within count "<< count);
     // std::cout<<"find all dynamic obstacles in freespace  within count "<< count << std::endl;
+    // cout << "find dynamic obstacle in freespace  within count"<<count<<"  Position "<<"x="<<p.x<<" y="<<p.y <<endl << endl;
 }
 
 void LevelScenario::staticObstacleSpawnUntilValid(){
@@ -462,7 +457,7 @@ void LevelScenario::staticObstacleSpawnUntilValid(){
 		count++;
         
 	}while((!checkValidGoalSpawn(robot_position, p) || occupied) && count < 1000);
-    // cout << "find static obstacle in freespace  within count"<<count<<"  Position "<<"x="<<p.x<<" y="<<p.y <<endl;
+    // cout << "find static obstacle in freespace  within count"<<count<<"  Position "<<"x="<<p.x<<" y="<<p.y << endl<< endl;
     // ROS_DEBUG_STREAM("find static obstacle in freespace  within count"<<count<<"   Position "<<"x="<<p.x<<" y="<<p.y);
     zRect aabb;
     addRandomShape(p, _SETTINGS->stage.min_obstacle_size/2, _SETTINGS->stage.max_obstacle_size/2, &aabb);	

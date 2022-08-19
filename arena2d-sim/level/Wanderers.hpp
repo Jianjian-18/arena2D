@@ -113,6 +113,11 @@ public:
     void getHumanWandererData(std::vector<float> & data);
 
     std::vector<std::vector<b2Vec2>>& getWaypointsList(){return waypoint_list;}
+
+
+    void resetInfo();
+
+    void resetSingleRandomObstacle(b2Vec2 p, RectSpawn & _dynamicSpawn, bool _dynamic, bool _human);
 private:
     /* calculate distance and angle of all wanderers relativ to the robot
 	 */

@@ -5,7 +5,7 @@
     <arg name="level_name" default="scenario" doc = "level name [empty, random, svg, scenario]"/>
     <arg name="level_mode" default="--dynamic" doc = "[--dynamic --human, --dynamic, --human,  ]"/>    
     <arg name="video_mode" default="--enable-video" doc = "video [--disable-video, --enable-video]"/> 
-    <arg name="num_envs" default="2" doc = "number of environment"/>
+    <arg name="num_envs" default="1" doc = "number of environment"/>
     <!-- robot setting -->
     <arg name="robot_model" default="burger" 
     doc="model type [burger, jackal, agvota, waffle_pi]"/>

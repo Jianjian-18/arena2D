@@ -201,9 +201,68 @@ void Wanderers::reset(RectSpawn & _dynamicSpawn, bool _dynamic, bool _human) {
     calculateDistanceAngle();
     getClosestWanderers();
 
-
-    //std::cout<<"=============Finish reset wanderes"<<std::endl;
 }
+
+void Wanderers::resetSingleRandomObstacle(b2Vec2 p, RectSpawn & _dynamicSpawn, bool _dynamic, bool _human){
+    if (_dynamic) {
+        std::vector<b2Vec2> waypoints={p};
+        int stop_counter_threshold=1;
+        float change_rate=0.5f;
+        float stop_rate=0.05f;
+        Wanderer *w =new Wanderer(_levelDef.world, 
+                                    p,
+                                    _SETTINGS->stage.obstacle_speed,
+                                    WANDERER_ID_ROBOT,
+                                    MODE_RANDOM,
+                                    waypoints,
+                                    stop_counter_threshold,
+                                    change_rate, 
+                                    stop_rate, 
+                                    _SETTINGS->stage.obstacle_angular_max
+                                    );
+        //w->addRobotPepper(_SETTINGS->stage.dynamic_obstacle_size);
+        w->addCircle(_SETTINGS->stage.dynamic_obstacle_size / 2.f);
+        _robot_wanderers.push_back(w);
+    }
+    if(_human){
+                std::vector<b2Vec2> waypoints={p};
+                int stop_counter_threshold=1;
+                float change_rate=0.5f;
+                float stop_rate=0.05f;
+                WandererBipedal *w =new WandererBipedal(_levelDef.world, 
+                                                        p,
+                                                        _SETTINGS->stage.obstacle_speed,
+                                                        WANDERER_ID_HUMAN,
+                                                        MODE_RANDOM,
+                                                        waypoints,
+                                                        stop_counter_threshold,
+                                                        change_rate, 
+                                                        stop_rate, 
+                                                        _SETTINGS->stage.obstacle_angular_max);                                                        
+                w->addRobotPepper(_SETTINGS->stage.dynamic_obstacle_size);
+                _wanderers.push_back(w);
+    }
+}
+
+
+void Wanderers::resetInfo(){
+
+    _old_infos_of_wanderers.clear();
+    _old_observed_wanderers.clear();
+    _infos_of_wanderers.clear();
+    _observed_wanderers.clear();
+    _distance_evaluation.clear();
+
+    if(!_SETTINGS->stage.num_dynamic_obstacles) {
+        freeWanderers();
+        freeRobotWanderers();
+    }
+
+    calculateDistanceAngle();
+    getClosestWanderers();    
+}
+
+
 
 void Wanderers::update(){
     updateHuman();
