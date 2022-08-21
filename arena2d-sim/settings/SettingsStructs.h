@@ -59,7 +59,8 @@ typedef struct
 	float max_obstacle_size;			// maximum diameter of static obstacles
 	float min_obstacle_size;			// minimum diameter of static obstacles
 	int num_obstacles;					// number of static obstacles
-	float dynamic_obstacle_size;		// size of dynamic obstacle
+	float dynamic_obstacle_size;		// maximal size of dynamic obstacle
+	float min_dynamic_obstacle_size;    // minimal size of dynamic obstacle
 	int num_dynamic_obstacles;			// number of dynamic obstacles in static_dynamic level
 	float obstacle_speed;				// in m/s for dynamic obstacles
 	float obstacle_angular_max;			// rad/s for dynamic obstacle

@@ -96,7 +96,8 @@ public:
 	bool checkHumanContact(b2Fixture * other_fixture) override{
 		return wanderers.checkHumanContact(other_fixture);
 	}
-
+	
+	void robotSpawnUntilValid(RectSpawn * goal_spawn = NULL) override;
 	void randomGoalSpawnUntilValid(RectSpawn * goal_spawn = NULL) override;
 
 	/**

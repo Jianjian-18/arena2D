@@ -3,6 +3,7 @@
 
     <!-- arguments for simulator setting -->
     <arg name="level_name" default="scenario" doc = "level name [empty, random, svg, scenario]"/>
+    <param name="level" value="$(arg level_name)"/>
     <arg name="level_mode" default="--dynamic" doc = "[--dynamic --human, --dynamic, --human,  ]"/>    
     <arg name="video_mode" default="--enable-video" doc = "video [--disable-video, --enable-video]"/> 
     <arg name="num_envs" default="4" doc = "number of environment"/>
@@ -22,11 +23,11 @@
 
     <!-- staged task -->
     <!-- load training curriculum for stage mode + set stage mode -->
-    <arg name="stage_mode" default="false" doc = "[true, false]"/> 
-    <param name="stage/stage" value="$(arg stage_mode)" />
-    <group if="$(eval arg('level_name') == 'random')">
-        <group if="$(eval arg('stage_mode') == true)">
-            <rosparam command="load" file = "$(find arena2d)/configs/training_curriculum.yaml" />
+    <arg name="staged_mode" default="false" doc = "[true, false]"/> 
+    <param name="stage/stage" value="$(arg staged_mode)" />
+    <group if="$(eval arg('level_name') == 'scenario')">
+        <group if="$(eval arg('staged_mode') == true)">
+            <rosparam command="load" file = "$(find arena2d)/configs/map1small.yaml" />
         </group>
     </group>
 
@@ -47,10 +48,13 @@
 
 
     <!-- Run the map server -->
-    <arg name="map_file" default="$(find arena2d)/scenario/map_ignc.yaml" 
-    doc = "load rosmap from /scenario" />
+    <arg name="map_file" default="map1_small" doc="[book, ignc, indoor, labor, obs, map1_small]"/>
+    <arg name="map_path" default="$(find arena2d)/scenario/$(arg map_file)/map.yaml" />    
     <node if="$(eval arg('level_name') == 'scenario')"
-    name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+    name="map_server" pkg="map_server" type="map_server" args="$(arg map_path)" />
+
+
+
 
     <!-- load rviz helper, transfer data to rviz -->    
     <!-- <node name="rviz_visualize_helper" 

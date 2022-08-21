@@ -69,12 +69,13 @@ void GlobalSettings::setToDefault()
 	_settings.stage.level_size = 4;
 	_settings.stage.obstacle_speed = 0.08;
 	_settings.stage.obstacle_angular_max = 60.0f;
-	_settings.stage.dynamic_obstacle_size = 0.3;
+	_settings.stage.dynamic_obstacle_size = 0.6;
+	_settings.stage.min_dynamic_obstacle_size = 0.2; 
 	_settings.stage.num_dynamic_obstacles = 4;
 	_settings.stage.max_time_chatting = 50.0f;
 	_settings.stage.num_obstacles = 8;
-	_settings.stage.min_obstacle_size = 0.1;
-	_settings.stage.max_obstacle_size = 1.0;
+	_settings.stage.min_obstacle_size = 0.2;
+	_settings.stage.max_obstacle_size = 0.6;
 	_settings.stage.goal_size = 0.1;
 	_settings.stage.svg_path = "svg_levels/";
 	_settings.stage.scenario_ros_service_name = "/static_map";

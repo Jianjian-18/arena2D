@@ -401,10 +401,7 @@ private:
 	/* set to true if python callback functions are used for training */
 	bool _pyAgentUsed;
 
-	int _cur_stage;
 
-	/* total number of episodes since fit next stage */
-	int _episodeCount_tmp;
 #ifdef ARENA_PYTHON_VERSION_3
 	wchar_t
 #else // old python <= 2.7
@@ -443,6 +440,9 @@ private:
 	bool stage_flag;
 	bool episode_flag;
 	bool curriculum_flag;
+	int _cur_stage;
+	/* total number of episodes since fit next stage */
+	int _episodeCount_tmp;	
 #endif // USE_ROS
 };
 

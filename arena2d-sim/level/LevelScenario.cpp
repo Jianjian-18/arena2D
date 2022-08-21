@@ -56,13 +56,6 @@ void LevelScenario::reset(bool robot_position_reset)
 
    
 
-    if (robot_position_reset)
-    {
-        resetRobotToCenter();
-        // _levelDef.robot->reset(pos, 0);
-        // _levelDef.robot->reset(pos, f_frandomRange(0, 2 * M_PI));
-    }
-
 
     if (_init_reset)
     {
@@ -83,6 +76,15 @@ void LevelScenario::reset(bool robot_position_reset)
         _staticSpawn.calculateArea();        
     }
 
+    if (robot_position_reset)
+    {
+        resetRobotToCenter();
+        // _levelDef.robot->reset(pos, 0);
+        // _levelDef.robot->reset(pos, f_frandomRange(0, 2 * M_PI));
+    }
+    else{
+        robotSpawnUntilValid();
+    }
     // dynamic obstacles
     
     if (_dynamic || _human)
@@ -339,7 +341,47 @@ float LevelScenario::getReward()
 	}
 	return reward;
 }
+void LevelScenario::robotSpawnUntilValid(RectSpawn * goal_spawn)
+{   
+    const auto &info = _occupancygrid_ptr->info;
+    const auto &data = _occupancygrid_ptr->data;
+    uint32 cols = info.width;
+    uint32 rows = info.height;
+    float resolution = info.resolution;
+    b2Vec2 lower_left_pos(-((cols >> 1) - ((cols & 1) ^ 1) / 2.f) * resolution,
+                          -((rows >> 1) - ((rows & 1) ^ 1) / 2.f) * resolution);
 
+    RectSpawn * spawn = &_goalSpawnArea;
+	if(goal_spawn != NULL)// use custom goal spawn
+	{
+		spawn = goal_spawn;
+	}
+	// spawn goal at random position
+	b2Vec2 spawn_position(0,0);
+	int count = 0;
+    bool occupied;
+    b2Vec2 coord;
+    int i,j;
+	do{
+        occupied=false;
+		spawn->getRandomPoint(spawn_position);
+        
+        coord=(spawn_position-lower_left_pos);
+        
+        i=floor(coord.y/resolution);
+        j=floor(coord.x/resolution);
+        
+        int point = _occupancy_map.at<uint8>(i, j);
+        if ( point == 255){
+            occupied=true;
+        }
+        
+		count++;
+        
+	}while((occupied) && count < 100);
+	_levelDef.robot->reset(spawn_position, f_frandomRange(0, 2 * M_PI));
+   
+}
 void LevelScenario::randomGoalSpawnUntilValid(RectSpawn * goal_spawn)
 {   
     const auto &info = _occupancygrid_ptr->info;

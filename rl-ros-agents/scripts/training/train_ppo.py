@@ -15,10 +15,21 @@ import argparse
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 LOGDIR = None
-GAMMA = 0.95
-LEARNING_RATE = 1e-3
+
+GAMMA           = 0.99
+N_STEP          = 4800
+ENT_COEF        = 5e-3 
+LEARNING_RATE   = 3e-3
+VF_COEF         = 0.22
+MAX_GRAD_NORM   = 0.5
+GAE_LAMBDA      = 0.95  # lam
+M_BATCH_SIZE    = 16    # nminibatches
+N_EPOCHS        = 3     # noptepochs
+CLIP_RANGE      = 0.22 
+VERBOSE         = 1
+
+
 N_STEPS = 4
-MAX_GRAD_NORM = 0.1
 
 TIME_STEPS = int(1e8)
 REWARD_BOUND = 130
@@ -40,6 +51,9 @@ def main(log_dir = None,name_results_root_folder = "results",use_reward_bound = 
             logdir = defaul_log_dir
     else:
         logdir = log_dir
+
+
+
     reward_bound = None if not use_reward_bound else reward_bound
     # get arena environments and custom callback
     envs = get_arena_envs(log_dir=logdir)
@@ -47,8 +61,22 @@ def main(log_dir = None,name_results_root_folder = "results",use_reward_bound = 
     # set temporary model path, if training was interrupted by the keyboard, the current model parameters will be saved.
     path_temp_model = os.path.join(logdir,"PPO_TEMP")
     if not args.restart_training:
-        model = PPO2(MlpPolicy, envs, verbose=1, gamma=GAMMA,
-                    tensorboard_log=logdir)
+        model = PPO2(
+            MlpPolicy, 
+            envs, 
+            gamma           = GAMMA,
+            n_step          = N_STEP,
+            ent_coef        = ENT_COEF,
+            learning_rate   = LEARNING_RATE,
+            VF_COEF         = VF_COEF,
+            MAX_GRAD_NORM   = MAX_GRAD_NORM,
+            GAE_LAMBDA      = GAE_LAMBDA,
+            M_BATCH_SIZE    = M_BATCH_SIZE,
+            N_EPOCHS        = N_EPOCHS,
+            CLIP_RANGE      = CLIP_RANGE,
+            tensorboard_log = logdir,
+            verbose         = VERBOSE
+            )
         reset_num_timesteps = True
     else:
         if os.path.exists(path_temp_model+".zip"):
@@ -60,7 +88,12 @@ def main(log_dir = None,name_results_root_folder = "results",use_reward_bound = 
             envs.close()
             exit(-1)
     try:
-        model.learn(time_steps, log_interval=200, callback=call_back,reset_num_timesteps=reset_num_timesteps)
+        model.learn(
+            time_steps, 
+            log_interval=200, 
+            callback=call_back,
+            reset_num_timesteps=reset_num_timesteps)
+
         model.save(os.path.join(logdir, "PPO_final"))
     except KeyboardInterrupt:
         model.save(path_temp_model)

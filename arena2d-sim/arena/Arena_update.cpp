@@ -498,68 +498,73 @@ void Arena::rosUpdate(float wait_time = 0.0f)
 
 
 				// stage mode: update number of obstacle
-				// if success rate over 0.9, then start episode wait: after 100 episode will into next stage
-				// if success rate under 0.7, then directly back to previous stage and episode count reset								
+				// if success rate over 0.9, then get into next stage
+				// if success rate under 0.7, then directly back to previous stage
+				// it can also be added with buffer between stage						
 				float cur_success = _meanSuccess.getMean();
-				string cur_level = _SETTINGS->stage.initial_level;
-				string::size_type idx = cur_level.find("random");
-
-				if((stage_flag) && (idx != string::npos) && (curriculum_flag == false)){
-					int static_obs,dynamic_obs = 0, _epsoide_buffer = 20;
+				string cur_level;
+				ros::param::get("level",cur_level);
+				string::size_type level = cur_level.find("scenario");
+				cout << level << endl;
+				if((stage_flag) && (level != string::npos) && (curriculum_flag == false)){
+					int static_obs,dynamic_obs = 0;
+					// int _epsoide_buffer = 20;
 									
-					if((cur_success >= 0.9) ){
-						if(episode_flag == false){
-							episode_flag = true;
-							_episodeCount_tmp = 0;
-							INFO("Start to count buffer_episode to next stage\n");
+					if(cur_success >= 0.9){
+						// if(episode_flag == false){
+						// 	episode_flag = true;
+						// 	_episodeCount_tmp = 0;
+						// 	INFO("Start to count buffer_episode to next stage\n");
+						// }
+						// else if(_episodeCount_tmp < _epsoide_buffer){
+						// 	++_episodeCount_tmp;
+						// 	INFO_F("Still need %i episode to next stage.", _epsoide_buffer - _episodeCount_tmp);
+						// }
+						// episode_flag = false;
+						// else{
+							// episode_flag = false;
+						_cur_stage += 1;
+						bool flag_static = ros::param::get("/stage_" + to_string(_cur_stage) + "/static", static_obs);
+						bool flag_dynamic = ros::param::get("/stage_" + to_string(_cur_stage) + "/dynamic", dynamic_obs);
+						if(flag_static && flag_dynamic){
+							_SETTINGS->stage.num_obstacles = static_obs;
+							_SETTINGS->stage.num_dynamic_obstacles = dynamic_obs;
+							INFO_F("Next stage is stage_%i with num_static = %i, num_dynamic = %i\n",_cur_stage,static_obs,dynamic_obs);
+							// cout << "stage over, next stage with num_static,num_dynamic: " << _SETTINGS->stage.num_obstacles 
+							// << ", "<< _SETTINGS->stage.num_dynamic_obstacles << endl;
 						}
-						else if(_episodeCount_tmp < _epsoide_buffer){
-							++_episodeCount_tmp;
-							INFO_F("Still need %i episode to next stage.", _epsoide_buffer - _episodeCount_tmp);
-						}
-						else{
-							episode_flag = false;
-							_cur_stage += 1;
-							bool flag_static = ros::param::get("/stage_" + to_string(_cur_stage) + "/static", static_obs);
-							bool flag_dynamic = ros::param::get("/stage_" + to_string(_cur_stage) + "/dynamic", dynamic_obs);
-							if(flag_static && flag_dynamic){
-								_SETTINGS->stage.num_obstacles = static_obs;
-								_SETTINGS->stage.num_dynamic_obstacles = dynamic_obs;
-								INFO_F("Next stage is stage_%i with num_static = %i, num_dynamic = %i\n",_cur_stage,static_obs,dynamic_obs);
-								// cout << "stage over, next stage with num_static,num_dynamic: " << _SETTINGS->stage.num_obstacles 
-								// << ", "<< _SETTINGS->stage.num_dynamic_obstacles << endl;
-							}
-							else{
-								INFO("Already to maximal stage of curriculum!\n");
-								curriculum_flag = true;
-							}						
+						else if(cur_success >= 0.95){
+							char time_buffer[32];
+							Timer::getTimeString(SDL_GetTicks() - _trainingStartTime, time_buffer, 32);
+							INFO_F("Training over. Total training time is %s\n",time_buffer);
+							quit();
 						}						
 					}
-					if((cur_success <= 0.7 && _cur_stage != 1)){
-						if(episode_flag == false){
-								episode_flag = true;
-								_episodeCount_tmp = 0;
-								INFO("Start to count buffer_episode to last stage\n");							
-						}
-						else if(_episodeCount_tmp < _epsoide_buffer){
-							++_episodeCount_tmp;
-							INFO_F("Still need %i episode to last stage.", _epsoide_buffer - _episodeCount_tmp);
-						}
-						else{
-							episode_flag = false;
-							_cur_stage -= 1;
-							bool flag_static = ros::param::get("/stage_" + to_string(_cur_stage) + "/static", static_obs);
-							bool flag_dynamic = ros::param::get("/stage_" + to_string(_cur_stage) + "/dynamic", dynamic_obs);
-							if(flag_static && flag_dynamic){
-								_SETTINGS->stage.num_obstacles = static_obs;
-								_SETTINGS->stage.num_dynamic_obstacles = dynamic_obs;
-								INFO_F("Back to last stage_%i with num_static = %i, num_dynamic = %i\n",_cur_stage,static_obs,dynamic_obs);
-								// cout << "stage over, next stage with num_static,num_dynamic: " << _SETTINGS->stage.num_obstacles 
-								// << ", "<< _SETTINGS->stage.num_dynamic_obstacles << endl;							
-							}				
-						}						
+					else if((cur_success <= 0.7 && _cur_stage != 1)){
+						// if(episode_flag == false){
+						// 		episode_flag = true;
+						// 		_episodeCount_tmp = 0;
+						// 		INFO("Start to count buffer_episode to last stage\n");							
+						// }
+						// else if(_episodeCount_tmp < _epsoide_buffer){
+						// 	++_episodeCount_tmp;
+						// 	INFO_F("Still need %i episode to last stage.", _epsoide_buffer - _episodeCount_tmp);
+						// }
+						// else{
+						// episode_flag = false;
+						_cur_stage -= 1;
+						bool flag_static = ros::param::get("/stage_" + to_string(_cur_stage) + "/static", static_obs);
+						bool flag_dynamic = ros::param::get("/stage_" + to_string(_cur_stage) + "/dynamic", dynamic_obs);
+						if(flag_static && flag_dynamic){
+							_SETTINGS->stage.num_obstacles = static_obs;
+							_SETTINGS->stage.num_dynamic_obstacles = dynamic_obs;
+							INFO_F("Back to last stage_%i with num_static = %i, num_dynamic = %i\n",_cur_stage,static_obs,dynamic_obs);
+							// cout << "stage over, next stage with num_static,num_dynamic: " << _SETTINGS->stage.num_obstacles 
+							// << ", "<< _SETTINGS->stage.num_dynamic_obstacles << endl;							
+						}				
+						// }						
+					}
 				}
-			}
 
 				// scenerio mode: limit number of episode
 				bool scenerio = false;
@@ -569,7 +574,7 @@ void Arena::rosUpdate(float wait_time = 0.0f)
 					if(_episodeCount > scenerio_count){
 						INFO_F("%i evaluations are over",scenerio_count);
 						printEpisodeResults(_envs[i].getTotalReward());
-						exitApplication();
+						quit();
 						// TODO: what should do? store plot/store some information?
 					}
 				}

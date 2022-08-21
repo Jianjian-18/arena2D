@@ -126,6 +126,12 @@ protected:
 		return (robot_pos-spawn_pos).Length() > (_SETTINGS->stage.goal_size/2.f+_levelDef.robot->getRadius());
 	}
 	
+
+	/* spawns robot at a random position in the current goal spawn area
+	 * @param goal_spawn if this parameter is NULL, the member RectSpawn _goalSpawnArea is used for sampling spawn positions,
+	 					 else the RectSpawn pointed to by this parameter is used for sampling
+	 */
+	virtual void robotSpawnUntilValid(RectSpawn * goal_spawn = NULL){};
 	/* spawns goal at a random position in the current goal spawn area
 	 * if the goal position is not valid with respect to the robot_position (see checkValidGoalSpawn()) another random position is sampled and the check is performed again
 	 * this is repeated until a valid position is found
