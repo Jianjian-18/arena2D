@@ -75,8 +75,8 @@ The definitions of the request and response message can be found [here](../arena
 
 1. open a terminal and run the simulator:  
     ```
-    cd ~/ARENA2d_ws;
-    source devel/setup.bash;
+    cd ~/ARENA2d_ws
+    source devel/setup.bash
     roslaunch arena2d arena_sim.launch
     ```
 - Turning the Video on or off have no significant difference in the training speed.
@@ -93,9 +93,9 @@ e.g `roslaunch arena2d arena_sim.launch model:=burger mode:=continuous ...`
 |                   | `stage_mode:=<stage_mode>`       | true, false | Option to execute stage task |
 2. open a new terminal and run the training script:
     ```
-    cd ~/ARENA2d_ws;
-    source devel/setup.bash;
-    cd ~/ARENA2d_ws/src/arena2D/rl-ros-agents;
-    conda activate arena2d;
+    cd ~/ARENA2d_ws
+    source devel/setup.bash
+    cd ~/ARENA2d_ws/src/arena2D/rl-ros-agents
+    conda activate arena2d
     python scripts/training/train_a3c.py
     ```
