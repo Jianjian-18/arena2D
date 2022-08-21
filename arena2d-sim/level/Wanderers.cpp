@@ -49,7 +49,8 @@ void Wanderers::reset(RectSpawn & _dynamicSpawn, bool _dynamic, bool _human) {
                                           _SETTINGS->stage.obstacle_angular_max
                                           );
                 //w->addRobotPepper(_SETTINGS->stage.dynamic_obstacle_size);
-                w->addCircle(_SETTINGS->stage.dynamic_obstacle_size / 2.f);
+		float radius = f_frandomRange(_SETTINGS->stage.min_dynamic_obstacle_size / 2.f, _SETTINGS->stage.dynamic_obstacle_size / 2.f);
+		w->addCircle(radius);
                 _robot_wanderers.push_back(w);
             }
         }
