@@ -55,6 +55,9 @@ def get_arena_envs(use_monitor=True, log_dir=None):
         return SubprocVecEnv([lambda i=i: Monitor(Arena2dEnvWrapper(i), logs_file_names[i]) for i in range(num_envs)])
     return SubprocVecEnv([lambda i=i: Arena2dEnvWrapper(i) for i in range(num_envs)])
 
+
+
+
 class Arena2dEnvWrapper(gym.Env):
     def __init__(self, idx_env, _is_action_space_discrete = robot_mode):
         super().__init__()
@@ -75,7 +78,7 @@ class Arena2dEnvWrapper(gym.Env):
 
         rospy.init_node("arena_ros_agent_env_{:02d}".format(idx_env), anonymous=True, log_level=rospy.INFO)
         self._setSubPub()
-        # self._setService()
+        self._setService()
         # ⭐comment for separate test: arena2d self don't have task generator
 
         # we use this to let main thread know the response is received which is done by another thread
@@ -180,7 +183,6 @@ class Arena2dEnvWrapper(gym.Env):
         # reset environment
         elif env_reset:
             req_msg.env_reset = True
-            # self.service_client()
             # ⭐comment for separate test: arena2d self don't have task generator
         else:
             req_msg.env_reset = False
@@ -204,6 +206,8 @@ class Arena2dEnvWrapper(gym.Env):
                 # req_msg.action.angular = self._action_discrete_map[action_name][1]
         self._ros_agent_pub.publish(req_msg)
         rospy.logdebug("send action")
+        if env_reset:
+            self.service_client()
 
     def _arena2dRespCallback(self, resp: Arena2dResp):
         rospy.logdebug("received response")

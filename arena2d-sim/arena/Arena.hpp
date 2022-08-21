@@ -29,6 +29,7 @@
 #ifdef USE_ROS
 #include "RosNode.hpp"
 #include <ros/ros.h>
+#include <ros/package.h>
 #endif
 
 #include "Evaluation.hpp"
@@ -442,7 +443,6 @@ private:
 	bool stage_flag;
 	bool episode_flag;
 	bool curriculum_flag;
-
 #endif // USE_ROS
 };
 

@@ -18,6 +18,7 @@
 #include "level/Wanderers.hpp"
 #include <std_msgs/String.h>
 #include <std_srvs/Empty.h>
+#include <list>
 class RosNode
 {
     using size_t = unsigned int;
@@ -25,17 +26,17 @@ class RosNode
 private:
     void _publishParams();
     /* callback function for handle ros agent request */
-    void _RosAgentReqCallback(const arena2d_msgs::RosAgentReq::ConstPtr  &action_msg, int idx_action);
+    void _RosAgentReqCallback(const arena2d_msgs::RosAgentReq::ConstPtr &action_msg, int idx_action);
     void _setRosAgentsReqSub();
     void _setArena2dResPub();
 
     /**
      * @description: callback function for subscribe standard /cmd_vel
-     * @param {ConstPtr } &action_msg 
+     * @param {ConstPtr } &action_msg
      * @param {int} index of environment
      * @return {*}
      */
-    void _RosTwistCallback(const geometry_msgs::Twist::ConstPtr  &action_msg, int idx_action);
+    void _RosTwistCallback(const geometry_msgs::Twist::ConstPtr &action_msg, int idx_action);
     void _setTwistSub();
 
     /**
@@ -47,23 +48,23 @@ private:
     /**
      * @description: callback function for services
      * @return {*}
-     */    
-    bool DeleteModelCallback(arena2d_msgs::DeleteModel::Request  &request,
+     */
+    bool DeleteModelCallback(arena2d_msgs::DeleteModel::Request &request,
                              arena2d_msgs::DeleteModel::Response &response);
 
-    bool MoveModelCallback(arena2d_msgs::MoveModel::Request  &request,
+    bool MoveModelCallback(arena2d_msgs::MoveModel::Request &request,
                            arena2d_msgs::MoveModel::Response &response);
 
-    bool SpawnModelCallback(arena2d_msgs::SpawnModel::Request  &request,
+    bool SpawnModelCallback(arena2d_msgs::SpawnModel::Request &request,
                             arena2d_msgs::SpawnModel::Response &response);
 
-    bool SpawnPedestrianCallback(arena2d_msgs::SpawnPeds::Request  &request,
-                                 arena2d_msgs::SpawnPeds::Response &response);    
+    bool SpawnPedestrianCallback(arena2d_msgs::SpawnPeds::Request &request,
+                                 arena2d_msgs::SpawnPeds::Response &response);
 
-    bool PauseCallback(std_srvs::Empty::Request  &request,
+    bool PauseCallback(std_srvs::Empty::Request &request,
                        std_srvs::Empty::Response &response);
-                       
-    bool UnpauseCallback(std_srvs::Empty::Request  &request,
+
+    bool UnpauseCallback(std_srvs::Empty::Request &request,
                          std_srvs::Empty::Response &response);
 
     std::vector<std::unique_ptr<Twist>> m_actions_buffer;
@@ -75,12 +76,11 @@ private:
     std::vector<bool> m_envs_reset;
     bool m_any_env_reset;
     int m_env_close; // number of envs request to close
-    Environment* m_envs;
+    Environment *m_envs;
     // store last velocity
     double last_linear;
     double last_angular;
 
-    
     ros::ServiceServer service_delete;
     ros::ServiceServer service_move;
     ros::ServiceServer service_spawn;
@@ -90,6 +90,9 @@ private:
 
     int last_call_static = -1;
     int last_call_dynamic = -1;
+
+    std::list<int> m_envs_reset_list;
+
 public:
     bool pause_flag = false;
     bool m_env_connected;
@@ -101,16 +104,14 @@ public:
         SIM_CLOSE,
         BAD_MESSAGE
     };
-    RosNode(Environment* envs,int num_envs, int argc, char **argv);
-    RosNode(const RosNode&)=delete;
+    RosNode(Environment *envs, int num_envs, int argc, char **argv);
+    RosNode(const RosNode &) = delete;
     ~RosNode();
     void publishStates(const bool *dones, float mean_reward = 0, float mean_sucess = 0);
-    /*  Synchronize the actions in temporary buffer with the buffer in the class Arena, 
-     *  if return false, Synchronization is not done. it means not all the messages are received 
-     *  
+    /*  Synchronize the actions in temporary buffer with the buffer in the class Arena,
+     *  if return false, Synchronization is not done. it means not all the messages are received
+     *
      */
-    Status getActions(Twist *robot_Twist, bool* ros_envs_reset, float waitTime);
+    Status getActions(Twist *robot_Twist, bool *ros_envs_reset, float waitTime);
     void waitConnection();
-
-
 };

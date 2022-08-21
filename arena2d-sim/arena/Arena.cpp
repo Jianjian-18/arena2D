@@ -930,10 +930,12 @@ void Arena::resize()
 
 
 void Arena::read_action_space_from_yaml(const string& name){
-	string homedir = getenv("HOME");
-	string path = homedir + "/ARENA2d_ws/src/arena2D/arena2d-sim/configs/action_space/default_settings_" + name + ".yaml";
+
+	std::string path = ros::package::getPath("arena2d");
+	path = path + "/configs/action_space/default_settings_" + name + ".yaml";
 	// string path = homedir + "catkin_ws/src/utils/arena-simulation-setup/robot/" + name + "/model_params.yaml";
 	// path for integration
+
 try{
 	YAML::Node action_space = YAML::LoadFile(path);
 		std::vector<discrete_actions> vec = action_space["robot"]["discrete_actions"].as<std::vector<discrete_actions>>();

@@ -1,9 +1,8 @@
 #include "RosNode.hpp"
 
-RosNode::RosNode(Environment *envs, int num_envs, int argc, char **argv) : m_num_envs(num_envs), m_envs(envs)
+RosNode::RosNode(Environment *envs, int num_envs, int argc, char **argv)
+    : m_num_envs(num_envs), m_envs(envs)
 {
-    
-    
     ROS_INFO("Ros node activated, waiting for connections from agents");
     m_env_connected = false;
     m_num_ros_agent_req_msgs_received = 0;
@@ -24,19 +23,23 @@ RosNode::RosNode(Environment *envs, int num_envs, int argc, char **argv) : m_num
     _setRosAgentsReqSub();
     _setArena2dResPub();
     _setRosService();
-    
 }
 RosNode::~RosNode(){};
 
-
-void RosNode::_setRosService(){
-
-        service_delete = m_nh_ptr->advertiseService("delete_model", &RosNode::DeleteModelCallback, this);
-        service_move = m_nh_ptr->advertiseService("move_model", &RosNode::MoveModelCallback, this);
-        service_spawn = m_nh_ptr->advertiseService("spawn_model", &RosNode::SpawnModelCallback, this);
-        service_spawn_pedestrian = m_nh_ptr->advertiseService("spawn_pedestrian", &RosNode::SpawnPedestrianCallback, this);
-        service_pause = m_nh_ptr->advertiseService("pause", &RosNode::PauseCallback, this);
-        service_unpause = m_nh_ptr->advertiseService("unpause", &RosNode::UnpauseCallback, this);
+void RosNode::_setRosService()
+{
+    service_delete = m_nh_ptr->advertiseService(
+        "delete_model", &RosNode::DeleteModelCallback, this);
+    service_move = m_nh_ptr->advertiseService("move_model",
+                                              &RosNode::MoveModelCallback, this);
+    service_spawn = m_nh_ptr->advertiseService(
+        "spawn_model", &RosNode::SpawnModelCallback, this);
+    service_spawn_pedestrian = m_nh_ptr->advertiseService(
+        "spawn_pedestrian", &RosNode::SpawnPedestrianCallback, this);
+    service_pause =
+        m_nh_ptr->advertiseService("pause", &RosNode::PauseCallback, this);
+    service_unpause =
+        m_nh_ptr->advertiseService("unpause", &RosNode::UnpauseCallback, this);
 }
 void RosNode::_publishParams()
 {
@@ -44,10 +47,15 @@ void RosNode::_publishParams()
     string ns = "~settings";
     ros::NodeHandle nh(ns);
     nh.setParam("num_envs", m_num_envs);
-    nh.setParam("action_space_lower_limit", vector<float>{_SETTINGS->robot.backward_speed.linear, _SETTINGS->robot.strong_right_speed.angular});
-    nh.setParam("action_space_upper_limit", vector<float>{_SETTINGS->robot.forward_speed.linear, _SETTINGS->robot.strong_left_speed.angular});
+    nh.setParam("action_space_lower_limit",
+                vector<float>{_SETTINGS->robot.backward_speed.linear,
+                              _SETTINGS->robot.strong_right_speed.angular});
+    nh.setParam("action_space_upper_limit",
+                vector<float>{_SETTINGS->robot.forward_speed.linear,
+                              _SETTINGS->robot.strong_left_speed.angular});
     nh.setParam("observation_space_num_beam", _SETTINGS->robot.laser_num_samples);
-    nh.setParam("observation_space_upper_limit", _SETTINGS->robot.laser_max_distance);
+    nh.setParam("observation_space_upper_limit",
+                _SETTINGS->robot.laser_max_distance);
 }
 
 void RosNode::_setRosAgentsReqSub()
@@ -57,11 +65,9 @@ void RosNode::_setRosAgentsReqSub()
         std::stringstream ss;
         ss << "env_" << i << "/request";
         // set tcp no_delay, to get better performance.
-        m_ros_agent_subs.push_back(m_nh_ptr->subscribe<arena2d_msgs::RosAgentReq>(ss.str(),
-                                                                                    1, 
-                                                                                    boost::bind(&RosNode::_RosAgentReqCallback, this, _1, i),
-                                                                                    ros::VoidConstPtr(), 
-                                                                                    ros::TransportHints().tcpNoDelay()));
+        m_ros_agent_subs.push_back(m_nh_ptr->subscribe<arena2d_msgs::RosAgentReq>(
+            ss.str(), 1, boost::bind(&RosNode::_RosAgentReqCallback, this, _1, i),
+            ros::VoidConstPtr(), ros::TransportHints().tcpNoDelay()));
     }
 }
 
@@ -72,11 +78,9 @@ void RosNode::_setTwistSub()
         std::stringstream ss;
         ss << "env_" << i << "/request_standard";
         // set tcp no_delay, to get better performance.
-        m_ros_agent_subs.push_back(m_nh_ptr->subscribe<geometry_msgs::Twist>(ss.str(),
-                                                                            1, 
-                                                                            boost::bind(&RosNode::_RosTwistCallback, this, _1, i),
-                                                                            ros::VoidConstPtr(), 
-                                                                            ros::TransportHints().tcpNoDelay()));
+        m_ros_agent_subs.push_back(m_nh_ptr->subscribe<geometry_msgs::Twist>(
+            ss.str(), 1, boost::bind(&RosNode::_RosTwistCallback, this, _1, i),
+            ros::VoidConstPtr(), ros::TransportHints().tcpNoDelay()));
     }
 }
 void RosNode::_setArena2dResPub()
@@ -85,13 +89,14 @@ void RosNode::_setArena2dResPub()
     {
         std::stringstream ss;
         ss << "env_" << i << "/response";
-        m_arena2d_pubs.push_back(m_nh_ptr->advertise<arena2d_msgs::Arena2dResp>(ss.str(), 1));
+        m_arena2d_pubs.push_back(
+            m_nh_ptr->advertise<arena2d_msgs::Arena2dResp>(ss.str(), 1));
     }
 }
 
-void RosNode::publishStates(const bool *dones, float mean_reward, float mean_sucess)
+void RosNode::publishStates(const bool *dones, float mean_reward,
+                            float mean_sucess)
 {
-
     for (int idx_env = 0; idx_env < m_num_envs; idx_env++)
     {
         // if any env need reset and not current one just skip.
@@ -107,7 +112,7 @@ void RosNode::publishStates(const bool *dones, float mean_reward, float mean_suc
         {
             resp.observation.ranges.push_back(laser_data[i]);
         }
-   
+
         // set goal position & distance and angle from goal
         float goal_x = 0, goal_y = 0;
         float angle = 0, distance = 0;
@@ -127,24 +132,30 @@ void RosNode::publishStates(const bool *dones, float mean_reward, float mean_suc
         string::size_type idx_robot, idx_human;
         idx_robot = _level.find("dynamic");
         idx_human = _level.find("human");
-        if(idx_robot != string::npos){
+        if (idx_robot != string::npos)
+        {
             std::vector<float> robot_obstacle_data;
             m_envs[idx_env].getRobotObstaclePosition(robot_obstacle_data);
-            for(auto i = 0; i < robot_obstacle_data.size(); i++){
-                resp.robot_obstacle_pos[i] = static_cast<double>(robot_obstacle_data[i]);
-            }            
+            for (auto i = 0; i < robot_obstacle_data.size(); i++)
+            {
+                resp.robot_obstacle_pos[i] =
+                    static_cast<double>(robot_obstacle_data[i]);
+            }
         }
-        if(idx_human != string::npos){
+        if (idx_human != string::npos)
+        {
             std::vector<float> human_obstacle_data;
             m_envs[idx_env].getHumanObstaclePosition(human_obstacle_data);
-            for(auto i = 0; i < human_obstacle_data.size(); i++){
-                resp.human_obstacle_pos[i] = static_cast<double>(human_obstacle_data[i]);
-            }            
-        }        
+            for (auto i = 0; i < human_obstacle_data.size(); i++)
+            {
+                resp.human_obstacle_pos[i] =
+                    static_cast<double>(human_obstacle_data[i]);
+            }
+        }
         // add last_action als response
-        resp.last_action.linear  = last_linear;
+        resp.last_action.linear = last_linear;
         resp.last_action.angular = last_angular;
-        //TODO Whats is additional data? add it and change the msg type if needed
+        // TODO Whats is additional data? add it and change the msg type if needed
 
         resp.reward = m_envs[idx_env].getReward();
         resp.done = dones[idx_env];
@@ -169,7 +180,8 @@ void RosNode::publishStates(const bool *dones, float mean_reward, float mean_suc
     m_num_ros_agent_req_msgs_received = 0;
 }
 
-void RosNode::_RosAgentReqCallback(const arena2d_msgs::RosAgentReq::ConstPtr &req_msg, int idx_env)
+void RosNode::_RosAgentReqCallback(
+    const arena2d_msgs::RosAgentReq::ConstPtr &req_msg, int idx_env)
 {
     if (req_msg->arena2d_sim_close)
     {
@@ -183,7 +195,8 @@ void RosNode::_RosAgentReqCallback(const arena2d_msgs::RosAgentReq::ConstPtr &re
     {
         m_envs_reset[idx_env] = true;
         m_any_env_reset = true;
-        ROS_DEBUG_STREAM("env " << idx_env << " request reset");
+        m_envs_reset_list.push_back(idx_env);
+        ROS_INFO_STREAM("env " << idx_env << " request reset");
     }
     else
     {
@@ -197,7 +210,9 @@ void RosNode::_RosAgentReqCallback(const arena2d_msgs::RosAgentReq::ConstPtr &re
     last_angular = req_msg->action.angular;
 }
 
-void RosNode::_RosTwistCallback(const geometry_msgs::Twist::ConstPtr &req_msg, int idx_env){
+void RosNode::_RosTwistCallback(const geometry_msgs::Twist::ConstPtr &req_msg,
+                                int idx_env)
+{
     m_actions_buffer[idx_env]->linear = req_msg->linear.x;
     m_actions_buffer[idx_env]->angular = req_msg->angular.z;
     m_num_ros_agent_req_msgs_received++;
@@ -205,7 +220,8 @@ void RosNode::_RosTwistCallback(const geometry_msgs::Twist::ConstPtr &req_msg, i
     last_angular = req_msg->angular.z;
 }
 
-RosNode::Status RosNode::getActions(Twist *robot_Twist, bool *ros_envs_reset, float waitTime = 0)
+RosNode::Status RosNode::getActions(Twist *robot_Twist, bool *ros_envs_reset,
+                                    float waitTime = 0)
 {
     ros::getGlobalCallbackQueue()->callAvailable(ros::WallDuration(waitTime));
     if (m_any_env_reset)
@@ -230,7 +246,8 @@ RosNode::Status RosNode::getActions(Twist *robot_Twist, bool *ros_envs_reset, fl
         }
         else if (m_env_close == m_num_envs)
         {
-            return RosNode::Status::SIM_CLOSE; // only all env wrapper requiring close is considered legal
+            return RosNode::Status::SIM_CLOSE; // only all env wrapper requiring
+                                               // close is considered legal
         }
         else
         {
@@ -271,200 +288,194 @@ void RosNode::waitConnection()
     }
 }
 
-bool RosNode:: DeleteModelCallback(arena2d_msgs::DeleteModel::Request  &request,
-                                   arena2d_msgs::DeleteModel::Response &response){
-  ROS_DEBUG_NAMED("Service", "Model delete requested with name(\"%s\")",
-                  request.name.c_str());
-  // current only service for delete "obstacle"
-  try {
-    if(request.name == "all"){
-
-        // _SETTINGS->stage.num_dynamic_obstacles = 0;
-        // _SETTINGS->stage.num_obstacles = 0;
-        // m_envs->reset(false);
-        for (int idx_env = 0; idx_env < m_num_envs; idx_env++)
+bool RosNode::DeleteModelCallback(
+    arena2d_msgs::DeleteModel::Request &request,
+    arena2d_msgs::DeleteModel::Response &response)
+{
+    ROS_DEBUG_NAMED("Service", "Model delete requested with name(\"%s\")",
+                    request.name.c_str());
+    // current only service for delete "obstacle"
+    try
+    {
+        if (request.name == "all")
         {
-            if (m_any_env_reset && !m_envs_reset[idx_env])
+            if (!m_envs_reset_list.empty())
             {
-                cout << "this env don't need delete" << endl;
-                continue;
+                _SETTINGS->stage.num_dynamic_obstacles = 0;
+                _SETTINGS->stage.num_obstacles = 0;
+                int env = m_envs_reset_list.front();
+                m_envs[env].reset(false);
+                // cout << "env: " << env << " be deleted" << endl;
             }
-            _SETTINGS->stage.num_dynamic_obstacles = 0;
-            _SETTINGS->stage.num_obstacles = 0;
-            // m_envs[idx_env].getLevel()->waypointsClear();
-            m_envs[idx_env].reset(false);
+            response.success = true;
+            response.message = "";
         }
-        response.success = true;
-        response.message = "";
+        else
+        {
+            response.success = false;
+            response.message =
+                "Wrong model type for 'delete model', please try again";
+        }
     }
-    else{
+    catch (const std::exception &e)
+    {
         response.success = false;
-        response.message = "Wrong model type for 'delete model', please try again";
+        response.message = std::string(e.what());
     }
-
-  } catch (const std::exception &e) {
-    response.success = false;
-    response.message = std::string(e.what());
-  }    
 
     return true;
 }
 
-bool RosNode:: MoveModelCallback(arena2d_msgs::MoveModel::Request  &request,
-                                 arena2d_msgs::MoveModel::Response &response){
-  ROS_DEBUG_NAMED("Service", "Model move requested with name(\"%s\")",
-                  request.name.c_str());
+bool RosNode::MoveModelCallback(arena2d_msgs::MoveModel::Request &request,
+                                arena2d_msgs::MoveModel::Response &response)
+{
+    ROS_DEBUG_NAMED("Service", "Model move requested with name(\"%s\")",
+                    request.name.c_str());
 
-  // currently only service for move "robot"
-  try {
-    if(request.name == "robot"){
-        b2Vec2 pose;
-        pose.x = request.pose.x;
-        pose.y = request.pose.y;
-        float theta = request.pose.theta;
-        // m_envs->getRobot()->reset(pose, theta);
-
-        for (int idx_env = 0; idx_env < m_num_envs; idx_env++)
+    // currently only service for move "robot"
+    try
+    {
+        if (request.name == "robot")
         {
-            if (m_any_env_reset && !m_envs_reset[idx_env])
+            b2Vec2 pose;
+            pose.x = request.pose.x;
+            pose.y = request.pose.y;
+            float theta = request.pose.theta;
+
+            if (!m_envs_reset_list.empty())
             {
-                cout << "this env don't need move" << endl;
-                continue;
-            }            
-            m_envs[idx_env].getRobot()->reset(pose, theta);
+                int env = m_envs_reset_list.front();
+                m_envs[env].getRobot()->reset(pose, theta);
+                // cout << "env: " << env << " be moved" << endl;
+            }
+
+            response.success = true;
+            response.message = "";
         }
-
-        response.success = true;
-        response.message = "";        
+        else
+        {
+            response.success = false;
+            response.message = "Wrong model type for 'move model', please try again";
+        }
     }
-    else{
+    catch (const std::exception &e)
+    {
         response.success = false;
-        response.message = "Wrong model type for 'move model', please try again";
-    }    
-
-  } catch (const std::exception &e) {
-    response.success = false;
-    response.message = std::string(e.what());
-  }    
+        response.message = std::string(e.what());
+    }
 
     return true;
 }
 
-bool RosNode:: SpawnModelCallback(arena2d_msgs::SpawnModel::Request  &request,
-                                  arena2d_msgs::SpawnModel::Response &response){
-  ROS_DEBUG_NAMED("Service", "Model spawn requested with name(\"%s\")",
-                  request.name.c_str());
+bool RosNode::SpawnModelCallback(arena2d_msgs::SpawnModel::Request &request,
+                                 arena2d_msgs::SpawnModel::Response &response)
+{
+    ROS_DEBUG_NAMED("Service", "Model spawn requested with name(\"%s\")",
+                    request.name.c_str());
 
-  try {
-    // if request name have prefix static, generate a random static obstacle    
-    if(boost::starts_with(request.name,"static")){
-        for (int idx_env = 0; idx_env < m_num_envs; idx_env++)
+    try
+    {
+        // if request name have prefix static, generate a random static obstacle
+        if (boost::starts_with(request.name, "static"))
         {
-            if (m_any_env_reset && !m_envs_reset[idx_env])
+            if (!m_envs_reset_list.empty())
             {
-                cout << "this env don't need spawn static" << endl;
-                continue;
-            }          
+                _SETTINGS->stage.num_obstacles++;
+                _SETTINGS->stage.min_obstacle_size = request.min_radius;
+                _SETTINGS->stage.max_obstacle_size = request.max_radius;
+                int env = m_envs_reset_list.front();
+                m_envs[env].reset(false);
+                _SETTINGS->stage.num_obstacles--;
+                // cout << "env: " << env << " spawn a static obscale" << endl;
+            }
             _SETTINGS->stage.num_obstacles++;
-            _SETTINGS->stage.min_obstacle_size = request.min_radius;
-            _SETTINGS->stage.max_obstacle_size = request.max_radius;
-            m_envs[idx_env].reset(false);
-            _SETTINGS->stage.num_obstacles--;
-        }
-        _SETTINGS->stage.num_obstacles++;
 
-        // _SETTINGS->stage.num_obstacles++;
-        // _SETTINGS->stage.min_obstacle_size = request.min_radius;
-        // _SETTINGS->stage.max_obstacle_size = request.max_radius;
-        // m_envs->reset(false);        
-        response.success = true;
-        response.message = "";        
+            response.success = true;
+            response.message = "";
+        }
+        // if request name have prefix dynamic, generate a random dynamic obstacle
+        else if (boost::starts_with(request.name, "dynamic"))
+        {
+            if (!m_envs_reset_list.empty())
+            {
+                _SETTINGS->stage.num_dynamic_obstacles++;
+                _SETTINGS->stage.dynamic_obstacle_size = request.min_radius;
+                _SETTINGS->stage.obstacle_speed = request.linear_vel;
+                _SETTINGS->stage.obstacle_angular_max = request.angular_vel_max;
+                int env = m_envs_reset_list.front();
+                m_envs[env].reset(false);
+                _SETTINGS->stage.num_dynamic_obstacles--;
+                // cout << "env: " << env << " spawn a dynamic obscale" << endl;
+            }
+            _SETTINGS->stage.num_dynamic_obstacles++;
+            response.success = true;
+            response.message = "";
+        }
+        else
+        {
+            response.success = false;
+            response.message = "Wrong model type for 'spawn model', please try again";
+        }
+        // current only service for delete obstacle
     }
-    // if request name have prefix dynamic, generate a random dynamic obstacle
-    else if(boost::starts_with(request.name,"dynamic")){
+    catch (const std::exception &e)
+    {
+        response.success = false;
+        response.message = std::string(e.what());
+    }
+
+    return true;
+}
+
+// generate pedestrian in waypoint mode -- Deserted for training
+bool RosNode::SpawnPedestrianCallback(
+    arena2d_msgs::SpawnPeds::Request &request,
+    arena2d_msgs::SpawnPeds::Response &response)
+{
+    try
+    {
+        std::vector<b2Vec2> waypoints;
+        b2Vec2 p;
+        for (std::vector<geometry_msgs::Point>::iterator it =
+                 request.waypoints.begin();
+             it != request.waypoints.end(); ++it)
+        {
+            cout << "waypoint is " << it->x << ", " << it->y << endl;
+            p.x = it->x;
+            p.y = it->y;
+            waypoints.push_back(p);
+        }
         for (int idx_env = 0; idx_env < m_num_envs; idx_env++)
         {
-            if (m_any_env_reset && !m_envs_reset[idx_env])
-            {
-                cout << "this env don't need spawn dynamic" << endl;
-                continue;
-            }             
+            m_envs[idx_env].getLevel()->waypointsStore(waypoints);
             _SETTINGS->stage.num_dynamic_obstacles++;
-            _SETTINGS->stage.dynamic_obstacle_size = request.min_radius;
-            _SETTINGS->stage.obstacle_speed = request.linear_vel;
-            _SETTINGS->stage.obstacle_angular_max = request.angular_vel_max;
             m_envs[idx_env].reset(false);
             _SETTINGS->stage.num_dynamic_obstacles--;
         }
         _SETTINGS->stage.num_dynamic_obstacles++;
-
-        // _SETTINGS->stage.num_dynamic_obstacles++;
-        // _SETTINGS->stage.dynamic_obstacle_size = request.min_radius;
-        // _SETTINGS->stage.obstacle_speed = request.linear_vel;
-        // _SETTINGS->stage.obstacle_angular_max = request.angular_vel_max;
-        // m_envs->reset(false);        
         response.success = true;
-        response.message = "";          
+        response.message = "";
     }
-    else{
-        response.success = false;
-        response.message = "Wrong model type for 'spawn model', please try again";        
-    }
-    // current only service for delete obstacle
-
-  } catch (const std::exception &e) {
-    response.success = false;
-    response.message = std::string(e.what());
-  }    
-
-    return true;
-}
-
-// generate pedestrian in waypoint mode
-bool RosNode:: SpawnPedestrianCallback(arena2d_msgs::SpawnPeds::Request  &request,
-                                       arena2d_msgs::SpawnPeds::Response &response){
-
-
-  try {
-    std::vector<b2Vec2> waypoints;
-    b2Vec2 p;
-    for(std::vector<geometry_msgs::Point>::iterator it = request.waypoints.begin(); it != request.waypoints.end(); ++it){
-    cout << "waypoint is " << it->x << ", " << it-> y << endl;
-    p.x = it->x;
-    p.y = it->y;
-    waypoints.push_back(p);
-    }
-    for (int idx_env = 0; idx_env < m_num_envs; idx_env++)
+    catch (const std::exception &e)
     {
-        m_envs[idx_env].getLevel()->waypointsStore(waypoints);
-        _SETTINGS->stage.num_dynamic_obstacles++;
-        m_envs[idx_env].reset(false);
-        _SETTINGS->stage.num_dynamic_obstacles--;
+        response.success = false;
+        response.message = std::string(e.what());
     }
-    _SETTINGS->stage.num_dynamic_obstacles++;    
-    response.success = true;
-    response.message = "";
-    
-  } catch (const std::exception &e) {
-    response.success = false;
-    response.message = std::string(e.what());
-  }    
 
     return true;
 }
 
-bool RosNode:: PauseCallback(std_srvs::Empty::Request  &request,
-                             std_srvs::Empty::Response &response){
-
+bool RosNode::PauseCallback(std_srvs::Empty::Request &request,
+                            std_srvs::Empty::Response &response)
+{
     pause_flag = true;
-
     return true;
 }
 
-bool RosNode:: UnpauseCallback(std_srvs::Empty::Request  &request,
-                             std_srvs::Empty::Response &response){
-
+bool RosNode::UnpauseCallback(std_srvs::Empty::Request &request,
+                              std_srvs::Empty::Response &response)
+{
+    m_envs_reset_list.pop_front();
     pause_flag = false;
-
     return true;
 }
