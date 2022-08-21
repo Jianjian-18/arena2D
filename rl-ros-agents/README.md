@@ -34,7 +34,7 @@ The definitions of the request and response message can be found [here](../arena
     Compile the code and add the workspace to the ROS environment with:
     ```
     $ cd ~/ARENA2d_ws/src
-    $ git clone https://github.com/ignc-research/arena2D.git # this repository
+    $ git clone https://github.com/ignc-research/arena2D.git
     $ cd ~/ARENA2d_ws/src/arena2D/rl-ros-agents
     $ conda env create -f environment.yml
     $ cd ~/ARENA2d_ws
@@ -69,46 +69,15 @@ The definitions of the request and response message can be found [here](../arena
    $ export PYTHONPATH=$PYTHONPATH:/usr/lib/python3/dist-packages # copy this in the bottom, then use wq! to quit
    $ source ~/.bashrc
    ```
-
-3. Make sure rl_ros_agents and further dependences is included in the PYTHONPATH.
-    ```
-    $ vim ~/.bashrc
-    $ export PYTHONPATH=~/ARENA2d_ws/src/arena2D/rl-ros-agents:${PYTHONPATH} # copy this in the bottom, then use wq! to quit
-    $ source ~/.bashrc
-    ```
 	You can check if your pythonpath is correct by using `echo $PYTHONPATH`.
-  
-## Additional work (not necessary)
-Offically ros packages are only built for python2. In some cases mixing useage of python3 with python2 may cause problems. Therefore we recommended building two more packages specifically.
-1. Create a python3 workspace:
-    ```bash
-    $ mkdir -p ~/python3_ws/src
-    $ cd ~/python3_ws/src
-    $ git clone --depth=1 https://github.com/ros/geometry.git
-    $ git clone --depth=1 https://github.com/ros/geometry2.git
-    ``` 
-2. When this README document is created, there is a duplicate name error. If you have the same issue, please solve it 
-refer to the methods introduced [here](https://github.com/ros/geometry/issues/213#issuecomment-643552794)
-3. Activate your virtual environment. e.g
-    ```bash
-    $ conda activate arena2d
-    ```
-4. complile the workspace:
-    ```bash
-    $ catkin_make -DPYTHON_EXECUTABLE:FILEPATH=$(which python)
-    ```
-5. append following command to the `.bashrc`file under your HOME folder.
-    ```bash
-    $ source ~/python3_ws/devel/setup.bash
-    ```
 
 ## Training
 
 1. open a terminal and run the simulator:  
     ```
-    $ cd ~/ARENA2d_ws
-    $ source devel/setup.bash
-    $ roslaunch arena2d arena_sim.launch
+    cd ~/ARENA2d_ws;
+    source devel/setup.bash;
+    roslaunch arena2d arena_sim.launch
     ```
 - Turning the Video on or off have no significant difference in the training speed.
 
@@ -124,9 +93,9 @@ e.g `roslaunch arena2d arena_sim.launch model:=burger mode:=continuous ...`
 |                   | `stage_mode:=<stage_mode>`       | true, false | Option to execute stage task |
 2. open a new terminal and run the training script:
     ```
-    $ cd ~/ARENA2d_ws
-    $ source devel/setup.bash
-    $ cd ~/ARENA2d_ws/src/arena2D/rl-ros-agents
-    $ conda activate arena2d
-    $ python scripts/training/train_a3c.py
+    cd ~/ARENA2d_ws;
+    source devel/setup.bash;
+    cd ~/ARENA2d_ws/src/arena2D/rl-ros-agents;
+    conda activate arena2d;
+    python scripts/training/train_a3c.py
     ```
