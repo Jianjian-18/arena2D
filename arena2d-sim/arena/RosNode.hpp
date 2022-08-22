@@ -92,7 +92,7 @@ private:
     int last_call_dynamic = -1;
 
     std::list<int> m_envs_reset_list;
-
+    const float rad_to_deg_constant = 57.29578;
 public:
     bool pause_flag = false;
     bool m_env_connected;
