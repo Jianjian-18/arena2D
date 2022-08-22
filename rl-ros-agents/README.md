@@ -77,7 +77,7 @@ The definitions of the request and response message can be found [here](../arena
     ```
     cd ~/ARENA2d_ws
     source devel/setup.bash
-    roslaunch arena2d arena_sim.launch
+    roslaunch arena2d arena2d_simulator.launch
     ```
 - Turning the Video on or off have no significant difference in the training speed.
 
@@ -97,5 +97,5 @@ e.g `roslaunch arena2d arena_sim.launch model:=burger mode:=continuous ...`
     source devel/setup.bash
     cd ~/ARENA2d_ws/src/arena2D/rl-ros-agents
     conda activate arena2d
-    python scripts/training/train_a3c.py
+    python scripts/training/train_ppo.py
     ```
