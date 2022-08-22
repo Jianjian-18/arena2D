@@ -362,9 +362,11 @@ void LevelScenario::randomGoalSpawnUntilValid(RectSpawn * goal_spawn)
 	b2Vec2 spawn_position(0,0);
 	int count = 0;
     bool occupied;
+    bool point_out;
     b2Vec2 coord;
     int i,j;
 	do{
+        point_out = false;
         occupied=false;
 		spawn->getRandomPoint(spawn_position);
         
@@ -372,9 +374,9 @@ void LevelScenario::randomGoalSpawnUntilValid(RectSpawn * goal_spawn)
         
         i=floor(coord.y/resolution);
         j=floor(coord.x/resolution);
-        
+        if(i < 0 || i > rows || j < 0 || j > cols) point_out = true;
         int point = _occupancy_map.at<uint8>(i, j);
-        if ( point == 255){
+        if ( point == 255 || point_out){
             occupied=true;
         }
         
