@@ -21,7 +21,12 @@ class SaveOnBestTrainingRewardCallback(BaseCallback):
 
     """
 
-    def __init__(self, check_freq: int, log_dir: str, verbose=1, reward_bound: Union[int, None] = None):
+    def __init__(self, 
+                check_freq: int, 
+                log_dir: str, 
+                verbose=1, 
+                reward_bound: Union[int, None] = None):
+                
         super(SaveOnBestTrainingRewardCallback, self).__init__(verbose)
         self.check_freq = check_freq
         self.log_dir = log_dir

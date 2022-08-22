@@ -191,12 +191,12 @@ void RosNode::_RosAgentReqCallback(
         }
         m_env_close += 1;
     }
-    if (req_msg->env_reset == 1)
+    if (req_msg->env_reset == 1 )
     {
         m_envs_reset[idx_env] = true;
         m_any_env_reset = true;
         m_envs_reset_list.push_back(idx_env);
-        ROS_INFO_STREAM("env " << idx_env << " request reset");
+        ROS_DEBUG_STREAM("env " << idx_env << " request reset");
     }
     else
     {

@@ -130,7 +130,6 @@ class Arena2dEnvWrapper(gym.Env):
 
     def reset(self):
         self._pubRosAgentReq(env_reset=True)
-        
         error_showed = False
         with self.response_con:
             while not self.resp_received:
@@ -227,12 +226,12 @@ class Arena2dEnvWrapper(gym.Env):
 if __name__ == "__main__":
     # comment out rospy.init_node in the class Arena2dEnv for the test!!!!!!!!!
     rospy.init_node("test")
-    def test_step(idx_env):
-        env = Arena2dEnvWrapper(idx_env)
-        action = [2, 0]
-        _, reward, _, _ = env.step(action)
-        # env.reset()
-        print("env: {:d} reward {}".format(idx_env, reward))
-    for i in range(4):
-        t = threading.Thread(target=test_step, args=(i,))
-        t.start()
+    # def test_step(idx_env):
+    #     env = Arena2dEnvWrapper(idx_env)
+    #     action = [2, 0]
+    #     _, reward, _, _ = env.step(action)
+    #     # env.reset()
+    #     print("env: {:d} reward {}".format(idx_env, reward))
+    # for i in range(4):
+    #     t = threading.Thread(target=test_step, args=(i,))
+    #     t.start()

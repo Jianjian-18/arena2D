@@ -382,6 +382,7 @@ void LevelScenario::robotSpawnUntilValid(RectSpawn * goal_spawn)
 	_levelDef.robot->reset(spawn_position, f_frandomRange(0, 2 * M_PI));
    
 }
+
 void LevelScenario::randomGoalSpawnUntilValid(RectSpawn * goal_spawn)
 {   
     const auto &info = _occupancygrid_ptr->info;
@@ -422,8 +423,8 @@ void LevelScenario::randomGoalSpawnUntilValid(RectSpawn * goal_spawn)
         
 		count++;
         
-	}while((!checkValidGoalSpawn(robot_position, spawn_position) || occupied) && count < 100);
-    // cout << "find goal in freespace  within count"<<count<<"   Position "<<"x="<<spawn_position.x<<" y="<<spawn_position.y <<endl;
+	}while((!checkValidGoalSpawn(robot_position, spawn_position) || occupied) && count < 1000);
+    cout << "find goal in freespace  within count"<<count<<"   Position "<<"x="<<spawn_position.x<<" y="<<spawn_position.y <<endl;
     // ROS_DEBUG_STREAM("find goal in freespace  within count"<<count<<"   Position "<<"x="<<spawn_position.x<<" y="<<spawn_position.y);
 	spawnGoal(spawn_position);
    
@@ -504,10 +505,6 @@ void LevelScenario::staticObstacleSpawnUntilValid(){
     zRect aabb;
     addRandomShape(p, _SETTINGS->stage.min_obstacle_size/2, _SETTINGS->stage.max_obstacle_size/2, &aabb);	
 }
-
-
-
-
 
 void LevelScenario::waypointsStore(std::vector<b2Vec2> waypoints){
     wanderers.getWaypointsList().push_back(waypoints);
