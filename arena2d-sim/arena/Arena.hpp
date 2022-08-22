@@ -400,8 +400,6 @@ private:
 
 	/* set to true if python callback functions are used for training */
 	bool _pyAgentUsed;
-
-
 #ifdef ARENA_PYTHON_VERSION_3
 	wchar_t
 #else // old python <= 2.7

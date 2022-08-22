@@ -505,7 +505,6 @@ void Arena::rosUpdate(float wait_time = 0.0f)
 				string cur_level;
 				ros::param::get("level",cur_level);
 				string::size_type level = cur_level.find("scenario");
-				cout << level << endl;
 				if((stage_flag) && (level != string::npos) && (curriculum_flag == false)){
 					int static_obs,dynamic_obs = 0;
 					// int _epsoide_buffer = 20;

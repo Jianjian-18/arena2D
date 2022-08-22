@@ -360,9 +360,11 @@ void LevelScenario::robotSpawnUntilValid(RectSpawn * goal_spawn)
 	b2Vec2 spawn_position(0,0);
 	int count = 0;
     bool occupied;
+    bool point_out;
     b2Vec2 coord;
     int i,j;
 	do{
+        point_out = false;
         occupied=false;
 		spawn->getRandomPoint(spawn_position);
         
@@ -370,9 +372,9 @@ void LevelScenario::robotSpawnUntilValid(RectSpawn * goal_spawn)
         
         i=floor(coord.y/resolution);
         j=floor(coord.x/resolution);
-        
+        if(i < 0 || i > rows || j < 0 || j > cols) point_out = true;
         int point = _occupancy_map.at<uint8>(i, j);
-        if ( point == 255){
+        if ( point == 255 || point_out){
             occupied=true;
         }
         
@@ -393,7 +395,7 @@ void LevelScenario::randomGoalSpawnUntilValid(RectSpawn * goal_spawn)
     b2Vec2 lower_left_pos(-((cols >> 1) - ((cols & 1) ^ 1) / 2.f) * resolution,
                           -((rows >> 1) - ((rows & 1) ^ 1) / 2.f) * resolution);
 
-
+    
     RectSpawn * spawn = &_goalSpawnArea;
 	if(goal_spawn != NULL)// use custom goal spawn
 	{
@@ -405,9 +407,11 @@ void LevelScenario::randomGoalSpawnUntilValid(RectSpawn * goal_spawn)
 	b2Vec2 spawn_position(0,0);
 	int count = 0;
     bool occupied;
+    bool point_out;
     b2Vec2 coord;
     int i,j;
 	do{
+        point_out = false;
         occupied=false;
 		spawn->getRandomPoint(spawn_position);
         
@@ -416,15 +420,16 @@ void LevelScenario::randomGoalSpawnUntilValid(RectSpawn * goal_spawn)
         i=floor(coord.y/resolution);
         j=floor(coord.x/resolution);
         
+        if(i < 0 || i > rows || j < 0 || j > cols) point_out = true;
         int point = _occupancy_map.at<uint8>(i, j);
-        if ( point == 255){
+        if (point == 255 || point_out){
             occupied=true;
         }
         
 		count++;
         
-	}while((!checkValidGoalSpawn(robot_position, spawn_position) || occupied) && count < 1000);
-    cout << "find goal in freespace  within count"<<count<<"   Position "<<"x="<<spawn_position.x<<" y="<<spawn_position.y <<endl;
+	}while((!checkValidGoalSpawn(robot_position, spawn_position) || occupied) && count < 100);
+    // cout << "find goal in freespace  within count"<<count<<"   Position "<<"x="<<spawn_position.x<<" y="<<spawn_position.y <<endl;
     // ROS_DEBUG_STREAM("find goal in freespace  within count"<<count<<"   Position "<<"x="<<spawn_position.x<<" y="<<spawn_position.y);
 	spawnGoal(spawn_position);
    

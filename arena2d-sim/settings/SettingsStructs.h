@@ -63,7 +63,7 @@ typedef struct
 	float min_dynamic_obstacle_size;    // minimal size of dynamic obstacle
 	int num_dynamic_obstacles;			// number of dynamic obstacles in static_dynamic level
 	float obstacle_speed;				// in m/s for dynamic obstacles
-	float obstacle_angular_max;			// rad/s for dynamic obstacle
+	float obstacle_angular_max;			// deg/s for dynamic obstacle
 	float max_time_chatting;	// maximum time for chatting between two wanderers
 	float goal_size;					// diameter of circular goal to reach
 	string svg_path;					// path to folder where svg files are stored
