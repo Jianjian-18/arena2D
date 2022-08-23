@@ -71,22 +71,30 @@ void LevelScenario::reset(bool robot_position_reset)
         }       
         // calculating goal spawn area
         _goalSpawnArea.calculateArea();
-
+        ROS_INFO("calculating the respawn area for static obstacles...");
         _staticSpawn.addCheeseRect(main_rect, _levelDef.world, COLLIDE_CATEGORY_PLAYER, max_obstacle_radius);
         _staticSpawn.calculateArea();        
+        ROS_INFO("calculation the respawn area for static obstacles is done");
     }
 
-    if (robot_position_reset)
-    {
-        resetRobotToCenter();
-        // _levelDef.robot->reset(pos, 0);
-        // _levelDef.robot->reset(pos, f_frandomRange(0, 2 * M_PI));
-    }
-    else{
-        robotSpawnUntilValid();
-    }
+    // if (robot_position_reset)
+    // {
+    //     resetRobotToCenter();
+    //     // _levelDef.robot->reset(pos, 0);
+    //     // _levelDef.robot->reset(pos, f_frandomRange(0, 2 * M_PI));
+    // }
+    // else{
+    //     robotSpawnUntilValid();
+    // }
+
+    //random reset robot
+    robotSpawnUntilValid();
+        
     // dynamic obstacles
-    
+	for(int i = 0; i < num_obstacles; i ++){
+        staticObstacleSpawnUntilValid();
+	}
+    ROS_DEBUG("static obstacles created!");   
     if (_dynamic || _human)
     {
         if (_init_reset)
@@ -100,20 +108,13 @@ void LevelScenario::reset(bool robot_position_reset)
             ROS_INFO("calculation the respawn area for dynamic obstacles is done");
             _init_reset = false;
         }
-
+        for(int i = 0; i < num_dynamic_obstacles; i ++){
+            dynamicObstacleSpawnUntilValid();
+        }
+        wanderers.resetInfo();       
+        ROS_DEBUG("dynamic obstacles created!");             
         // wanderers.reset(_dynamicSpawn, _dynamic, _human);
     }
-    
-	for(int i = 0; i < num_obstacles; i ++){
-        staticObstacleSpawnUntilValid();
-	}
-    ROS_DEBUG("static obstacles created!");   
-	for(int i = 0; i < num_dynamic_obstacles; i ++){
-        dynamicObstacleSpawnUntilValid();
-	}
-    wanderers.resetInfo();
-    ROS_DEBUG("dynamic obstacles created!");    
-
     randomGoalSpawnUntilValid();
     ROS_DEBUG("goal spawned");
 }

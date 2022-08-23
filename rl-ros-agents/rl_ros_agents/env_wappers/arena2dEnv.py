@@ -104,7 +104,9 @@ class Arena2dEnvWrapper(gym.Env):
         obervation_space_upper_limit = rospy.get_param(NS_SETTING + "observation_space_upper_limit")
         if not self._is_action_space_discrete:
             self.action_space = spaces.Box(low=lower_limit,
-                                           high=upper_limit * 3, dtype=np.float)
+                                           high=upper_limit, dtype=np.float)
+                                        #    high=upper_limit * 3, dtype=np.float)                                           
+        # ⭐why hier *3 
         else:
             self.action_space = spaces.Discrete(len(self._action_discrete_list))
             

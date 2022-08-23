@@ -32,7 +32,7 @@ VERBOSE         = 1
 
 TIME_STEPS = int(1e8)
 REWARD_BOUND = 130
-use_reward_bound = True
+use_reward_bound = False
 
 
 def main(log_dir = None,

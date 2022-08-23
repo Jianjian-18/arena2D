@@ -5,8 +5,8 @@
     <arg name="level_name" default="scenario" doc = "level name [empty, random, svg, scenario]"/>
     <param name="level" value="$(arg level_name)"/>
     <arg name="level_mode" default="--dynamic" doc = "[--dynamic --human, --dynamic, --human,  ]"/>    
-    <arg name="video_mode" default="--enable-video" doc = "video [--disable-video, --enable-video]"/> 
-    <arg name="num_envs" default="9" doc = "number of environment"/>
+    <arg name="video_mode" default="--disable-video" doc = "video [--disable-video, --enable-video]"/> 
+    <arg name="num_envs" default="12" doc = "number of environment"/>
     <!-- robot setting -->
     <arg name="robot_model" default="burger" 
     doc="model type [burger, jackal, agvota, waffle_pi]"/>
@@ -72,6 +72,11 @@
 
     <node name="arena_sim" pkg="arena2d" type="arena2d" output="screen" 
     args="--use_ros_agent $(arg video_mode) --num_envs $(arg num_envs) --run &quot;level $(arg level_name) $(arg level_mode) &quot;"/>
+
+    <!-- launch arena2d server for detect memory leak-->
+    
+
+
 
 
 </launch>

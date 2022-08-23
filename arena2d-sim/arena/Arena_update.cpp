@@ -361,7 +361,7 @@ void Arena::update()
 
 // #ifdef USE_ROS
 void Arena::rosUpdate(float wait_time = 0.0f)
-{	_videoDisabled = _ros_node_ptr->pause_flag;
+{
 	bool any_arrow_key_pressed = false;
 	if (_keysPressed[UP] || _keysPressed[DOWN] || _keysPressed[LEFT] || _keysPressed[RIGHT])
 	{
@@ -502,7 +502,7 @@ void Arena::rosUpdate(float wait_time = 0.0f)
 				// if success rate under 0.7, then directly back to previous stage
 				// it can also be added with buffer between stage						
 				float cur_success = _meanSuccess.getMean();
-				string cur_level;
+				string cur_level = "";
 				ros::param::get("level",cur_level);
 				string::size_type level = cur_level.find("scenario");
 				if((stage_flag) && (level != string::npos) && (curriculum_flag == false)){
