@@ -401,7 +401,7 @@ int Arena::init(int argc, char **argv)
 				_envs-=_numEnvs;
 			}
 		}
-		string robot_model;
+		string robot_model = "";
 		ros::param::get("/model",robot_model);
 		read_action_space_from_yaml(robot_model);
 	}
@@ -544,10 +544,10 @@ void Arena::quit()
 
 	// shutting down environment threads
 	delete[] _threads;
-
+	delete[] (_envs);
 	delete[](_actions);
 	delete[](_dones);
-
+	delete[](_ros_envs_reset);
 	/* shutting down python interpreter */
 
 	if (_trainingMode)

@@ -84,7 +84,10 @@ void LevelScenario::reset(bool robot_position_reset)
     }
 
     // dynamic obstacles
-    
+    for(int i = 0; i < num_obstacles; i ++){
+    staticObstacleSpawnUntilValid();
+    }
+    ROS_DEBUG("static obstacles created!");   
     if (_dynamic || _human)
     {
         if (_init_reset)
@@ -98,20 +101,14 @@ void LevelScenario::reset(bool robot_position_reset)
             ROS_INFO("calculation the respawn area for dynamic obstacles is done");
             _init_reset = false;
         }
-
+        for(int i = 0; i < num_dynamic_obstacles; i ++){
+            dynamicObstacleSpawnUntilValid();
+        }
+        wanderers.resetInfo();
+        ROS_DEBUG("dynamic obstacles created!");    
         // wanderers.reset(_dynamicSpawn, _dynamic, _human);
     }
     
-	for(int i = 0; i < num_obstacles; i ++){
-        staticObstacleSpawnUntilValid();
-	}
-    ROS_DEBUG("static obstacles created!");   
-	for(int i = 0; i < num_dynamic_obstacles; i ++){
-        dynamicObstacleSpawnUntilValid();
-	}
-    wanderers.resetInfo();
-    ROS_DEBUG("dynamic obstacles created!");    
-
     randomGoalSpawnUntilValid();
     ROS_DEBUG("goal spawned");
 }
