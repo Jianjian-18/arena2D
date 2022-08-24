@@ -181,7 +181,6 @@ void Arena::update()
 				// adding success value to success buffer
 				_meanSuccess.push((s == Environment::POSITIVE_END) ? 1 : 0);
 				_meanSuccess.calculateMean();
-				cout <<"try to find successrate: -1 "<< _meanSuccess.getMean() << endl;
 				
 				// adding reward to total reward buffer
 				_meanReward.push(_envs[i].getTotalReward());
@@ -581,6 +580,10 @@ void Arena::rosUpdate(float wait_time = 0.0f)
 				
 				// show results
 				printEpisodeResults(_envs[i].getTotalReward());
+				if(stage_flag){
+					INFO_F("  Current Stage is: %i",_cur_stage);
+				}
+
 				episode_over = true;
 				over_env = i;
 				// if key pressed reset environment immediately
