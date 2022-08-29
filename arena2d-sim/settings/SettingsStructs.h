@@ -87,6 +87,7 @@ typedef struct
 	float safety_distance_human; // safty distance to human, which should be always fullfilled
 	float reward_distance_to_human_decreased; // reward when distance to human decreases
 	float reward_distance_to_human_increased; // reward when distance to human increases
+	float reward_safe_dist;		 // reward when too close to wanderers	
 	int num_obs_humans; // maximum number of humans the agent can observe inside the camera view
 	int reward_function; // choose between different reward functions (1 = distance rewards only for observed humans, 2 = distance rewards for all humans in level)
 } f_trainingSettings;

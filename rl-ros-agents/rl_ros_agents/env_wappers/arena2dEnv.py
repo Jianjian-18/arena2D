@@ -15,19 +15,21 @@ from rosparam import upload_params
 from yaml import load, safe_load
 import rospkg
 from std_srvs.srv import Empty, EmptyResponse
+import sys
 # namespace of arena settings
 NS_SETTING = "/arena_sim/settings/"
-HOLONOMIC = "/robot/holonomic/"
-CONTINUOUS_ACTION = "/robot/continuous_actions/"
-DISCRETE_ACTION = "/robot/discrete_actions/"
+HOLONOMIC = "/is_holonomic/"
+CONTINUOUS_ACTION = "/actions/continuous/"
+DISCRETE_ACTION = "/actions/discrete/"
 # OBSERVATION = "/plugins/"
 robot_model = rospy.get_param('model')
 robot_mode = rospy.get_param('mode')
 DEFAULT_ACTION_SPACE = os.path.join(
     rospkg.RosPack().get_path("arena2d"),
     "configs",
-    "action_space",
-    f"default_settings_{robot_model}.yaml",
+    "robot",
+    {robot_model},
+    f"model_params.yaml",
 )
 # ⭐get robot action space
 
@@ -91,7 +93,6 @@ class Arena2dEnvWrapper(gym.Env):
         self.done = None
         self.info = None
         self._set_action_oberservation_space()
-        
 
     def _set_action_oberservation_space(self):
         action_space_linear_range = rospy.get_param(CONTINUOUS_ACTION + "linear_range")
@@ -120,10 +121,10 @@ class Arena2dEnvWrapper(gym.Env):
         # get the observations from the arena simulater
         with self.response_con:
             while not self.resp_received:
-                self.response_con.wait(0.5)
+                self.response_con.wait(1)
                 if not self.resp_received:
                     rospy.logwarn(
-                        "Environement wrapper [{}] didn't get the feedback within 0.5s \
+                        "Environement wrapper [{}] didn't get the feedback within 1s \
                              from arena simulator after sending action".format(self._idx_env))
                     break
             self.resp_received = False

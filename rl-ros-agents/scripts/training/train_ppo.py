@@ -17,13 +17,13 @@ tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 LOGDIR = None
 
 GAMMA           = 0.99
-N_STEPS         = 4800
+N_STEPS         = 2048 # (n_steps * n_envs) / m_match_size = batch_size
 ENT_COEF        = 5e-3 
 LEARNING_RATE   = 3e-3
 VF_COEF         = 0.22
 MAX_GRAD_NORM   = 0.5
 GAE_LAMBDA      = 0.95  # lam
-M_BATCH_SIZE    = 16    # nminibatches
+M_BATCH_SIZE    = 64    # nminibatches
 N_EPOCHS        = 3     # noptepochs
 CLIP_RANGE      = 0.22 
 VERBOSE         = 1
@@ -43,6 +43,9 @@ def main(log_dir = None,
 
     args = parseArgs()
 
+    
+
+
     # if log_dir doesnt created,use defaul one which contains the starting time of the training.
     # create log_dir
     if log_dir is None:
@@ -56,7 +59,6 @@ def main(log_dir = None,
             logdir = defaul_log_dir
     else:
         logdir = log_dir
-
 
 
     reward_bound = None if not use_reward_bound else reward_bound
@@ -100,9 +102,12 @@ def main(log_dir = None,
             reset_num_timesteps=reset_num_timesteps)
 
         model.save(os.path.join(logdir, "PPO_final"))
-    except KeyboardInterrupt:
+    except KeyboardInterrupt :
         model.save(path_temp_model)
         print("KeyboardInterrupt: saved the current model to {}".format(path_temp_model))
+    # except SystemExit:
+    #     model.save(path_temp_model)
+    #     print("SystemExit: saved the current model to {}".format(path_temp_model))
     finally:
         envs.close()
         exit(0)

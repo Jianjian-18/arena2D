@@ -264,6 +264,19 @@ private:
   */
 	void read_action_space_from_yaml(const string& name);
 
+ /**
+  * @description: read laser from .yaml config file for different robot
+  * @param {string&} robot name
+  * @return {*}
+  */
+	void read_laser_from_yaml(const string& name);	
+ /**
+  * @description: read robot_radius from .yaml config file for different robot
+  * @param {string&} robot name
+  * @return {*}
+  */
+	void read_robot_radius_from_yaml(const string& name);		
+
 #ifdef USE_ROS
 
 	void rosUpdate(float wait_time);
@@ -435,10 +448,27 @@ private:
 	std::unique_ptr<RosNode> _ros_node_ptr;
 	bool _use_ros_agent = false;
 	bool *_ros_envs_reset;
+
+	// staged mode related:
+
 	bool stage_flag;
-	bool episode_flag;
-	bool curriculum_flag;
-	int _cur_stage;
+	// true if staged mode activated
+	int cur_stage;
+	// start with 1; current stage number
+	int arrived_max_stage;
+	// arrivied maximal stage
+	int stage_static_obs;
+	int stage_dynamic_obs;
+	// be loaded number of obstacle
+	int episode_buffer;
+	/* buffer if stage changed
+	need wait e.g. 100 episode to caculate successful rate */
+	int episode_buffer_count;
+	// count for episode buffer
+	bool episode_buffer_flag;
+	// true if in episode buffer
+
+
 	/* total number of episodes since fit next stage */
 	int _episodeCount_tmp;	
 #endif // USE_ROS
@@ -470,6 +500,56 @@ namespace YAML {
             rhs.name = node["name"].as<std::string>();
             rhs.linear = node["linear"].as<double>();
 			rhs.angular = node["angular"].as<double>();
+            return true;
+        }
+    };
+}
+
+
+struct laser_angle {
+    double min;
+    double max;
+	double increment;
+};
+namespace YAML {
+    template<>
+    struct convert<laser_angle> {
+        static Node encode(const laser_angle &rhs) {
+            Node node;
+            node.push_back(rhs.min);	
+            node.push_back(rhs.max);	
+            node.push_back(rhs.increment);									
+		
+            return node;
+        }
+
+        static bool decode(const Node &node, laser_angle &rhs) {
+            rhs.min = node["min"].as<double>();			
+            rhs.max = node["max"].as<double>();
+            rhs.increment = node["increment"].as<double>();	
+            return true;
+        }
+    };
+}
+
+struct laser {
+    int num_beams;
+    float range;
+};
+
+namespace YAML {
+    template<>
+    struct convert<laser> {
+        static Node encode(const laser &rhs) {
+            Node node;		
+            node.push_back(rhs.num_beams);
+            node.push_back(rhs.range);
+            return node;
+        }
+
+        static bool decode(const Node &node, laser &rhs) {		
+            rhs.num_beams = node["num_beams"].as<int>();
+            rhs.range = node["range"].as<float>();		
             return true;
         }
     };

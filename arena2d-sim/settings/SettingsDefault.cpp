@@ -45,21 +45,22 @@ void GlobalSettings::setToDefault()
 	_settings.keys.play_pause_simulation = SDLK_SPACE;
 
 	// training
-	_settings.training.max_time = 100.0f;
+	_settings.training.max_time = 500.0f;
 	_settings.training.episode_over_on_hit = 0;
-	_settings.training.reward_goal = 100.0f;
-	_settings.training.reward_towards_goal = 0.1f;
-
+	_settings.training.reward_goal = 15.0f;
+	_settings.training.reward_towards_goal = 0.3f;
+	_settings.training.reward_away_from_goal = -0.4f;
 	_settings.training.reward_hit = -10.0f;
 	_settings.training.reward_time_out = 0.f;
 	_settings.training.num_envs = 4;
 	_settings.training.num_threads = -1;
 	_settings.training.agent_class = "Agent";
 
-	_settings.training.reward_human = -100.0f;
-	_settings.training.safety_distance_human = 0.5f;
-	_settings.training.reward_distance_to_human_decreased = -0.3f;
-	_settings.training.reward_distance_to_human_increased = 0.3f;
+	_settings.training.reward_human = 0.0f;
+	_settings.training.safety_distance_human = 0.23;
+	_settings.training.reward_distance_to_human_decreased = 0.0f;
+	_settings.training.reward_distance_to_human_increased = 0.0f;
+	_settings.training.reward_safe_dist = -0.25f;
 	_settings.training.num_obs_humans = 3;
 	_settings.training.reward_function = 1;
 
@@ -67,8 +68,8 @@ void GlobalSettings::setToDefault()
 	_settings.stage.random_seed = 0;
 	_settings.stage.initial_level = "random";
 	_settings.stage.level_size = 4;
-	_settings.stage.obstacle_speed = 0.08;
-	_settings.stage.obstacle_angular_max = 60.0f;
+	_settings.stage.obstacle_speed = 0.1;
+	_settings.stage.obstacle_angular_max = 45.0f;
 	_settings.stage.dynamic_obstacle_size = 0.6;
 	_settings.stage.min_dynamic_obstacle_size = 0.2; 
 	_settings.stage.num_dynamic_obstacles = 4;
@@ -76,7 +77,7 @@ void GlobalSettings::setToDefault()
 	_settings.stage.num_obstacles = 8;
 	_settings.stage.min_obstacle_size = 0.2;
 	_settings.stage.max_obstacle_size = 0.6;
-	_settings.stage.goal_size = 0.1;
+	_settings.stage.goal_size = 0.3;
 	_settings.stage.svg_path = "svg_levels/";
 	_settings.stage.scenario_ros_service_name = "/static_map";
 	// robot

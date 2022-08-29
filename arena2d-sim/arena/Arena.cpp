@@ -45,8 +45,10 @@ int Arena::init(int argc, char **argv)
 	/* use for the redirection of the parameters to ros init */
 	int ros_argc = 0;
 	std::vector<char *> ros_argv;
-	_cur_stage = 1;
+	cur_stage = 1;
+	arrived_max_stage = 1;
 	int num_envs = 1;
+	std::string robot_model = "burger";
 
 	while (arg_i < argc)
 	{
@@ -87,6 +89,20 @@ int Arena::init(int argc, char **argv)
 				exit(1);
 			}
 		}		
+		else if (!strcmp(argv[arg_i], "--robot"))
+		{ // robot
+			if (arg_i < argc - 1)
+			{
+				robot_model = argv[arg_i + 1];
+
+				arg_i++; // skip next argument (number of enviroment)
+			}
+			else
+			{
+				printf("No valid robot type given for environment!\n");
+				exit(1);
+			}
+		}				
 		else if (!strcmp(argv[arg_i], "--run"))
 		{
 			if (arg_i + 1 < argc)
@@ -209,6 +225,9 @@ int Arena::init(int argc, char **argv)
 		{ // does not exist locally, try system path
 			font_bold_path = sys_dir + font_bold_name;
 		}
+		
+		/* setting robot model*/
+		read_robot_radius_from_yaml(robot_model);
 
 		/* loading fonts */
 		_monospaceRegular = new zFont();
@@ -262,7 +281,7 @@ int Arena::init(int argc, char **argv)
 
 	/* register this object as contact listener */
 	_PHYSICS_WORLD->SetContactListener((b2ContactListener *)this);
-		
+	
 	/* creating environments */
 	_SETTINGS->training.num_envs = num_envs;
 	_numEnvs = _SETTINGS->training.num_envs;
@@ -383,27 +402,18 @@ int Arena::init(int argc, char **argv)
 	if (_use_ros_agent)
 	{
 		_ros_node_ptr = std::unique_ptr<RosNode>(new RosNode(_envs, _numEnvs, ros_argc, ros_argv.data()));	
-		// service_node_ptr = std::unique_ptr<RosService>(new RosService(ros_argc, ros_argv.data()));
-		// update laser scan and maximal range of robot model
-		float range, angle_max, angle_min, increment = 0.0;
-		ros::param::get("/range", range);
-		ros::param::get("/angle/max", angle_max);		
-		ros::param::get("/angle/min", angle_min);		
-		ros::param::get("/angle/increment", increment);
-		_SETTINGS->robot.laser_num_samples = floor((angle_max - angle_min)/increment);
-		ros::param::set("/arena_sim/settings/observation_space_num_beam", _SETTINGS->robot.laser_num_samples);
-		_SETTINGS->robot.laser_max_distance = range;
-		ros::param::set("/arena_sim/settings/observation_space_upper_limit", _SETTINGS->robot.laser_max_distance);
+		string robot_model = "";
+		ros::param::get("/model",robot_model);
+		read_laser_from_yaml(robot_model);		
 		for(int i=0; i < _numEnvs; ++i){
 			_envs->getRobot()->updateLidar();
 			_envs++;
 			if(i == _numEnvs -1){
 				_envs-=_numEnvs;
 			}
-		}
-		string robot_model = "";
-		ros::param::get("/model",robot_model);
+		}		
 		read_action_space_from_yaml(robot_model);
+
 	}
 	else
 	{
@@ -425,14 +435,13 @@ int Arena::init(int argc, char **argv)
 	// if use stage mode, initial number of obstacles by curriculum
 	ros::param::get("stage/stage", stage_flag);
 	if(stage_flag){
-		int static_obs,dynamic_obs = 0;
-		string s = "/stage_" + to_string(_cur_stage);
-		ros::param::get(s, static_obs);
-		ros::param::get(s, dynamic_obs);					
-		_SETTINGS->stage.num_obstacles = static_obs;
-		_SETTINGS->stage.num_dynamic_obstacles = dynamic_obs;
-		episode_flag = false;
-		curriculum_flag = false;
+		stage_static_obs, stage_dynamic_obs = 0;
+		string s = "/stage_" + to_string(cur_stage);
+		ros::param::get(s, stage_static_obs);
+		ros::param::get(s, stage_dynamic_obs);					
+		_SETTINGS->stage.num_obstacles = stage_static_obs;
+		_SETTINGS->stage.num_dynamic_obstacles = stage_dynamic_obs;
+		episode_buffer_flag = false;
 	}			
 
 	if (command_index >= 0)
@@ -932,13 +941,11 @@ void Arena::resize()
 void Arena::read_action_space_from_yaml(const string& name){
 
 	std::string path = ros::package::getPath("arena2d");
-	path = path + "/configs/action_space/default_settings_" + name + ".yaml";
-	// string path = homedir + "catkin_ws/src/utils/arena-simulation-setup/robot/" + name + "/model_params.yaml";
-	// path for integration
-
+	path = path + "/configs/robot/" + name + "/model_params.yaml";
+	// path = path + "/configs/action_space/default_settings_" + name + ".yaml";	
 try{
-	YAML::Node action_space = YAML::LoadFile(path);
-		std::vector<discrete_actions> vec = action_space["robot"]["discrete_actions"].as<std::vector<discrete_actions>>();
+	YAML::Node param = YAML::LoadFile(path);
+		std::vector<discrete_actions> vec = param["actions"]["discrete"].as<std::vector<discrete_actions>>();
         for (std::vector<discrete_actions>::iterator it = vec.begin(); it != vec.end(); ++it) {
 			if(it->name == "move_forward"){
 				_SETTINGS->robot.forward_speed.linear = it->linear;
@@ -965,6 +972,47 @@ try{
 				_SETTINGS->robot.strong_right_speed.angular = it->angular;
 			}
     	}			
+} catch(const YAML::BadFile& e) {
+        std::cerr << e.msg << std::endl;
+    } catch(const YAML::ParserException& e) {
+        std::cerr << e.msg << std::endl;
+    }
+
+}
+
+void Arena::read_laser_from_yaml(const string& name){
+
+	std::string path = ros::package::getPath("arena2d");
+	path = path + "/configs/robot/" + name + "/model_params.yaml";
+
+try{
+	YAML::Node param = YAML::LoadFile(path);
+
+	laser l = param["laser"].as<laser>();
+	_SETTINGS->robot.laser_num_samples = l.num_beams;
+	_SETTINGS->robot.laser_max_distance = l.range;
+	ros::param::set("/arena_sim/settings/observation_space_num_beam", _SETTINGS->robot.laser_num_samples);	
+	ros::param::set("/arena_sim/settings/observation_space_upper_limit", _SETTINGS->robot.laser_max_distance);
+} catch(const YAML::BadFile& e) {
+        std::cerr << e.msg << std::endl;
+    } catch(const YAML::ParserException& e) {
+        std::cerr << e.msg << std::endl;
+    }
+
+}
+
+void Arena::read_robot_radius_from_yaml(const string& name){
+
+	std::string path = ros::package::getPath("arena2d");
+	path = path + "/configs/robot/" + name + "/model_params.yaml";
+
+try{
+	YAML::Node param = YAML::LoadFile(path);
+
+	float robot_radius = param["robot_radius"].as<float>();
+	_SETTINGS->robot.base_size.x =robot_radius;
+	_SETTINGS->robot.base_size.y =robot_radius;	
+
 } catch(const YAML::BadFile& e) {
         std::cerr << e.msg << std::endl;
     } catch(const YAML::ParserException& e) {

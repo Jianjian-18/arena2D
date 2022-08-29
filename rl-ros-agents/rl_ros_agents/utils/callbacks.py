@@ -34,6 +34,10 @@ class SaveOnBestTrainingRewardCallback(BaseCallback):
         self.best_mean_reward = -np.inf
         self.reward_bound = reward_bound
 
+        self.stage = rospy.get_param("stage/stage")        
+        self.cur_stage = 1
+        self.arrived_max_stage = 1
+
     def _init_callback(self) -> None:
         # Create folder if needed
         if self.save_path is not None:
@@ -48,10 +52,15 @@ class SaveOnBestTrainingRewardCallback(BaseCallback):
                 # Mean training reward over the last 100 episodes
                 mean_reward = np.mean(y[-100:])
                 if self.verbose > 0:
+                    if self.stage:
+                        self.cur_stage = rospy.get_param("stage/curstage")
+                        self.arrived_max_stage = rospy.get_param("stage/maxstage")
+                        print("\nCurrent stage is: {}, arrived maximal stage is: {}".format(self.cur_stage, self.arrived_max_stage))
                     print("Num timesteps: {}".format(self.num_timesteps))
                     print(
                         "Best mean reward: {:.2f} - Last mean reward per episode: {:.2f}".format(self.best_mean_reward, mean_reward))
                     print(f"self.reward_bound is {self.reward_bound} and mean_ward is {mean_reward}")
+
                 # New best model, you could save the agent here
                 if mean_reward > self.best_mean_reward:
                     self.best_mean_reward = mean_reward
