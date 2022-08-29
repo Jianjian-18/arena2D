@@ -1,7 +1,7 @@
-from stable_baselines.common.callbacks import BaseCallback
+from stable_baselines3.common.callbacks import BaseCallback
 import numpy as np
 import os
-from stable_baselines.results_plotter import load_results, ts2xy
+from stable_baselines3.common.results_plotter import load_results, ts2xy
 from typing import Union
 
 

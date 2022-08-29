@@ -29,19 +29,18 @@ The definitions of the request and response message can be found [here](../arena
     $ mkdir -p ~/ARENA2d_ws/src
     $ cd ~/ARENA2d_ws/
     ```
-2. Clone this repository in the src-folder of your catkin workspace and checkout the branch `arena-ros`.  
+2. Clone this repository in the src-folder of your catkin workspace
  
     Compile the code and add the workspace to the ROS environment with:
     ```
     $ cd ~/ARENA2d_ws/src
-    $ git clone https://github.com/ignc-research/arena2D.git
+    $ git clone https://github.com/zenghjian/arena2D.git
     $ cd ~/ARENA2d_ws/src/arena2D/rl-ros-agents
-    $ conda env create -f environment.yml
+    $ conda env create -n arena2d python=3.8
+    $ poetry shell && poetry install 
+    $ pip install stable-baselines3[extra]
     $ cd ~/ARENA2d_ws
     $ pip install empy
-	$ vim ~/.bashrc
-	$ export PYTHONPATH=$PYTHONPATH:~/anaconda3/envs/arena2d/lib/python3.6/site-packages # copy this in the bottom, then use wq! to quit
-	$ source ~/.bashrc
     $ catkin_make -DUSE_ROS=ON
     $ source devel/setup.bash
     ```
@@ -77,9 +76,8 @@ The definitions of the request and response message can be found [here](../arena
     ```
     cd ~/ARENA2d_ws
     source devel/setup.bash
-    roslaunch arena2d arena2d_simulator.launch
+    roslaunch arena2d arena2d_simulator.launch staged_mode:="true"
     ```
-- Turning the Video on or off have no significant difference in the training speed.
 
 e.g `roslaunch arena2d arena_sim.launch model:=burger mode:=continuous ...`
 | Program call      | Agent Flag   | Usage                                                          | Description                                         |

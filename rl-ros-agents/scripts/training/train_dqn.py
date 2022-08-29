@@ -1,6 +1,6 @@
 import rospy
 from stable_baselines.common.vec_env import SubprocVecEnv
-from rl_ros_agents.env_wappers.arena2dEnv import get_arena_envs, Arena2dEnvWrapper
+from rl_ros_agents.env_wappers.arena2dEnv_old import get_arena_envs, Arena2dEnvWrapper
 from rl_ros_agents.utils.callbacks import SaveOnBestTrainingRewardCallback
 from rl_ros_agents.utils import getTimeStr
 from stable_baselines import DQN

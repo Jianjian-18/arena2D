@@ -15,20 +15,39 @@ import argparse
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 LOGDIR = None
-GAMMA = 0.95
-LEARNING_RATE = 1e-3
-N_STEPS = 4
-MAX_GRAD_NORM = 0.1
+
+GAMMA           = 0.99
+N_STEPS         = 2048 # (n_steps * n_envs) / m_match_size = batch_size
+ENT_COEF        = 5e-3 
+LEARNING_RATE   = 3e-3
+VF_COEF         = 0.22
+MAX_GRAD_NORM   = 0.5
+GAE_LAMBDA      = 0.95  # lam
+M_BATCH_SIZE    = 64    # nminibatches
+N_EPOCHS        = 3     # noptepochs
+CLIP_RANGE      = 0.22 
+VERBOSE         = 1
+
+
 
 TIME_STEPS = int(1e8)
 REWARD_BOUND = 130
-use_reward_bound = True
+use_reward_bound = False
 
 
-def main(log_dir = None,name_results_root_folder = "results",use_reward_bound = True,reward_bound = 130,gamma = 0.95,n_steps = 4, time_steps = int(1e5),max_grad_norm=0.1,learn_rate = 1e-3):
+def main(log_dir = None,
+         name_results_root_folder = "results",
+         use_reward_bound = True,
+         reward_bound = 130,
+         time_steps = int(1e5)):
+
     args = parseArgs()
 
+    
+
+
     # if log_dir doesnt created,use defaul one which contains the starting time of the training.
+    # create log_dir
     if log_dir is None:
         if args.restart_training:
             #find the latest training folder
@@ -40,6 +59,8 @@ def main(log_dir = None,name_results_root_folder = "results",use_reward_bound = 
             logdir = defaul_log_dir
     else:
         logdir = log_dir
+
+
     reward_bound = None if not use_reward_bound else reward_bound
     # get arena environments and custom callback
     envs = get_arena_envs(log_dir=logdir)
@@ -47,8 +68,22 @@ def main(log_dir = None,name_results_root_folder = "results",use_reward_bound = 
     # set temporary model path, if training was interrupted by the keyboard, the current model parameters will be saved.
     path_temp_model = os.path.join(logdir,"PPO_TEMP")
     if not args.restart_training:
-        model = PPO2(MlpLstmPolicy, envs, verbose=1, gamma=GAMMA,
-                    tensorboard_log=logdir)
+        model = PPO2(
+            MlpPolicy, 
+            envs, 
+            gamma           = GAMMA,
+            n_steps         = N_STEPS,
+            ent_coef        = ENT_COEF,
+            learning_rate   = LEARNING_RATE,
+            vf_coef         = VF_COEF,
+            max_grad_norm   = MAX_GRAD_NORM,
+            lam             = GAE_LAMBDA,
+            nminibatches    = M_BATCH_SIZE,
+            noptepochs      = N_EPOCHS,
+            cliprange       = CLIP_RANGE,
+            tensorboard_log = logdir,
+            verbose         = VERBOSE
+            )
         reset_num_timesteps = True
     else:
         if os.path.exists(path_temp_model+".zip"):
@@ -60,11 +95,19 @@ def main(log_dir = None,name_results_root_folder = "results",use_reward_bound = 
             envs.close()
             exit(-1)
     try:
-        model.learn(time_steps, log_interval=200, callback=call_back,reset_num_timesteps=reset_num_timesteps)
+        model.learn(
+            time_steps, 
+            log_interval=200, 
+            callback=call_back,
+            reset_num_timesteps=reset_num_timesteps)
+
         model.save(os.path.join(logdir, "PPO_final"))
-    except KeyboardInterrupt:
+    except KeyboardInterrupt :
         model.save(path_temp_model)
         print("KeyboardInterrupt: saved the current model to {}".format(path_temp_model))
+    # except SystemExit:
+    #     model.save(path_temp_model)
+    #     print("SystemExit: saved the current model to {}".format(path_temp_model))
     finally:
         envs.close()
         exit(0)
@@ -75,4 +118,7 @@ def parseArgs():
     return parser.parse_args()
 
 if __name__ == "__main__":
-    main(log_dir=LOGDIR,use_reward_bound=use_reward_bound,reward_bound=REWARD_BOUND,time_steps=TIME_STEPS,max_grad_norm=MAX_GRAD_NORM,gamma=GAMMA,learn_rate=LEARNING_RATE,n_steps=N_STEPS)
+    main(log_dir=LOGDIR,
+         use_reward_bound=use_reward_bound,
+         reward_bound=REWARD_BOUND,
+         time_steps=TIME_STEPS)

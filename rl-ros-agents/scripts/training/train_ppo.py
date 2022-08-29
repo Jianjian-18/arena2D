@@ -1,18 +1,15 @@
 import rospy
-from stable_baselines.common.vec_env import SubprocVecEnv
+from stable_baselines3.common.vec_env import SubprocVecEnv
 from rl_ros_agents.env_wappers.arena2dEnv import get_arena_envs, Arena2dEnvWrapper
 from rl_ros_agents.utils.callbacks import SaveOnBestTrainingRewardCallback
 from rl_ros_agents.utils import getTimeStr
-from stable_baselines import PPO2
-from stable_baselines.common.policies import MlpLstmPolicy, MlpPolicy
-import tensorflow as tf
+from stable_baselines3 import PPO
+from stable_baselines3.common.policies import ActorCriticPolicy
 import random
 import numpy as np
 import os
 import sys
 import argparse
-# disable tensorflow deprecated information
-tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 LOGDIR = None
 
@@ -68,8 +65,8 @@ def main(log_dir = None,
     # set temporary model path, if training was interrupted by the keyboard, the current model parameters will be saved.
     path_temp_model = os.path.join(logdir,"PPO_TEMP")
     if not args.restart_training:
-        model = PPO2(
-            MlpPolicy, 
+        model = PPO(
+            "MlpPolicy", 
             envs, 
             gamma           = GAMMA,
             n_steps         = N_STEPS,
@@ -77,18 +74,19 @@ def main(log_dir = None,
             learning_rate   = LEARNING_RATE,
             vf_coef         = VF_COEF,
             max_grad_norm   = MAX_GRAD_NORM,
-            lam             = GAE_LAMBDA,
-            nminibatches    = M_BATCH_SIZE,
-            noptepochs      = N_EPOCHS,
-            cliprange       = CLIP_RANGE,
+            gae_lambda      = GAE_LAMBDA,
+            batch_size      = M_BATCH_SIZE,
+            n_epochs        = N_EPOCHS,
+            clip_range      = CLIP_RANGE,
             tensorboard_log = logdir,
+            device          = "cuda",
             verbose         = VERBOSE
             )
         reset_num_timesteps = True
     else:
         if os.path.exists(path_temp_model+".zip"):
             print("continue training the model...")
-            model = PPO2.load(path_temp_model,env=envs)
+            model = PPO.load(path_temp_model,env=envs)
             reset_num_timesteps = False
         else:
             print("Can't load the model with the path: {}, please check again!".format(path_temp_model))

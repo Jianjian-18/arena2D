@@ -24,7 +24,13 @@ DISCRETE_ACTION = "/actions/discrete/"
 # OBSERVATION = "/plugins/"
 robot_model = rospy.get_param('model')
 robot_mode = rospy.get_param('mode')
-
+DEFAULT_ACTION_SPACE = os.path.join(
+    rospkg.RosPack().get_path("arena2d"),
+    "configs",
+    "robot",
+    {robot_model},
+    f"model_params.yaml",
+)
 # ⭐get robot action space
 
 # DEFAULT_OBSERVATION_SPACE = os.path.join(
