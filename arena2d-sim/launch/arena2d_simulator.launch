@@ -6,7 +6,7 @@
     <param name="level" value="$(arg level_name)"/>
     <arg name="level_mode" default="--dynamic" doc = "[--dynamic --human, --dynamic, --human,  ]"/>    
     <arg name="video_mode" default="--disable-video" doc = "video [--disable-video, --enable-video]"/> 
-    <arg name="num_envs" default="2" doc = "number of environment"/>
+    <arg name="num_envs" default="12" doc = "number of environment"/>
     <!-- robot setting -->
     <arg name="robot_model" default="burger" 
     doc="model type [burger, jackal, agvota, waffle_pi]"/>
@@ -30,7 +30,7 @@
     <param name="stage/stage" value="$(arg staged_mode)" />
     <group if="$(eval arg('level_name') == 'scenario')">
         <group if="$(eval arg('staged_mode') == true)">
-        <arg name="curriculum_file" default="normal" doc="simple, normal, hard]"/>
+        <arg name="curriculum_file" default="dynamic" doc="simple, normal, hard, dynamic]"/>
         <arg name="curriculum_path" default="$(find arena2d)/configs/curriculum/training_curriculum_$(arg curriculum_file).yaml" />    
             <rosparam command="load" file = "$(arg curriculum_path)" />
         </group>
@@ -53,7 +53,7 @@
 
 
     <!-- Run the map server -->
-    <arg name="map_file" default="map_empty" doc="[book, ignc, indoor, labor, obs, map1_small, map_empty, map_small]"/>
+    <arg name="map_file" default="map1_small" doc="[book, ignc, indoor, labor, obs, map1_small, map_empty, map_small]"/>
     <arg name="map_path" default="$(find arena2d)/scenario/$(arg map_file)/map.yaml" />    
     <node if="$(eval arg('level_name') == 'scenario')"
     name="map_server" pkg="map_server" type="map_server" args="$(arg map_path)" />
@@ -78,7 +78,6 @@
     <node name="arena_sim" pkg="arena2d" type="arena2d" output="screen" 
     args="--use_ros_agent $(arg video_mode) --num_envs $(arg num_envs) --robot $(arg robot_model) --run &quot;level $(arg level_name) $(arg level_mode) &quot;"/>
 
-    <!-- launch arena2d server for detect memory leak-->
     
 
 

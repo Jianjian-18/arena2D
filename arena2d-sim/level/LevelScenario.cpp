@@ -332,7 +332,7 @@ float LevelScenario::getReward()
 			}
 			//give constant reward for distance to human decreased/increased
 			else{
-                reward -= 0.25;
+                reward += _SETTINGS->training.reward_safe_dist;
 				if(distance_after < distance_before){
 					reward += _SETTINGS->training.reward_distance_to_human_decreased;
 				}else if(distance_after > distance_before){

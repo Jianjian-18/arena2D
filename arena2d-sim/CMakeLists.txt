@@ -37,7 +37,7 @@ link_directories(${YAML_CPP_LIBRARY_DIRS})
 if(USE_ROS)
 	add_compile_options("-DUSE_ROS")
 	message(STATUS "USE_ROS is enabled")
-	find_package(Boost)
+	find_package(Boost 1.71.0 REQUIRED COMPONENTS system regex)
 	find_package(OpenCV REQUIRED )
 	find_package(catkin REQUIRED COMPONENTS
 	roscpp

@@ -1,6 +1,6 @@
 /* Author: Cornelius Marx */
 #include "Arena.hpp"
-
+#define BOOST_DISABLE_ASSERTS
 //global variable
 Evaluation _evaluation;
 
@@ -419,7 +419,7 @@ int Arena::init(int argc, char **argv)
 	{
 		_ros_node_ptr = nullptr;
 	}
-
+	// if use stage mode, initial number of obstacles by curriculum
 	_ros_envs_reset = new bool[_numEnvs];
 
 // #endif
@@ -432,13 +432,12 @@ int Arena::init(int argc, char **argv)
 		initializeTraining();
 	}
 
-	// if use stage mode, initial number of obstacles by curriculum
 	ros::param::get("stage/stage", stage_flag);
 	if(stage_flag){
 		stage_static_obs, stage_dynamic_obs = 0;
 		string s = "/stage_" + to_string(cur_stage);
-		ros::param::get(s, stage_static_obs);
-		ros::param::get(s, stage_dynamic_obs);					
+		ros::param::get(s + "/static", stage_static_obs);
+		ros::param::get(s + "/dynamic", stage_dynamic_obs);					
 		_SETTINGS->stage.num_obstacles = stage_static_obs;
 		_SETTINGS->stage.num_dynamic_obstacles = stage_dynamic_obs;
 		episode_buffer_flag = false;

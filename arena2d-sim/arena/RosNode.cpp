@@ -1,5 +1,4 @@
 #include "RosNode.hpp"
-
 RosNode::RosNode(Environment *envs, int num_envs, int argc, char **argv)
     : m_num_envs(num_envs), m_envs(envs)
 {
@@ -120,7 +119,9 @@ void RosNode::publishStates(const bool *dones, float mean_reward,
         resp.goal_xy[0] = static_cast<double>(goal_x);
         resp.goal_xy[1] = static_cast<double>(goal_y);
         resp.goal_pos[0] = static_cast<double>(distance);
-        resp.goal_pos[1] = static_cast<double>(angle);
+
+        float angle_rad = - angle * (PI/180);
+        resp.goal_pos[1] = static_cast<double>(angle_rad);
         // robot theta is in radian
         float robot_x, robot_y, robot_theta;
         m_envs[idx_env].getRobotPos(robot_x, robot_y, robot_theta);
@@ -128,6 +129,18 @@ void RosNode::publishStates(const bool *dones, float mean_reward,
         resp.robot_pos.y = static_cast<double>(robot_y);
         resp.robot_pos.theta = static_cast<double>(robot_theta);
         // obstacle position
+
+        
+        // cout << "angle_rad is: " << angle_rad << endl;
+        // cout << "robot_theta is: " << robot_theta << endl;
+        // float y_relative = goal_y - robot_y;
+        // float x_relative = goal_x - robot_x;
+        // float rho =  pow((pow(x_relative,2)+pow(y_relative,2)),0.5);
+        // cout << "distance is: " << distance << endl;
+        // cout << "rho is: " << rho << endl;
+
+        // double theta = fmod((atan2(y_relative,x_relative) - robot_theta + 4 * PI),(2 * PI)) - PI;
+        // cout << "theta is: " << theta << endl;
         string _level = _SETTINGS->stage.initial_level;
         string::size_type idx_robot, idx_human;
         idx_robot = _level.find("dynamic");

@@ -10,17 +10,18 @@ import numpy as np
 import os
 import sys
 import argparse
-
+import rospkg
+from stable_baselines3.common.evaluation import evaluate_policy
 LOGDIR = None
 
 GAMMA           = 0.99
-N_STEPS         = 2048 # (n_steps * n_envs) / m_match_size = batch_size
+N_STEPS         = 1200 # (n_steps * n_envs) / m_match_size = batch_size -- has problem
 ENT_COEF        = 5e-3 
-LEARNING_RATE   = 3e-3
+LEARNING_RATE   = 3e-4
 VF_COEF         = 0.22
 MAX_GRAD_NORM   = 0.5
 GAE_LAMBDA      = 0.95  # lam
-M_BATCH_SIZE    = 64    # nminibatches
+BATCH_SIZE      = 14400    # nminibatches? --- = n_steps * n_envs
 N_EPOCHS        = 3     # noptepochs
 CLIP_RANGE      = 0.22 
 VERBOSE         = 1
@@ -64,6 +65,8 @@ def main(log_dir = None,
     call_back = SaveOnBestTrainingRewardCallback(500, logdir, 1, reward_bound)
     # set temporary model path, if training was interrupted by the keyboard, the current model parameters will be saved.
     path_temp_model = os.path.join(logdir,"PPO_TEMP")
+    package_dir = rospkg.RosPack().get_path("rl-ros-agents")
+    path_best_model = os.path.join(package_dir,"best_model.zip")
     if not args.restart_training:
         model = PPO(
             "MlpPolicy", 
@@ -75,7 +78,7 @@ def main(log_dir = None,
             vf_coef         = VF_COEF,
             max_grad_norm   = MAX_GRAD_NORM,
             gae_lambda      = GAE_LAMBDA,
-            batch_size      = M_BATCH_SIZE,
+            batch_size      = BATCH_SIZE,
             n_epochs        = N_EPOCHS,
             clip_range      = CLIP_RANGE,
             tensorboard_log = logdir,
@@ -83,36 +86,42 @@ def main(log_dir = None,
             verbose         = VERBOSE
             )
         reset_num_timesteps = True
-    else:
-        if os.path.exists(path_temp_model+".zip"):
-            print("continue training the model...")
-            model = PPO.load(path_temp_model,env=envs)
-            reset_num_timesteps = False
+    elif not args.eval:
+            if os.path.exists(path_temp_model+".zip"):
+                print("continue training the model...")
+                model = PPO.load(path_temp_model,env=envs)
+                reset_num_timesteps = False
+            else:
+                print("Can't load the model with the path: {}, please check again!".format(path_temp_model))
+                envs.close()
+                exit(-1)
+    else: 
+        if os.path.exists(path_best_model):
+            print("evaluate best model...")
+            model = PPO.load(path_best_model,env=envs)
+            evaluate_policy(
+                model=model, env=envs, n_eval_episodes=20, deterministic=True)
+            envs.close()
+            exit(0)
         else:
-            print("Can't load the model with the path: {}, please check again!".format(path_temp_model))
+            print("Can't load the model with the path: {}, please check again!".format(path_best_model))
             envs.close()
             exit(-1)
     try:
-        model.learn(
-            time_steps, 
-            log_interval=200, 
-            callback=call_back,
-            reset_num_timesteps=reset_num_timesteps)
-
+        model.learn(time_steps, log_interval=200, callback=call_back,reset_num_timesteps=reset_num_timesteps)
         model.save(os.path.join(logdir, "PPO_final"))
-    except KeyboardInterrupt :
+    except KeyboardInterrupt:
         model.save(path_temp_model)
         print("KeyboardInterrupt: saved the current model to {}".format(path_temp_model))
-    # except SystemExit:
-    #     model.save(path_temp_model)
-    #     print("SystemExit: saved the current model to {}".format(path_temp_model))
     finally:
         envs.close()
         exit(0)
 
+        
 def parseArgs():
     parser = argparse.ArgumentParser()
     parser.add_argument("-r","--restart_training",action="store_true",help="restart the latest unfinished training")
+    parser.add_argument("--eval",action="store_true",help="start the evaluation mode")    
     return parser.parse_args()
 
 if __name__ == "__main__":

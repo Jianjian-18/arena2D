@@ -19,6 +19,10 @@
 #include <std_msgs/String.h>
 #include <std_srvs/Empty.h>
 #include <list>
+#include <math.h>
+
+#define PI acos(-1)
+
 class RosNode
 {
     using size_t = unsigned int;

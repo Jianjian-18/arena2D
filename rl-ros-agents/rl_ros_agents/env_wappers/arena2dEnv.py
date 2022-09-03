@@ -16,6 +16,7 @@ from yaml import load, safe_load
 import rospkg
 from std_srvs.srv import Empty, EmptyResponse
 import sys
+import math
 # namespace of arena settings
 NS_SETTING = "/arena_sim/settings/"
 HOLONOMIC = "/is_holonomic/"
@@ -87,7 +88,6 @@ class Arena2dEnvWrapper(gym.Env):
         self.done = None
         self.info = None
         self._set_action_oberservation_space()
-
     def _set_action_oberservation_space(self):
         action_space_linear_range = rospy.get_param(CONTINUOUS_ACTION + "linear_range")
         action_space_angular_range = rospy.get_param(CONTINUOUS_ACTION + "angular_range")
@@ -106,7 +106,9 @@ class Arena2dEnvWrapper(gym.Env):
             self.action_space = spaces.Discrete(len(self._action_discrete_list))
             
         self.observation_space = spaces.Box(low=0, high=obervation_space_upper_limit,
-                                            shape=(1, num_beam+2), dtype=np.float)
+                                            shape=(num_beam+2,),dtype=np.float)
+        # self.observation_space = spaces.Box(low=0, high=obervation_space_upper_limit,
+        #                                     shape=(1, num_beam+2), dtype=np.float)                                            
         # ⭐最终将action和observation space 导入
         
     def step(self, action):
@@ -211,8 +213,11 @@ class Arena2dEnvWrapper(gym.Env):
             goal_distance_angle = resp.goal_pos
             # in current settings the observation not only contains laser scan but also
             # contains the relative distance and angle to goal position.
-            self.obs = np.array(obs + goal_distance_angle).reshape([1, -1])
+            # print(obs.shape)
+            self.obs = np.array(obs + goal_distance_angle)
+            # self.obs = np.array(obs + goal_distance_angle).reshape([1, -1])            
             # print("obs:"+obs.__str__()+" gda: "+goal_distance_angle.__str__())
+            # print(" gda: "+goal_distance_angle.__str__())
             self.reward = resp.reward
             self.done = resp.done
             self.info = dict(mean_reward=resp.mean_reward, mean_success=resp.mean_success)
