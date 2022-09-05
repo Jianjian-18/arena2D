@@ -116,12 +116,20 @@ void RosNode::publishStates(const bool *dones, float mean_reward,
         float goal_x = 0, goal_y = 0;
         float angle = 0, distance = 0;
         m_envs[idx_env].getGoalDistance(distance, angle, goal_x, goal_y);
-        resp.goal_xy[0] = static_cast<double>(goal_x);
-        resp.goal_xy[1] = static_cast<double>(goal_y);
-        resp.goal_pos[0] = static_cast<double>(distance);
+        resp.goal_pos[0] = static_cast<double>(goal_x);
+        resp.goal_pos[1] = static_cast<double>(goal_y);
+        resp.goal_info[0] = static_cast<double>(distance);
 
-        float angle_rad = - angle * (PI/180);
-        resp.goal_pos[1] = static_cast<double>(angle_rad);
+        float angle_rad = angle * (PI/180);
+        float angle_final = 0.0;
+        if(angle_rad < 0){
+            angle_final = angle_rad + PI;
+        }
+        else{
+            angle_final = angle_rad - PI;
+        }
+
+        resp.goal_info[1] = static_cast<double>(angle_final);
         // robot theta is in radian
         float robot_x, robot_y, robot_theta;
         m_envs[idx_env].getRobotPos(robot_x, robot_y, robot_theta);
@@ -130,8 +138,9 @@ void RosNode::publishStates(const bool *dones, float mean_reward,
         resp.robot_pos.theta = static_cast<double>(robot_theta);
         // obstacle position
 
-        
-        // cout << "angle_rad is: " << angle_rad << endl;
+        // cout << "angle is: " << angle << endl;
+        // cout << "angle_rad is: " << angle_rad << endl << endl;
+        // cout << "angle_final is: " << angle_final << endl << endl;
         // cout << "robot_theta is: " << robot_theta << endl;
         // float y_relative = goal_y - robot_y;
         // float x_relative = goal_x - robot_x;
@@ -140,7 +149,7 @@ void RosNode::publishStates(const bool *dones, float mean_reward,
         // cout << "rho is: " << rho << endl;
 
         // double theta = fmod((atan2(y_relative,x_relative) - robot_theta + 4 * PI),(2 * PI)) - PI;
-        // cout << "theta is: " << theta << endl;
+        // cout << "theta is: " << theta << endl << endl;
         string _level = _SETTINGS->stage.initial_level;
         string::size_type idx_robot, idx_human;
         idx_robot = _level.find("dynamic");

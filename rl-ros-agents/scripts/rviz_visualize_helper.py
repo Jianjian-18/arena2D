@@ -278,7 +278,7 @@ class IntermediateRosNode:
                                       self._robot_frame_id, "world")      
 
         self._show_scan_in_rviz(resp.observation)                                        
-        self. _show_goal_robot_in_rviz(resp.goal_xy[0],resp.goal_xy[1], robot_pos)
+        self. _show_goal_robot_in_rviz(resp.goal_pos[0],resp.goal_pos[1], robot_pos)
         self._show_path_in_rviz(resp.robot_pos)
         self._show_obstacle_in_rviz(resp.robot_obstacle_pos, resp.human_obstacle_pos)
 

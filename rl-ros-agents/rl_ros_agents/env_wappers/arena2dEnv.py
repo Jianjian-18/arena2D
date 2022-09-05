@@ -210,7 +210,7 @@ class Arena2dEnvWrapper(gym.Env):
         rospy.logdebug("received response")
         with self.response_con:
             obs = resp.observation.ranges
-            goal_distance_angle = resp.goal_pos
+            goal_distance_angle = resp.goal_info
             # in current settings the observation not only contains laser scan but also
             # contains the relative distance and angle to goal position.
             # print(obs.shape)

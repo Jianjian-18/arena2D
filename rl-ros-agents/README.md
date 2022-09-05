@@ -95,5 +95,6 @@ e.g `roslaunch arena2d arena_sim.launch model:=burger mode:=continuous ...`
     source devel/setup.bash
     cd ~/ARENA2d_ws/src/arena2D/rl-ros-agents
     conda activate arena2d
+    poetry shell
     python scripts/training/train_ppo.py
     ```

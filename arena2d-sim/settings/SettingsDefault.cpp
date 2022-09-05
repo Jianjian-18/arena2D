@@ -57,9 +57,9 @@ void GlobalSettings::setToDefault()
 	_settings.training.agent_class = "Agent";
 
 	_settings.training.reward_human = 0.0f;
-	_settings.training.safety_distance_human = 0.23;
-	_settings.training.reward_distance_to_human_decreased = 0.0f;
-	_settings.training.reward_distance_to_human_increased = 0.0f;
+	_settings.training.safety_distance_human = 0.5;
+	_settings.training.reward_distance_to_human_decreased = -0.3f;
+	_settings.training.reward_distance_to_human_increased = 0.3f;
 	_settings.training.reward_safe_dist = -0.25f;
 	_settings.training.num_obs_humans = 3;
 	_settings.training.reward_function = 1;
@@ -68,15 +68,15 @@ void GlobalSettings::setToDefault()
 	_settings.stage.random_seed = 0;
 	_settings.stage.initial_level = "random";
 	_settings.stage.level_size = 4;
-	_settings.stage.obstacle_speed = 0.1;
+	_settings.stage.obstacle_speed = 0.2;
 	_settings.stage.obstacle_angular_max = 45.0f;
-	_settings.stage.dynamic_obstacle_size = 0.6;
-	_settings.stage.min_dynamic_obstacle_size = 0.2; 
+	_settings.stage.dynamic_obstacle_size = 1.2;
+	_settings.stage.min_dynamic_obstacle_size = 0.4; 
 	_settings.stage.num_dynamic_obstacles = 4;
 	_settings.stage.max_time_chatting = 50.0f;
 	_settings.stage.num_obstacles = 8;
-	_settings.stage.min_obstacle_size = 0.2;
-	_settings.stage.max_obstacle_size = 0.6;
+	_settings.stage.min_obstacle_size = 0.4;
+	_settings.stage.max_obstacle_size = 1.2;
 	_settings.stage.goal_size = 0.3;
 	_settings.stage.svg_path = "svg_levels/";
 	_settings.stage.scenario_ros_service_name = "/static_map";
