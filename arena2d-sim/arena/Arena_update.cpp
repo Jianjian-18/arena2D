@@ -361,6 +361,7 @@ void Arena::update()
 // #ifdef USE_ROS
 void Arena::rosUpdate(float wait_time = 0.0f)
 {
+	_videoDisabled = _ros_node_ptr->pause_flag;
 	bool any_arrow_key_pressed = false;
 	if (_keysPressed[UP] || _keysPressed[DOWN] || _keysPressed[LEFT] || _keysPressed[RIGHT])
 	{

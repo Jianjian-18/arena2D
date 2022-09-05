@@ -75,7 +75,7 @@ class Arena2dEnvWrapper(gym.Env):
 
         rospy.init_node("arena_ros_agent_env_{:02d}".format(idx_env), anonymous=True, log_level=rospy.INFO)
         self._setSubPub()
-        # self._setService()
+        self._setService()
         # ⭐comment for separate test: arena2d self don't have task generator
 
         # we use this to let main thread know the response is received which is done by another thread
@@ -163,11 +163,11 @@ class Arena2dEnvWrapper(gym.Env):
             times += 1
         rospy.loginfo("env[{:d}] connected with arena-2d simulator, took {:3.1f}s.".format(self._idx_env, .1 * times))
 
-    # def _setService(self):
-    #     service_name = "task_generator"
-    #     rospy.wait_for_service(service_name)
-    #     print(f"{service_name} has started")
-    #     self.service_client = rospy.ServiceProxy(service_name, Empty)
+    def _setService(self):
+        service_name = "task_generator"
+        rospy.wait_for_service(service_name)
+        print(f"{service_name} has started")
+        self.service_client = rospy.ServiceProxy(service_name, Empty)
 
     def _pubRosAgentReq(self,
                         action: Union[List, Tuple, RosAgentReq] = None,
@@ -203,8 +203,8 @@ class Arena2dEnvWrapper(gym.Env):
                 # req_msg.action.angular = self._action_discrete_map[action_name][1]
         self._ros_agent_pub.publish(req_msg)
         rospy.logdebug("send action")
-        # if env_reset:
-        #     self.service_client()
+        if env_reset:
+            self.service_client()
 
     def _arena2dRespCallback(self, resp: Arena2dResp):
         rospy.logdebug("received response")
