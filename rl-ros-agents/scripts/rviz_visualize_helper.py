@@ -83,7 +83,7 @@ class IntermediateRosNode:
         # subscriber
         # According to the testing,enable tcp_nodelay can double the performance
 
-        # ⭐
+
         self._sub_map = rospy.Subscriber("map", OccupancyGrid, self._mapCallback ,tcp_nodelay=True)        
 
         self._sub = rospy.Subscriber(namespace_sub + "response", Arena2dResp,
@@ -96,7 +96,6 @@ class IntermediateRosNode:
             time.sleep(0.1)
             times += 1
         rospy.loginfo("Successfully connected with arena-2d simulator, took {:3.1f}s.".format(.1 * times))
-    # ⭐
     def _mapCallback(self, msg: OccupancyGrid):
 
         # rospy.loginfo(rospy.get_caller_id() + "I heard %s", msg.info)
