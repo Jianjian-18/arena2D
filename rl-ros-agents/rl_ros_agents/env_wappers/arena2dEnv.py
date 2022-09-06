@@ -75,7 +75,7 @@ class Arena2dEnvWrapper(gym.Env):
 
         rospy.init_node("arena_ros_agent_env_{:02d}".format(idx_env), anonymous=True, log_level=rospy.INFO)
         self._setSubPub()
-        self._setService()
+
         # ⭐comment for separate test: arena2d self don't have task generator
 
         # we use this to let main thread know the response is received which is done by another thread
@@ -88,25 +88,31 @@ class Arena2dEnvWrapper(gym.Env):
         self.done = None
         self.info = None
         self._set_action_oberservation_space()
+        self._setService()
+        self.staged_mode = True
+        if(not rospy.get_param("stage/stage")):
+            self.staged_mode = False
+        
+
     def _set_action_oberservation_space(self):
         action_space_linear_range = rospy.get_param(CONTINUOUS_ACTION + "linear_range")
         action_space_angular_range = rospy.get_param(CONTINUOUS_ACTION + "angular_range")
 
-        lower_limit = np.array([action_space_linear_range[0], action_space_angular_range[0]], dtype=np.float)
-        upper_limit = np.array([action_space_linear_range[1], action_space_angular_range[1]], dtype=np.float)
+        lower_limit = np.array([action_space_linear_range[0], action_space_angular_range[0]], dtype=float)
+        upper_limit = np.array([action_space_linear_range[1], action_space_angular_range[1]], dtype=float)
 
         num_beam = rospy.get_param(NS_SETTING + "observation_space_num_beam")    
         obervation_space_upper_limit = rospy.get_param(NS_SETTING + "observation_space_upper_limit")
         if not self._is_action_space_discrete:
             self.action_space = spaces.Box(low=lower_limit,
-                                           high=upper_limit, dtype=np.float)
+                                           high=upper_limit, dtype=float)
                                         #    high=upper_limit * 3, dtype=np.float)                                           
         # ⭐why hier *3 
         else:
             self.action_space = spaces.Discrete(len(self._action_discrete_list))
             
         self.observation_space = spaces.Box(low=0, high=obervation_space_upper_limit,
-                                            shape=(num_beam+2,),dtype=np.float)
+                                            shape=(num_beam+2,),dtype=float)
         # self.observation_space = spaces.Box(low=0, high=obervation_space_upper_limit,
         #                                     shape=(1, num_beam+2), dtype=np.float)                                            
         # ⭐最终将action和observation space 导入
@@ -138,7 +144,7 @@ class Arena2dEnvWrapper(gym.Env):
                         "Environement wrapper [{}] didn't get the feedback within 1.5s from arena \
                             simulator after sending reset command".format(self._idx_env))
                     break
-            self.resp_received = False
+            self.resp_received = False            
         return self.obs
 
     def close(self):
@@ -203,7 +209,7 @@ class Arena2dEnvWrapper(gym.Env):
                 # req_msg.action.angular = self._action_discrete_map[action_name][1]
         self._ros_agent_pub.publish(req_msg)
         rospy.logdebug("send action")
-        if env_reset:
+        if env_reset & (not self.staged_mode):
             self.service_client()
 
     def _arena2dRespCallback(self, resp: Arena2dResp):
