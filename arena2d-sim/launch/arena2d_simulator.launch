@@ -6,7 +6,7 @@
     <param name="level" value="$(arg level_name)"/>
     <arg name="level_mode" default="--dynamic" doc = "[--dynamic --human, --dynamic, --human,  ]"/>    
     <arg name="video_mode" default="--disable-video" doc = "video [--disable-video, --enable-video]"/> 
-    <arg name="num_envs" default="12" doc = "number of environment"/>
+    <arg name="num_envs" default="4" doc = "number of environment"/>
     <!-- robot setting -->
     <arg name="robot_model" default="burger" 
     doc="model type [burger, jackal, agvota, waffle_pi]"/>
@@ -42,8 +42,8 @@
     <!-- The value needs to be set carefully, 
     1.) range = [- (width * resolution / 2) , width * resolution / 2]
     2.) make sure the spawn point without obstacle -->
-    <param name="scenerio/scenerio" value="false" />
-    <!-- <group if="$(eval arg ('level_name') == 'scenario')">
+    <!-- <param name="scenerio/scenerio" value="false" />
+    <group if="$(eval arg ('level_name') == 'scenario')">
         <param name="scenerio/scenerio" value="true" />    
         <param name="scenerio/goal_x" value = "-3.0" />
         <param name="scenerio/goal_y" value = "4.0" />

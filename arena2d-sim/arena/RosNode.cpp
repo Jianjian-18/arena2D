@@ -498,7 +498,9 @@ bool RosNode::PauseCallback(std_srvs::Empty::Request &request,
 bool RosNode::UnpauseCallback(std_srvs::Empty::Request &request,
                               std_srvs::Empty::Response &response)
 {
-    m_envs_reset_list.pop_front();
+    if (!m_envs_reset_list.empty()){
+        m_envs_reset_list.pop_front();
+    }
     pause_flag = false;
     return true;
 }

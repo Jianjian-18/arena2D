@@ -170,7 +170,7 @@ class Arena2dEnvWrapper(gym.Env):
         rospy.loginfo("env[{:d}] connected with arena-2d simulator, took {:3.1f}s.".format(self._idx_env, .1 * times))
 
     def _setService(self):
-        service_name = "task_generator"
+        service_name = "reset_task"
         rospy.wait_for_service(service_name)
         print(f"{service_name} has started")
         self.service_client = rospy.ServiceProxy(service_name, Empty)
