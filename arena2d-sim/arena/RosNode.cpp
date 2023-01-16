@@ -22,6 +22,9 @@ RosNode::RosNode(Environment *envs, int num_envs, int argc, char **argv)
     _setRosAgentsReqSub();
     _setArena2dResPub();
     _setRosService();
+
+    // receive Twist message
+    _setTwistSub();
 }
 RosNode::~RosNode(){};
 
@@ -217,7 +220,7 @@ void RosNode::_RosAgentReqCallback(
     {
         m_envs_reset[idx_env] = true;
         m_any_env_reset = true;
-        m_envs_reset_list.push_back(idx_env);
+        // m_envs_reset_list.push_back(idx_env);
         ROS_DEBUG_STREAM("env " << idx_env << " request reset");
     }
     else
@@ -235,6 +238,13 @@ void RosNode::_RosAgentReqCallback(
 void RosNode::_RosTwistCallback(const geometry_msgs::Twist::ConstPtr &req_msg,
                                 int idx_env)
 {
+    if(reset_flag == true){
+        m_envs_reset[idx_env] = true;
+        m_any_env_reset = true;
+        // m_envs_reset_list.push_back(idx_env);
+        // std::cout << "set reset in twistcallback " << std::endl;
+        reset_flag = false;        
+    }
     m_actions_buffer[idx_env]->linear = req_msg->linear.x;
     m_actions_buffer[idx_env]->angular = req_msg->angular.z;
     m_num_ros_agent_req_msgs_received++;
@@ -491,14 +501,21 @@ bool RosNode::SpawnPedestrianCallback(
 bool RosNode::PauseCallback(std_srvs::Empty::Request &request,
                             std_srvs::Empty::Response &response)
 {
+    
+    m_envs_reset_list.push_back(m_envs_reset_list.size());
     pause_flag = true;
+    reset_flag = true;
     return true;
 }
 
 bool RosNode::UnpauseCallback(std_srvs::Empty::Request &request,
                               std_srvs::Empty::Response &response)
 {
-    m_envs_reset_list.pop_front();
+
+    if (!m_envs_reset_list.empty()){
+        m_envs_reset_list.pop_front();
+    }
+
     pause_flag = false;
     return true;
 }

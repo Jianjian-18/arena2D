@@ -97,8 +97,11 @@ private:
 
     std::list<int> m_envs_reset_list;
 
+    int env_count = 0;
+
 public:
     bool pause_flag = false;
+    bool reset_flag = false;
     bool m_env_connected;
     enum class Status
     {
